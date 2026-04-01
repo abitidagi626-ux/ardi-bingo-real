@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ardi Bingo - Play</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: #0f172a; 
+            color: white; 
+            margin: 0; 
+            padding: 20px; 
+            text-align: center; 
+        }
+        .container { 
+            max-width: 400px; 
+            margin: auto; 
+            background: #1e293b; 
+            padding: 25px; 
+            border-radius: 20px; 
+            border: 2px solid #3b82f6; 
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+        .balance-display { 
+            background: #334155; 
+            padding: 10px; 
+            border-radius: 10px; 
+            margin-bottom: 20px; 
+            font-size: 18px;
+        }
+        #balance-amount { color: #10b981; font-weight: bold; }
+        
+        .bingo-ball-container {
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle at 30% 30%, #3b82f6, #1d4ed8);
+            border-radius: 50%;
+            margin: 30px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            font-weight: bold;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border: 4px solid #fff;
+        }
+        
+        .play-btn {
+            background: linear-gradient(45deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.3s;
+        }
+        .play-btn:disabled { background: #475569; cursor: not-allowed; }
+        .play-btn:active { transform: scale(0.95); }
+
+        .back-link { 
+            display: block; 
+            margin-top: 20px; 
+            color: #94a3b8; 
+            text-decoration: none; 
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>ቢንጎ ተጫወት 🎮</h2>
+        
+        <div class="balance-display">
+            ያለዎት ሂሳብ: <span id="balance-amount">0</span> ETB
+        </div>
+
+        <div class="bingo-ball-container" id="ball">?</div>
+        
+        <p style="color: #94a3b8;">የአንድ ጊዜ ጨዋታ 10 ETB</p>
+        
+        <button id="playBtn" class="play-btn" onclick="playGame()">ተጫወት (Play)</button>
+
+        <a href="index.html" class="back-link">← ወደ ዋናው ገጽ ተመለስ</a>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js"></script>
+
+    <script>
+        // ያንተ Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAPhAZp0ey0DHrzSYuiuPN6S818ymodDtY",
+            authDomain: "ardi-bingo-real.firebaseapp.com",
+            projectId: "ardi-bingo-real",
+            storageBucket: "ardi-bingo-real.firebasestorage.app",
+            messagingSenderId: "352198180987",
+            appId: "1:352198180987:web:d2c51b2a7391c3e862e2de"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const myUserId = "yordanos_test_user"; // ተጠቃሚውን ለመለየት
+
+        let currentBalance = 0;
+
+        // ባላንሱን በቅጽበት (Real-time) ለመከታተል
+        db.collection("users").doc(myUserId).onSnapshot((doc) => {
+            if (doc.exists) {
+                currentBalance = doc.data().balance || 0;
+                document.getElementById("balance-amount").innerText = currentBalance;
+                
+                // ከ 10 ብር በታች ከሆነ ቁልፉን መዝጋት
+                document.getElementById("playBtn").disabled = currentBalance < 10;
+            }
+        });
+
+        // የጨዋታው ሂደት
+        function playGame() {
+            if (currentBalance >= 10) {
+                const userRef = db.collection("users").doc(myUserId);
+                
+                // 1. ከባላንስ ላይ 10 ብር መቀነስ
+                userRef.update({
+                    balance: firebase.firestore.FieldValue.increment(-10)
+                }).then(() => {
+                    // 2. የዘፈቀደ የቢንጎ ቁጥር ማውጣት (1-90)
+                    animateBall();
+                }).catch(err => {
+                    alert("ስህተት ተፈጥሯል: " + err.message);
+                });
+            }
+        }
+
+        // ቁጥሩ ሲወጣ ትንሽ እንዲሽከረከር ለማድረግ
+        function animateBall() {
+            let count = 0;
+            const interval = setInterval(() => {
+                document.getElementById("ball").innerText = Math.floor(Math.random() * 90) + 1;
+                count++;
+                if (count > 10) {
+                    clearInterval(interval);
+                    let finalNum = Math.floor(Math.random() * 90) + 1;
+                    document.getElementById("ball").innerText = finalNum;
+                }
+            }, 50);
+        }
+    </script>
+</body>
+</html>
