@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ardi Bingo - Deposit</title>
+    <style>
+        /* የገጹ ውበት (Styling) */
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            text-align: center; 
+            background-color: #f0f2f5; 
+            margin: 0; 
+            padding: 20px; 
+        }
+        .container { 
+            background: white; 
+            max-width: 400px; 
+            margin: 50px auto; 
+            padding: 30px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+        }
+        h1 { color: #1a73e8; font-size: 24px; }
+        .balance-card { 
+            background: #e8f0fe; 
+            padding: 20px; 
+            border-radius: 15px; 
+            margin: 20px 0; 
+        }
+        .balance-amount { 
+            font-size: 36px; 
+            color: #28a745; 
+            font-weight: bold; 
+        }
+        input { 
+            width: 90%; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border: 2px solid #ddd; 
+            border-radius: 10px; 
+            font-size: 18px; 
+            outline: none;
+        }
+        input:focus { border-color: #1a73e8; }
+        button { 
+            width: 100%; 
+            padding: 15px; 
+            background-color: #1a73e8; 
+            color: white; 
+            border: none; 
+            border-radius: 10px; 
+            font-size: 18px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.3s;
+        }
+        button:hover { background-color: #1557b0; }
+        .footer-text { color: #777; font-size: 12px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>አርዲ ቢንጎ ክፍያ</h1>
+        
+        <div class="balance-card">
+            <p>የአሁኑ ባላንስ (Play Balance)</p>
+            <div class="balance-amount" id="balance">0 ETB</div>
+        </div>
+
+        <input type="number" id="depositAmount" placeholder="የብር መጠን ያስገቡ (ETB)">
+        <button onclick="makeDeposit()">ብር አስገባ (Deposit)</button>
+
+        <p class="footer-text">Ardi Bingo Real-time Payment System</p>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js"></script>
+
+    <script>
+        // *** ያንተ Firebase Config ***
+        const firebaseConfig = {
+            apiKey: "AIzaSyAPhAZp0ey0DHrzSYuiuPN6S818ymodDtY",
+            authDomain: "ardi-bingo-real.firebaseapp.com",
+            projectId: "ardi-bingo-real",
+            storageBucket: "ardi-bingo-real.firebasestorage.app",
+            messagingSenderId: "352198180987",
+            appId: "1:352198180987:web:d2c51b2a7391c3e862e2de",
+            measurementId: "G-Y44ZE0G593"
+        };
+
+        // Firebase-ን ማስጀመር
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // ለሙከራ የምንጠቀመው User ID (በኋላ ከቴሌግራም ID ጋር እናገናኘዋለን)
+        const myUserId = "yordanos_test_user";
+
+        // 1. ባላንሱን ከFirebase አምጥቶ በገጹ ላይ ማሳየት
+        db.collection("users").doc(myUserId).onSnapshot((doc) => {
+            if (doc.exists) {
+                document.getElementById("balance").innerText = doc.data().balance + " ETB";
+            } else {
+                document.getElementById("balance").innerText = "0 ETB";
+            }
+        });
+
+        // 2. ብር ሲገባ ወደ Firebase መላክ
+        function makeDeposit() {
+            const amountInput = document.getElementById("depositAmount");
+            const amount = parseInt(amountInput.value);
+
+            if (amount > 0) {
+                // በFirebase ውስጥ ባላንሱን መጨመር
+                db.collection("users").doc(myUserId).set({
+                    balance: firebase.firestore.FieldValue.increment(amount)
+                }, { merge: true })
+                .then(() => {
+                    alert(amount + " ብር በተሳካ ሁኔታ ተጨምሯል!");
+                    amountInput.value = ""; // ሳጥኑን ባዶ ማድረግ
+                })
+                .catch((error) => {
+                    console.error("Error updating balance: ", error);
+                    alert("ስህተት ተፈጥሯል፣ እባክህ እንደገና ሞክር።");
+                });
+            } else {
+                alert("እባክህ ትክክለኛ የብር መጠን ያስገቡ!");
+            }
+        }
+    </script>
+</body>
+</html>
