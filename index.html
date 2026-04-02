@@ -3,190 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ardi Bingo - Elite Edition</title>
+    <title>Ardi Bingo - Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; touch-action: manipulation; }
-
-        /* Image 3: Advanced 3D Stake Buttons */
         .stake-3d { 
-            position: relative;
-            background: linear-gradient(to bottom, #f97316, #ea580c);
-            border: none;
-            border-radius: 24px;
-            box-shadow: 0 10px 0 #9a3412, 0 15px 25px rgba(0,0,0,0.25);
-            transition: all 0.1s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            position: relative; background: linear-gradient(to bottom, #f97316, #ea580c);
+            border-radius: 24px; box-shadow: 0 10px 0 #9a3412, 0 15px 25px rgba(0,0,0,0.25);
+            transition: all 0.1s ease; display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-        .stake-3d:active { 
-            transform: translateY(6px); 
-            box-shadow: 0 4px 0 #9a3412, 0 5px 10px rgba(0,0,0,0.2);
-        }
-        .birr-label { font-size: 12px; font-weight: 800; opacity: 0.9; margin-bottom: -4px; }
-
-        /* Image 1 & 2 Fix: 10 Cards Per Row + Blue Background */
-        #cards-display {
-            display: grid;
-            grid-template-columns: repeat(10, 1fr); /* 10 cards per row */
-            gap: 6px;
-            padding: 12px;
-            background-color: #1e40af; /* Blue Background as requested */
-            border-radius: 12px;
-            width: 100%;
-        }
-        .compact-card {
-            background: white;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            padding: 10px 0;
-            font-weight: 900;
-            font-size: 12px;
-            color: #1f2937;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .back-btn { position: absolute; top: 15px; left: 15px; z-index: 100; background: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .selected-card-green { background: #22c55e !important; color: white !important; border: none !important; }
+        .stake-3d:active { transform: translateY(6px); box-shadow: 0 4px 0 #9a3412; }
+        #cards-display { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; padding: 12px; background-color: #1e40af; border-radius: 12px; }
+        .compact-card { background: #3b82f6; border: 1px solid #60a5fa; border-radius: 8px; padding: 10px 0; font-weight: 900; font-size: 12px; color: white; text-align: center; }
+        .selected-card-green { background: #22c55e !important; border: none !important; }
         .bingo-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; background: #cbd5e1; padding: 2px; }
         .bingo-cell { background: white; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; }
+        .admin-panel { position: fixed; bottom: 10px; right: 10px; z-index: 1000; }
     </style>
 </head>
 <body class="min-h-screen">
 
     <div id="home-page" class="flex flex-col items-center justify-center min-h-screen p-6">
-        <img src="ardi.jpg" class="w-32 h-32 rounded-full border-4 border-white shadow-2xl mb-8 object-cover">
-        <h1 class="text-4xl font-black text-slate-900 mb-12 tracking-tighter italic">ARDI BINGO</h1>
-        <div class="space-y-5 w-full max-w-xs">
-            <button onclick="showPage('stake-page')" class="w-full bg-green-600 text-white py-5 rounded-[28px] font-black text-xl shadow-xl active:scale-95 transition">🕹 PLAY NOW</button>
-            <button onclick="showPage('deposit-methods')" class="w-full bg-blue-700 text-white py-5 rounded-[28px] font-black text-xl shadow-xl active:scale-95 transition">💰 DEPOSIT</button>
+        <img src="ardi.jpg" class="w-24 h-24 rounded-full border-4 border-white shadow-xl mb-6 object-cover">
+        <h1 class="text-3xl font-black text-slate-900 mb-10 italic">ARDI BINGO</h1>
+        <div class="space-y-4 w-full max-w-xs">
+            <button onclick="showPage('stake-page')" class="w-full bg-green-600 text-white py-4 rounded-[20px] font-black shadow-lg">🕹 PLAY NOW</button>
+            <button onclick="showPage('deposit-methods')" class="w-full bg-blue-700 text-white py-4 rounded-[20px] font-black shadow-lg">💰 DEPOSIT</button>
+            <button onclick="showPage('admin-page')" class="w-full bg-slate-800 text-white py-2 rounded-xl text-xs font-bold opacity-50">ADMIN PANEL</button>
         </div>
     </div>
 
-    <div id="deposit-methods" class="hidden min-h-screen p-6">
-        <button onclick="showPage('home-page')" class="back-btn">←</button>
-        <div class="mt-16 text-center">
-            <h2 class="text-2xl font-black text-slate-800 mb-10 uppercase tracking-widest">Manual Deposit</h2>
-            <div class="grid grid-cols-1 gap-4 max-w-sm mx-auto">
-                <div onclick="showDeposit('TELEBIRR')" class="flex items-center p-5 bg-white rounded-3xl border border-slate-200 shadow-sm cursor-pointer active:scale-95 transition">
-                    <img src="telebirr.png" class="w-12 h-12 rounded-xl mr-4">
-                    <div class="text-left"><p class="font-black text-slate-900">Telebirr</p></div>
-                </div>
-                <div onclick="showDeposit('CBE')" class="flex items-center p-5 bg-white rounded-3xl border border-slate-200 shadow-sm cursor-pointer active:scale-95 transition">
-                    <img src="cbe.png" class="w-12 h-12 rounded-xl mr-4">
-                    <div class="text-left"><p class="font-black text-slate-900">CBE Bank</p></div>
-                </div>
+    <div id="deposit-methods" class="hidden min-h-screen p-6 text-center">
+        <button onclick="showPage('home-page')" class="absolute top-4 left-4 bg-white p-2 rounded-full shadow">←</button>
+        <h2 class="mt-12 text-xl font-black mb-6">Deposit Money</h2>
+        <div class="bg-white p-6 rounded-[30px] shadow-sm border border-slate-100 max-w-sm mx-auto">
+            <p class="font-black text-blue-600 text-lg mb-1">yared molla 251993697243📋</p>
+            <div class="text-[11px] text-left space-y-2 my-4 font-bold text-slate-600">
+                <p>1. ከላይ ባለው የቴሌብር አካውንት ብር ያስገቡ</p>
+                <p>2. የደረሳችሁን አጭር የጹሁፍ መለክት (SMS) ሙሉዉን ኮፒ በማረግ ከታሽ ባለው ሳጥን ላይ ይላኩት</p>
             </div>
+            <input type="number" id="dep-amount" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl mb-3 outline-none font-black" placeholder="Amount (ETB)">
+            <textarea id="ref-input" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl h-20 mb-3 outline-none text-xs" placeholder="Enter Message (Format: CA999DASAD)"></textarea>
+            <button onclick="submitDeposit()" class="w-full bg-green-600 text-white py-3 rounded-xl font-black text-sm">Send for Verification</button>
+            <p class="mt-3 text-[10px] text-slate-400 font-bold italic text-center">ችግር ካለ @ardisupport ያናግሩ</p>
         </div>
     </div>
 
-    <div id="deposit-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-[40px] w-full max-w-sm overflow-hidden shadow-2xl relative p-8 text-center">
-            <button onclick="hideModal('deposit-modal')" class="absolute top-6 right-6 text-slate-400 font-bold">✕</button>
-            <h3 class="font-black text-xl mb-6">Deposit</h3>
-            <div class="bg-slate-50 p-6 rounded-[32px] border-2 border-dashed border-slate-200 mb-6">
-                <p id="acc-num" class="text-blue-600 text-2xl font-black tracking-tighter mb-1 select-all"></p>
-                <p id="acc-name" class="text-sm font-black text-slate-900 uppercase tracking-widest">YARED MOLLA</p>
-            </div>
-            
-            <input type="number" id="deposit-amount" class="w-full bg-slate-100 border border-slate-200 p-4 rounded-2xl mb-4 focus:ring-2 focus:ring-blue-500 outline-none font-bold" placeholder="Enter Amount (ETB)">
-            
-            <textarea id="ref-input" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl h-24 mb-4 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium" placeholder="Enter Message (SMS Code)"></textarea>
-            <button onclick="sendVerification()" class="w-full bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg uppercase tracking-wider">Send for Verification</button>
+    <div id="admin-page" class="hidden min-h-screen p-6 bg-slate-900 text-white">
+        <button onclick="showPage('home-page')" class="mb-6 text-sm">← Back</button>
+        <h2 class="text-xl font-black mb-4">Pending Requests</h2>
+        <div id="pending-list" class="space-y-3">
+            <p class="text-slate-500 italic text-sm">No pending deposits.</p>
         </div>
     </div>
 
-    <div id="stake-page" class="hidden min-h-screen p-6">
-        <button onclick="showPage('home-page')" class="back-btn">←</button>
-        <div class="mt-20 text-center">
-            <h1 class="text-2xl font-black text-slate-900 mb-12 uppercase tracking-tighter">Choose Stake</h1>
-            <div class="grid grid-cols-2 gap-8 max-w-xs mx-auto">
-                <button onclick="selectStake(10)" class="stake-3d w-full aspect-square text-white">
-                    <span class="birr-label">Birr</span><span class="text-4xl font-black">10</span>
-                </button>
-                <button onclick="selectStake(20)" class="stake-3d w-full aspect-square text-white">
-                    <span class="birr-label">Birr</span><span class="text-4xl font-black">20</span>
-                </button>
-                <button onclick="selectStake(50)" class="stake-3d w-full aspect-square text-white">
-                    <span class="birr-label">Birr</span><span class="text-4xl font-black">50</span>
-                </button>
-                <button onclick="selectStake(100)" class="stake-3d w-full aspect-square text-white">
-                    <span class="birr-label">Birr</span><span class="text-4xl font-black">100</span>
-                </button>
-            </div>
+    <div id="stake-page" class="hidden min-h-screen p-6 text-center">
+        <button onclick="showPage('home-page')" class="absolute top-4 left-4 bg-white p-2 rounded-full shadow">←</button>
+        <h1 class="mt-16 text-xl font-black mb-10">SELECT STAKE</h1>
+        <div class="grid grid-cols-2 gap-6 max-w-xs mx-auto">
+            <button onclick="selectStake(10)" class="stake-3d aspect-square text-white"><span class="text-3xl font-black">10</span></button>
+            <button onclick="selectStake(20)" class="stake-3d aspect-square text-white"><span class="text-3xl font-black">20</span></button>
+            <button onclick="selectStake(50)" class="stake-3d aspect-square text-white"><span class="text-3xl font-black">50</span></button>
+            <button onclick="selectStake(100)" class="stake-3d aspect-square text-white"><span class="text-3xl font-black">100</span></button>
         </div>
     </div>
 
     <div id="game-page" class="hidden min-h-screen bg-white flex flex-col">
-        <div class="bg-black text-white p-4 flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
-            <div class="flex flex-col"><span>Game ID</span><span class="text-orange-500">#27721</span></div>
-            <div class="flex flex-col items-center"><span>Timer</span><span id="timer" class="text-sm text-red-500">60s</span></div>
-            <div class="flex flex-col items-end"><span>Wallet</span><span id="wallet-balance" class="text-green-500">0.00 ETB</span></div>
+        <div class="bg-black text-white p-4 flex justify-between items-center text-[10px] font-black uppercase">
+            <div class="flex flex-col"><span>Timer</span><span id="timer" class="text-sm text-red-500">60s</span></div>
+            <div class="flex flex-col items-center"><span>Derrash</span><span id="derrash-display" class="text-sm text-green-400 font-black">0.00</span></div>
+            <div class="flex flex-col items-end"><span>Wallet</span><span id="wallet-display" class="text-sm text-blue-400">0.00 ETB</span></div>
         </div>
-
-        <div class="bg-slate-100 p-2 border-b border-slate-200">
-             <div class="flex justify-between items-center px-2">
-                <p class="text-[9px] font-black text-slate-500 uppercase">Select Card (ረድፍ 10)</p>
-                <p class="text-[9px] font-black text-orange-600 uppercase">Bet: <span id="display-bet">0</span></p>
-             </div>
-        </div>
-        
-        <div class="p-2">
-            <div id="cards-display">
-                </div>
-        </div>
+        <div class="p-2 overflow-y-auto"><div id="cards-display"></div></div>
     </div>
 
     <div id="card-view" class="hidden fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-4">
-        <div class="bg-white rounded-[40px] p-6 w-full max-w-sm shadow-2xl text-center">
-            <h2 class="text-2xl font-black text-slate-900 mb-6 uppercase tracking-tighter">Card #<span id="selected-card-num"></span></h2>
-            <div class="bingo-grid mb-8 rounded-lg overflow-hidden border border-slate-300">
-                <div class="bg-green-600 text-white font-black py-2">B</div>
-                <div class="bg-red-600 text-white font-black py-2">I</div>
-                <div class="bg-orange-500 text-white font-black py-2">N</div>
-                <div class="bg-blue-600 text-white font-black py-2">G</div>
-                <div class="bg-pink-600 text-white font-black py-2">O</div>
+        <div class="bg-white rounded-[40px] p-6 w-full max-w-sm text-center">
+            <h2 class="text-xl font-black mb-4 uppercase">Card #<span id="sel-card-num"></span></h2>
+            <div class="bingo-grid mb-6 rounded-lg overflow-hidden">
+                <div class="bg-blue-600 text-white font-black py-1">B</div>
+                <div class="bg-blue-600 text-white font-black py-1">I</div>
+                <div class="bg-blue-600 text-white font-black py-1">N</div>
+                <div class="bg-blue-600 text-white font-black py-1">G</div>
+                <div class="bg-blue-600 text-white font-black py-1">O</div>
                 <div id="bingo-numbers" class="contents"></div>
             </div>
-            <div class="flex gap-3">
-                <button onclick="acceptCard()" class="flex-1 bg-green-600 text-white py-5 rounded-3xl font-black uppercase tracking-widest shadow-lg">Accept</button>
-                <button onclick="hideModal('card-view')" class="flex-1 bg-slate-100 text-slate-400 py-5 rounded-3xl font-black uppercase tracking-widest">Back</button>
+            <div class="flex gap-2">
+                <button onclick="buyCard()" class="flex-1 bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg">ACCEPT</button>
+                <button onclick="hideModal('card-view')" class="flex-1 bg-slate-100 text-slate-500 py-4 rounded-2xl font-black">BACK</button>
             </div>
         </div>
     </div>
 
     <script>
-        let selectedStake = 0;
+        let wallet = 0;
+        let stake = 0;
+        let selectedCardNum = 0;
+        let selectedCardsCount = 0;
+        let pendingDeposits = [];
         let timerVal = 60;
-        let timerInterval;
-        let currentWallet = 0.00;
 
-        function showPage(pageId) {
-            document.querySelectorAll('div[id]').forEach(d => {
-                if(!['deposit-modal', 'card-view', 'bingo-numbers'].includes(d.id)) d.classList.add('hidden');
-            });
-            document.getElementById(pageId).classList.remove('hidden');
-        }
-
-        function showDeposit(method) {
-            const acc = document.getElementById('acc-num');
-            if(method === 'TELEBIRR') {
-                acc.innerText = "0993697243";
-            } else {
-                acc.innerText = "1000261501396";
-            }
-            document.getElementById('deposit-modal').classList.remove('hidden');
+        function showPage(id) {
+            document.querySelectorAll('div[id]').forEach(d => { if(!['card-view','bingo-numbers'].includes(d.id)) d.classList.add('hidden'); });
+            document.getElementById(id).classList.remove('hidden');
         }
 
         function hideModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-        function selectStake(amount) {
-            selectedStake = amount;
-            document.getElementById('display-bet').innerText = amount + " ETB";
+        // Wallet & Deposit
+        function submitDeposit() {
+            let amt = parseFloat(document.getElementById('dep-amount').value);
+            let msg = document.getElementById('ref-input').value;
+            if(!amt || !msg) { alert("Please fill all fields!"); return; }
+            pendingDeposits.push({amt, msg, id: Date.now()});
+            updateAdminPanel();
+            alert("Sent! Waiting for Admin Approval.");
+            showPage('home-page');
+        }
+
+        function updateAdminPanel() {
+            const list = document.getElementById('pending-list');
+            list.innerHTML = pendingDeposits.length ? '' : '<p class="text-slate-500 italic">No pending deposits.</p>';
+            pendingDeposits.forEach(d => {
+                let div = document.createElement('div');
+                div.className = "bg-slate-800 p-4 rounded-xl flex justify-between items-center border border-slate-700";
+                div.innerHTML = `<div><p class="font-black">${d.amt} ETB</p><p class="text-[10px] opacity-60">${d.msg}</p></div>
+                    <div class="flex gap-2">
+                        <button onclick="adminApprove(${d.id})" class="bg-green-600 px-3 py-1 rounded text-xs font-bold">Approve</button>
+                        <button onclick="adminCancel(${d.id})" class="bg-red-600 px-3 py-1 rounded text-xs font-bold">Cancel</button>
+                    </div>`;
+                list.appendChild(div);
+            });
+        }
+
+        function adminApprove(id) {
+            let req = pendingDeposits.find(x => x.id === id);
+            wallet += req.amt;
+            pendingDeposits = pendingDeposits.filter(x => x.id !== id);
+            updateAdminPanel();
+            document.getElementById('wallet-display').innerText = wallet.toFixed(2) + " ETB";
+        }
+
+        function adminCancel(id) {
+            pendingDeposits = pendingDeposits.filter(x => x.id !== id);
+            updateAdminPanel();
+        }
+
+        // Game Logic
+        function selectStake(amt) {
+            stake = amt;
             showPage('game-page');
             initCards();
             startTimer();
@@ -196,68 +162,62 @@
             const container = document.getElementById('cards-display');
             container.innerHTML = '';
             for(let i=1; i<=100; i++) {
-                let btn = document.createElement('button');
-                btn.id = `card-btn-${i}`;
-                btn.className = "compact-card";
-                btn.innerText = i;
-                btn.onclick = () => showBingoNumbers(i);
-                container.appendChild(btn);
+                let b = document.createElement('button');
+                b.id = `card-btn-${i}`; b.className = "compact-card"; b.innerText = i;
+                b.onclick = () => openCard(i);
+                container.appendChild(b);
             }
         }
 
-        function showBingoNumbers(num) {
-            document.getElementById('selected-card-num').innerText = num;
+        function openCard(num) {
+            selectedCardNum = num;
+            document.getElementById('sel-card-num').innerText = num;
             const grid = document.getElementById('bingo-numbers');
             grid.innerHTML = '';
-            const ranges = [[1,15], [16,30], [31,45], [46,60], [61,75]];
+            
+            // Unique Numbers Generator (B:1-15, I:16-30...)
+            const columns = [[1,15], [16,30], [31,45], [46,60], [61,75]];
+            let cardData = [];
             for(let r=0; r<5; r++) {
                 for(let c=0; c<5; c++) {
-                    let cell = document.createElement('div');
-                    cell.className = "bingo-cell";
-                    if(r===2 && c===2) cell.innerHTML = "⭐";
-                    else cell.innerText = Math.floor(Math.random() * (ranges[c][1] - ranges[c][0] + 1)) + ranges[c][0];
-                    grid.appendChild(cell);
+                    if(r===2 && c===2) { cardData.push("⭐"); continue; }
+                    let min = columns[c][0], max = columns[c][1];
+                    let n;
+                    do { n = Math.floor(Math.random() * (max - min + 1)) + min; } while(cardData.includes(n));
+                    cardData.push(n);
                 }
             }
+
+            cardData.forEach(val => {
+                let cell = document.createElement('div');
+                cell.className = "bingo-cell";
+                cell.innerText = val;
+                grid.appendChild(cell);
+            });
             document.getElementById('card-view').classList.remove('hidden');
         }
 
-        function acceptCard() {
-            let cardNum = document.getElementById('selected-card-num').innerText;
-            document.getElementById(`card-btn-${cardNum}`).classList.add('selected-card-green');
+        function buyCard() {
+            if(wallet < stake) { alert("Insufficient Balance!"); return; }
+            wallet -= stake;
+            selectedCardsCount++;
+            document.getElementById(`card-btn-${selectedCardNum}`).classList.add('selected-card-green');
+            document.getElementById(`card-btn-${selectedCardNum}`).innerText = "✓";
+            document.getElementById('wallet-display').innerText = wallet.toFixed(2) + " ETB";
+            
+            // Winning Calc: Cards * Stake * 0.85
+            let winning = selectedCardsCount * stake * 0.85;
+            document.getElementById('derrash-display').innerText = winning.toFixed(2);
+            
             hideModal('card-view');
         }
 
         function startTimer() {
-            if(timerInterval) clearInterval(timerInterval);
             timerVal = 60;
-            timerInterval = setInterval(() => {
-                if(timerVal > 0) {
-                    timerVal--;
-                    document.getElementById('timer').innerText = timerVal + "s";
-                }
+            let interval = setInterval(() => {
+                if(timerVal <= 0) clearInterval(interval);
+                else { timerVal--; document.getElementById('timer').innerText = timerVal + "s"; }
             }, 1000);
-        }
-
-        function sendVerification() {
-            const amountInput = document.getElementById('deposit-amount').value;
-            const amount = parseFloat(amountInput);
-
-            if (isNaN(amount) || amount <= 0) {
-                alert("እባክዎ ትክክለኛ የብር መጠን ያስገቡ!");
-                return;
-            }
-
-            // Simulate Admin Approval & Balance Update
-            alert("መረጃው ተልኳል! አድሚን ሲያጸድቀው " + amount + " ETB ባላንስዎ ላይ ይደመራል።");
-            
-            // This part simulates the balance update upon "approval"
-            currentWallet += amount;
-            document.getElementById('wallet-balance').innerText = currentWallet.toFixed(2) + " ETB";
-
-            document.getElementById('deposit-amount').value = '';
-            document.getElementById('ref-input').value = '';
-            hideModal('deposit-modal');
         }
     </script>
 </body>
