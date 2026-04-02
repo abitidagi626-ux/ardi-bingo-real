@@ -1,89 +1,71 @@
-import sqlite3
-from telegram import Update, WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, CallbackQueryHandler
+import logging
+import random
+from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
-TOKEN = '8684712579:AAE9JK0cdSK-cVeycF7xAd_KSrUUqmN5HWI'
+# 1. ያንተን Token እዚህ ጋር አስገባ
+TOKEN = "8684712579:AAE9JK0cdSK-cVeycf7xAd_KSrUUqmN5HWI"
 
-# --- DATABASE SETUP ---
-def init_db():
-    conn = sqlite3.connect('bingo_users.db')
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS users 
-                 (user_id INTEGER PRIMARY KEY, first_name TEXT, balance REAL DEFAULT 0.0)''')
-    conn.commit()
-    conn.close()
-
-# --- START COMMAND ---
+# --- ደረጃ 1: START ሲባል ስልክ ቁጥር መጠየቅ ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.effective_user
-    conn = sqlite3.connect('bingo_users.db')
-    c = conn.cursor()
-    c.execute("INSERT OR IGNORE INTO users (user_id, first_name) VALUES (?, ?)", (user.id, user.first_name))
-    conn.commit()
-    conn.close()
-
-    # ያንተ ቋሚ Web App ሊንክ
-    web_app_url = "https://dagibingo-0979.loca.lt/index.html" 
+    # ስልክ ቁጥር እንዲያጋሩ የሚጠይቅ ትልቅ ቁልፍ
+    contact_button = KeyboardButton("📲 ስልክ ቁጥርዎን ያጋሩ (Share Contact)", request_contact=True)
     
+    reply_markup = ReplyKeyboardMarkup(
+        [[contact_button]], 
+        resize_keyboard=True, 
+        one_time_keyboard=True
+    )
+    
+    await update.message.reply_text(
+        "እንኳን ወደ አርዲ ቢንጎ በሰላም መጡ! ለመመዝገብ እባክዎ ከታች ያለውን ሰማያዊ ቁልፍ ተጭነው ስልክ ቁጥርዎን ያጋሩ።",
+        reply_markup=reply_markup
+    )
+
+# --- ደረጃ 2: ስልኩ ሲላክ ID ሰጥቶ ዝርዝሩን ማምጣት ---
+async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    contact = update.message.contact
+    phone_number = contact.phone_number
+    
+    # የዘፈቀደ 5 ዲጂት ID መፍጠር
+    user_id = random.randint(10000, 99999)
+    
+    # የ GitHub ሊንክህ
+    play_url = f"https://abitidagi626-ux.github.io/ardi-bingo-real/index.html?id={user_id}"
+    
+    # ልክ እንደ Cartela Bingo ቁልፎቹን መደርደር
     keyboard = [
-        [InlineKeyboardButton(text="🎮 Play Now", web_app=WebAppInfo(url=web_app_url))],
+        [InlineKeyboardButton("🕹 Play Now", url=play_url)], # ትልቁ ቁልፍ
         [
-            InlineKeyboardButton(text="💰 Check Balance", callback_data='balance'),
-            InlineKeyboardButton(text="🏦 Make a Deposit", callback_data='deposit_bot')
+            InlineKeyboardButton("💰 Check Balance", callback_data="bal"),
+            InlineKeyboardButton("🏦 Make a Deposit", url="https://abitidagi626-ux.github.io/ardi-bingo-real/deposit.html")
         ],
         [
-            InlineKeyboardButton(text="📞 Support", callback_data='support'),
-            InlineKeyboardButton(text="📕 Instructions", callback_data='instructions')
+            InlineKeyboardButton("📞 Support", url="https://t.me/your_support_link"),
+            InlineKeyboardButton("📖 Instructions", callback_data="rules")
         ],
         [
-            InlineKeyboardButton(text="📩 Invite", callback_data='invite'),
-            InlineKeyboardButton(text="🏆 Leaderboard", callback_data='leaderboard')
-        ],
-        [InlineKeyboardButton(text="👤 Change Username", callback_data='settings')]
+            InlineKeyboardButton("📨 Invite", callback_data="invite"),
+            InlineKeyboardButton("🏆 Leaderboard", callback_data="lead")
+        ]
     ]
     
     reply_markup = InlineKeyboardMarkup(keyboard)
-    welcome_text = (
-        f"<b>🎉 Welcome To Dagi Bingo, {user.first_name}! 🎉</b>\n\n"
-        "🕹 Every Square Counts – Grab Your Cartela, Join the Game, and Let the Fun Begin!"
+    
+    # ውጤቱን መላክ
+    await update.message.reply_text(
+        f"✅ በተሳካ ሁኔታ ተመዝግበዋል!\n\n🆔 የእርስዎ ID: {user_id}\n📞 ስልክ: {phone_number}\n\nአሁን ከታች ካሉት አማራጮች አንዱን ይምረጡ፦",
+        reply_markup=reply_markup
     )
-    await update.message.reply_html(welcome_text, reply_markup=reply_markup)
 
-# --- BUTTON HANDLERS ---
-async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-    user_id = query.from_user.id
+def main():
+    app = Application.builder().token(TOKEN).build()
     
-    if query.data == 'balance':
-        conn = sqlite3.connect('bingo_users.db')
-        c = conn.cursor()
-        c.execute("SELECT balance FROM users WHERE user_id=?", (user_id,))
-        bal = c.fetchone()[0]
-        conn.close()
-        await query.message.reply_text(f"📊 Your Current Balance: {bal} ETB")
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(MessageHandler(filters.CONTACT, handle_contact))
     
-    elif query.data == 'instructions':
-        instr = (
-            "📕 <b>How to Play:</b>\n\n"
-            "1. Click 'Play Now' to open the game app.\n"
-            "2. Deposit money using CBE or Telebirr.\n"
-            "3. Once the game starts, numbers will be called.\n"
-            "4. Match the numbers on your cartela to win!"
-        )
-        await query.message.reply_html(instr)
-
-    elif query.data == 'invite':
-        link = f"https://t.me/ArdiiiBingoBot?start={user_id}"
-        await query.message.reply_text(f"📩 Invite friends and earn a bonus!\n\nYour Referral Link:\n{link}")
-
-    elif query.data == 'deposit_bot':
-        await query.message.reply_text("🏦 ብር ለማስገባት 'Play Now' የሚለውን ተጭነው 'Deposit Money' የሚለውን ይምረጡ።")
+    print("ቦቱ ስራ ጀምሯል... (Running)")
+    app.run_polling()
 
 if __name__ == '__main__':
-    init_db()
-    app = ApplicationBuilder().token(TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CallbackQueryHandler(button_handler))
-    print("ቦቱ ከቋሚ ሊንክ ጋር እየሠራ ነው...")
-    app.run_polling()
+    main()
