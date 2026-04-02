@@ -3,59 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ardi Bingo - መግቢያ</title>
+    <title>Ardi Bingo - Play</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: sans-serif; background: #0f172a; color: white; text-align: center; padding: 20px; }
-        .card { background: #1e293b; padding: 30px; border-radius: 15px; border: 1px solid #3b82f6; }
-        input { width: 80%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; font-size: 16px; }
-        .btn { background: #10b981; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 85%; }
-        #welcome-section { display: none; }
+        .bingo-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+        .selected-stake { border: 3px solid #facc15; background-color: #ca8a04; }
     </style>
 </head>
-<body>
+<body class="bg-purple-900 text-white font-sans min-h-screen p-2">
 
-    <div id="login-section" class="card">
-        <img src="https://i.ibb.co/Vp7vF7M/ardi-bingo-logo.jpg" style="width: 150px; border-radius: 50%;">
-        <h2>እንኳን ወደ አርዲ ቢንጎ መጡ!</h2>
-        <p>ለመቀጠል ስልክ ቁጥርዎን ያስገቡ</p>
-        <input type="tel" id="userPhone" placeholder="0911223344" maxlength="10">
-        <button class="btn" onclick="register()">ይመዝገቡ</button>
+    <div id="main-menu">
+        <div class="flex justify-between items-center bg-blue-100 text-blue-900 p-2 rounded-lg text-xs font-bold mb-4 shadow-lg">
+            <div class="text-center">Game<br><span id="game-id">312680</span></div>
+            <div class="text-center">Bet<br><span id="display-bet">0 ETB</span></div>
+            <div class="text-center">Active Game<br>0</div>
+            <div class="text-center">Wallet<br>0.00 ETB</div>
+            <div class="text-center bg-blue-200 p-1 rounded">Derrash<br><b id="potential-win" class="text-sm text-red-600">0.00</b></div>
+        </div>
+
+        <p class="text-center mb-2 font-bold">Stake (መደብ ይምረጡ)</p>
+        <div class="flex justify-center gap-2 mb-4">
+            <button onclick="setStake(10)" class="stake-btn bg-orange-500 px-4 py-2 rounded-full font-bold">10</button>
+            <button onclick="setStake(20)" class="stake-btn bg-orange-500 px-4 py-2 rounded-full font-bold">20</button>
+            <button onclick="setStake(50)" class="stake-btn bg-orange-500 px-4 py-2 rounded-full font-bold">50</button>
+            <button onclick="setStake(100)" class="stake-btn bg-orange-500 px-4 py-2 rounded-full font-bold">100</button>
+        </div>
+
+        <div class="grid grid-cols-5 gap-2 overflow-y-auto max-h-[60vh] p-1 bg-purple-800 rounded-lg">
+            <script>
+                for(let i=1; i<=100; i++) {
+                    document.write(`<button onclick="showCard(${i})" class="bg-orange-600 hover:bg-orange-400 p-2 rounded text-sm font-bold shadow">${i}</button>`);
+                }
+            </script>
+        </div>
+        <p class="text-center mt-4 text-xs text-purple-300">@cartela_bingo_bot</p>
     </div>
 
-    <div id="welcome-section" class="card">
-        <h2 id="greet">ሰላም!</h2>
-        <p style="background: #334155; padding: 10px; border-radius: 10px;">
-            የእርስዎ ID: <strong id="myID" style="color: #fbbf24;"></strong>
-        </p>
-        <hr style="border: 0.5px solid #334155;">
-        <button class="btn" onclick="location.href='game.html'" style="margin-top: 10px;">🎮 አሁኑኑ ይጫወቱ</button>
-        <button class="btn" style="background: #3b82f6; margin-top: 10px;">💰 ሂሳብ ይሙሉ</button>
+    <div id="card-view" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4">
+        <div class="bg-orange-200 rounded-2xl p-4 w-full max-w-sm text-center">
+            <h2 class="text-black font-bold mb-2">Card #<span id="selected-card-num">0</span></h2>
+            
+            <div class="grid grid-cols-5 bg-white rounded-lg overflow-hidden border-2 border-orange-400">
+                <div class="bg-green-500 text-white font-bold p-1">B</div>
+                <div class="bg-red-500 text-white font-bold p-1">I</div>
+                <div class="bg-orange-400 text-white font-bold p-1">N</div>
+                <div class="bg-blue-600 text-white font-bold p-1">G</div>
+                <div class="bg-pink-500 text-white font-bold p-1">O</div>
+                <div id="card-numbers" class="contents text-black font-bold"></div>
+            </div>
+
+            <div class="flex gap-4 mt-6">
+                <button onclick="acceptCard()" class="flex-1 bg-green-600 text-white py-3 rounded-full font-bold shadow-lg">Accept</button>
+                <button onclick="closeCard()" class="flex-1 bg-orange-600 text-white py-3 rounded-full font-bold shadow-lg">Cancel</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // ቀድሞ የተመዘገበ ተጠቃሚ ካለ ለማየት
-        window.onload = function() {
-            if(localStorage.getItem('ardi_phone')) {
-                showMenu();
+        let currentStake = 0;
+        let gameId = Math.floor(10000 + Math.random() * 90000);
+        document.getElementById('game-id').innerText = gameId;
+
+        function setStake(amount) {
+            currentStake = amount;
+            document.getElementById('display-bet').innerText = amount + " ETB";
+            // Derrash = Stake * 0.85 [ስሌቱ በጠየቅከው መሰረት]
+            let derrash = (amount * 0.85).toFixed(2);
+            document.getElementById('potential-win').innerText = derrash;
+            
+            // Highlight button
+            document.querySelectorAll('.stake-btn').forEach(btn => btn.classList.remove('selected-stake'));
+            event.target.classList.add('selected-stake');
+        }
+
+        function showCard(num) {
+            if(currentStake === 0) {
+                alert("እባክዎ መጀመሪያ Stake (መደብ) ይምረጡ!");
+                return;
+            }
+            document.getElementById('selected-card-num').innerText = num;
+            generateBingoNumbers();
+            document.getElementById('card-view').classList.remove('hidden');
+        }
+
+        function generateBingoNumbers() {
+            const container = document.getElementById('card-numbers');
+            container.innerHTML = '';
+            // B(1-15), I(16-30), N(31-45), G(46-60), O(61-75)
+            const ranges = [[1,15], [16,30], [31,45], [46,60], [61,75]];
+            
+            for(let row=0; row<5; row++) {
+                for(let col=0; col<5; col++) {
+                    if(row === 2 && col === 2) {
+                        container.innerHTML += `<div class="p-2 border border-gray-200 bg-gray-100">⭐</div>`;
+                    } else {
+                        let num = Math.floor(ranges[col][0] + Math.random() * (ranges[col][1] - ranges[col][0]));
+                        container.innerHTML += `<div class="p-2 border border-gray-200 bg-white">${num}</div>`;
+                    }
+                }
             }
         }
 
-        function register() {
-            let phone = document.getElementById('userPhone').value;
-            if(phone.length >= 10) {
-                let randomID = Math.floor(10000 + Math.random() * 90000);
-                localStorage.setItem('ardi_phone', phone);
-                localStorage.setItem('ardi_id', randomID);
-                showMenu();
-            } else {
-                alert("እባክዎ ትክክለኛ ስልክ ቁጥር ያስገቡ!");
-            }
+        function closeCard() {
+            document.getElementById('card-view').classList.add('hidden');
         }
 
-        function showMenu() {
-            document.getElementById('login-section').style.display = 'none';
-            document.getElementById('welcome-section').style.display = 'block';
-            document.getElementById('myID').innerText = localStorage.getItem('ardi_id');
+        function acceptCard() {
+            alert("ካርቴላ ተመርጧል! መልካም ዕድል!");
+            closeCard();
         }
     </script>
 </body>
