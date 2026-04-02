@@ -3,71 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ardi Bingo Menu</title>
+    <title>Ardi Bingo - መግቢያ</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #0f172a; color: white; margin: 0; padding: 15px; text-align: center; }
-        .header-img { width: 100%; border-radius: 15px; margin-bottom: 15px; }
-        .balance-card { background: #1e293b; padding: 15px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 20px; }
-        .balance-amount { font-size: 28px; color: #10b981; font-weight: bold; }
-        
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        button { padding: 15px; border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.2s; }
-        
-        .btn-play { grid-column: span 2; background: linear-gradient(45deg, #ef4444, #f59e0b); font-size: 18px; padding: 20px; margin-bottom: 5px; }
-        .btn-secondary { background-color: #334155; }
-        .btn-secondary:active { background-color: #475569; }
-        .icon { font-size: 20px; margin-bottom: 5px; }
+        body { font-family: sans-serif; background: #0f172a; color: white; text-align: center; padding: 20px; }
+        .card { background: #1e293b; padding: 30px; border-radius: 15px; border: 1px solid #3b82f6; }
+        input { width: 80%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; font-size: 16px; }
+        .btn { background: #10b981; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 85%; }
+        #welcome-section { display: none; }
     </style>
 </head>
 <body>
 
-    <img src="https://abitidagi626-ux.github.io/ardi-bingo-real/bingo-logo.jpg" class="header-img" alt="Bingo">
-
-    <div class="balance-card">
-        <div>💰 Your Balance</div>
-        <div class="balance-amount" id="balance">0 ETB</div>
+    <div id="login-section" class="card">
+        <img src="https://i.ibb.co/Vp7vF7M/ardi-bingo-logo.jpg" style="width: 150px; border-radius: 50%;">
+        <h2>እንኳን ወደ አርዲ ቢንጎ መጡ!</h2>
+        <p>ለመቀጠል ስልክ ቁጥርዎን ያስገቡ</p>
+        <input type="tel" id="userPhone" placeholder="0911223344" maxlength="10">
+        <button class="btn" onclick="register()">ይመዝገቡ</button>
     </div>
 
-    <div class="menu-grid">
-        <button class="btn-play" onclick="location.href='game.html'">
-            <span class="icon">🎮</span> Play Now
-        </button>
-        
-        <button class="btn-secondary" onclick="location.href='deposit.html'">
-            <span class="icon">💸</span> Make a Deposit
-        </button>
-        
-        <button class="btn-secondary" onclick="alert('Balance: ' + document.getElementById('balance').innerText)">
-            <span class="icon">💰</span> Check Balance
-        </button>
-        
-        <button class="btn-secondary" onclick="alert('Help: @your_telegram_username')">
-            <span class="icon">📞</span> Support
-        </button>
-        
-        <button class="btn-secondary" onclick="alert('Invite link copied!')">
-            <span class="icon">📩</span> Invite
-        </button>
+    <div id="welcome-section" class="card">
+        <h2 id="greet">ሰላም!</h2>
+        <p style="background: #334155; padding: 10px; border-radius: 10px;">
+            የእርስዎ ID: <strong id="myID" style="color: #fbbf24;"></strong>
+        </p>
+        <hr style="border: 0.5px solid #334155;">
+        <button class="btn" onclick="location.href='game.html'" style="margin-top: 10px;">🎮 አሁኑኑ ይጫወቱ</button>
+        <button class="btn" style="background: #3b82f6; margin-top: 10px;">💰 ሂሳብ ይሙሉ</button>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js"></script>
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAPhAZp0ey0DHrzSYuiuPN6S818ymodDtY",
-            authDomain: "ardi-bingo-real.firebaseapp.com",
-            projectId: "ardi-bingo-real",
-            storageBucket: "ardi-bingo-real.firebasestorage.app",
-            messagingSenderId: "352198180987",
-            appId: "1:352198180987:web:d2c51b2a7391c3e862e2de"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const myUserId = "yordanos_test_user";
+        // ቀድሞ የተመዘገበ ተጠቃሚ ካለ ለማየት
+        window.onload = function() {
+            if(localStorage.getItem('ardi_phone')) {
+                showMenu();
+            }
+        }
 
-        db.collection("users").doc(myUserId).onSnapshot((doc) => {
-            if (doc.exists) document.getElementById("balance").innerText = doc.data().balance + " ETB";
-        });
+        function register() {
+            let phone = document.getElementById('userPhone').value;
+            if(phone.length >= 10) {
+                let randomID = Math.floor(10000 + Math.random() * 90000);
+                localStorage.setItem('ardi_phone', phone);
+                localStorage.setItem('ardi_id', randomID);
+                showMenu();
+            } else {
+                alert("እባክዎ ትክክለኛ ስልክ ቁጥር ያስገቡ!");
+            }
+        }
+
+        function showMenu() {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('welcome-section').style.display = 'block';
+            document.getElementById('myID').innerText = localStorage.getItem('ardi_id');
+        }
     </script>
 </body>
 </html>
