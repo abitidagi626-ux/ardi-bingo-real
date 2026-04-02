@@ -8,69 +8,68 @@
     <style>
         .stake-3d { box-shadow: 0 8px 0 #c2410c, 0 15px 20px rgba(0,0,0,.3); transition: all 0.2s; }
         .stake-3d:active { transform: translateY(4px); box-shadow: 0 4px 0 #c2410c; }
-        .back-btn { position: absolute; top: 10px; left: 10px; cursor: pointer; background: #eee; padding: 8px 12px; border-radius: 50%; font-weight: bold; z-index: 100; border: none; }
-        .modal-bg { background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); }
-        .card-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; background-color: #ddd; border: 2px solid #ddd; }
-        .card-cell { background: white; padding: 10px 2px; text-align: center; font-weight: bold; font-size: 14px; }
-        .selected-card-green { background-color: #16a34a !important; color: white !important; }
+        .back-btn { position: absolute; top: 15px; left: 15px; cursor: pointer; background: #eee; padding: 8px 12px; border-radius: 50%; font-weight: bold; z-index: 100; border: none; }
+        .modal-bg { background-color: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); }
+        .card-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; background-color: #ccc; }
+        .card-cell { background: white; padding: 12px 2px; text-align: center; font-weight: bold; font-size: 14px; color: #000; }
+        .selected-card-green { background-color: #16a34a !important; color: white !important; border: 2px solid #fff; }
+        /* ካርቴላዎቹ እንዲታዩ የሚያደርግ ማስተካከያ */
+        #cards-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 15px; min-height: 200px; }
     </style>
 </head>
-<body class="bg-white font-sans min-h-screen overflow-x-hidden text-gray-900">
+<body class="bg-white font-sans min-h-screen text-gray-900">
 
     <div id="home-page" class="flex flex-col items-center justify-center min-h-screen p-4 text-center">
         <img src="ardi.jpg" alt="Logo" class="w-28 h-28 rounded-full shadow-2xl mb-8 border-4 border-white">
-        <h1 class="text-4xl font-black mb-12 text-purple-900 tracking-tighter">ARDI BINGO</h1>
+        <h1 class="text-4xl font-black mb-12 text-purple-900 tracking-tighter uppercase">ARDI BINGO</h1>
         <div class="grid grid-cols-1 gap-6 w-full max-w-xs">
-            <button onclick="showPage('stake-page')" class="bg-green-600 text-white py-5 rounded-3xl font-black text-xl shadow-lg active:scale-95 transition">🕹 PLAY NOW</button>
-            <button onclick="showPage('deposit-methods')" class="bg-blue-600 text-white py-5 rounded-3xl font-black text-xl shadow-lg active:scale-95 transition">💰 DEPOSIT</button>
+            <button onclick="showPage('stake-page')" class="bg-green-600 text-white py-5 rounded-3xl font-black text-xl shadow-xl active:scale-95 transition">🕹 PLAY NOW</button>
+            <button onclick="showPage('deposit-methods')" class="bg-blue-600 text-white py-5 rounded-3xl font-black text-xl shadow-xl active:scale-95 transition">💰 DEPOSIT</button>
         </div>
     </div>
 
     <div id="deposit-methods" class="hidden flex flex-col items-center justify-center min-h-screen p-4">
         <button onclick="showPage('home-page')" class="back-btn">←</button>
         <img src="ardi.jpg" class="w-20 mb-6 rounded-full shadow-lg">
-        <h2 class="text-purple-800 font-black mb-8 text-2xl uppercase text-center">Manual Deposit</h2>
+        <h2 class="text-purple-800 font-black mb-8 text-2xl uppercase">Deposit</h2>
         <div class="grid grid-cols-3 gap-4 w-full max-w-sm">
-            <div onclick="showDeposit('CBE')" class="border-2 border-white rounded-3xl p-4 text-center cursor-pointer shadow-lg bg-white active:scale-90 transition">
-                <img src="cbe.png" class="h-14 mx-auto mb-2">
+            <div onclick="showDeposit('CBE')" class="border rounded-3xl p-4 text-center cursor-pointer shadow-lg bg-white active:scale-90 transition">
+                <img src="cbe.png" class="h-12 mx-auto mb-2">
                 <p class="text-[10px] font-black uppercase">CBE Bank</p>
             </div>
-            <div onclick="showDeposit('CBE_BIRR')" class="border-2 border-white rounded-3xl p-4 text-center cursor-pointer shadow-lg bg-white active:scale-90 transition">
-                <img src="cbebirr.png" class="h-14 mx-auto mb-2">
+            <div onclick="showDeposit('CBE_BIRR')" class="border rounded-3xl p-4 text-center cursor-pointer shadow-lg bg-white active:scale-90 transition">
+                <img src="cbebirr.png" class="h-12 mx-auto mb-2">
                 <p class="text-[10px] font-black uppercase">CBE Birr</p>
             </div>
-            <div onclick="showDeposit('TELEBIRR')" class="border-2 border-white rounded-3xl p-4 text-center cursor-pointer shadow-lg bg-white active:scale-90 transition">
-                <img src="telebirr.png" class="h-14 mx-auto mb-2">
+            <div onclick="showDeposit('TELEBIRR')" class="border rounded-3xl p-4 text-center cursor-pointer shadow-lg bg-white active:scale-90 transition">
+                <img src="telebirr.png" class="h-12 mx-auto mb-2">
                 <p class="text-[10px] font-black uppercase">Telebirr</p>
             </div>
         </div>
     </div>
 
     <div id="deposit-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-[40px] w-full max-w-sm overflow-hidden shadow-2xl relative">
+        <div class="bg-white rounded-[40px] w-full max-w-sm overflow-hidden shadow-2xl relative p-8 text-center">
             <button onclick="hideModal('deposit-modal')" class="absolute top-5 right-6 text-2xl font-bold text-gray-400">✕</button>
-            <div class="p-8 text-center">
-                <h3 id="bank-title" class="font-black text-xl mb-6 text-gray-800">Deposit</h3>
-                <div class="bg-gray-50 p-8 rounded-[32px] border-2 border-gray-100 mb-6">
-                    <p id="acc-num" class="text-blue-700 text-2xl font-black tracking-widest mb-2"></p>
-                    <p id="acc-name" class="text-sm font-black text-gray-500 uppercase tracking-widest"></p>
-                </div>
-                <div class="text-left text-[13px] space-y-3 mb-6 px-2 text-gray-700 font-bold leading-relaxed">
-                    <p>1. ከላይ ባለው የቴሌብር አካውንት ብር ያስገቡ</p>
-                    <p>2. የደረሳችሁን አጭር የጹሁፍ መለክት (SMS) ሙሉዉን ኮፒ (COPY) በማረግ ከታሽ ባለው የጹሁፍ ማስገቢያው ላይ ፔስት (PASTE) በማረግ ይላኩት</p>
-                </div>
-                <textarea id="ref-input" class="w-full border-2 border-gray-100 bg-gray-50 p-4 rounded-2xl text-sm h-32 outline-none font-medium" placeholder="Enter Message"></textarea>
-                <button onclick="sendVerification()" class="w-full bg-green-500 text-white py-5 mt-6 rounded-[24px] font-black shadow-lg uppercase tracking-wider">Send for Verification</button>
-                <p class="mt-4 text-[10px] text-gray-400 font-bold italic">E.g Format: CA999DASAD</p>
-                <p class="mt-4 text-[11px] text-gray-600 font-bold px-4 leading-relaxed">የሚያጋጥማቹ የክፍያ ችግር ካለ ኤጀንቱን ማዋራት ይችላሉ ወይም <span class="text-blue-600">@ardibingosupport</span> በዚ ሰፖርት ማዉራት ይችላሉ።</p>
+            <h3 class="font-black text-xl mb-6">Deposit</h3>
+            <div class="bg-gray-50 p-6 rounded-[32px] border-2 border-gray-100 mb-6">
+                <p id="acc-num" class="text-blue-700 text-2xl font-black tracking-widest mb-2"></p>
+                <p id="acc-name" class="text-sm font-black text-gray-500 uppercase tracking-widest"></p>
             </div>
+            <div class="text-left text-[13px] space-y-3 mb-6 font-bold text-gray-700">
+                <p>1. ከላይ ባለው የቴሌብር አካውንት ብር ያስገቡ</p>
+                <p>2. የደረሳችሁን አጭር የጹሁፍ መለክት (SMS) ሙሉዉን ኮፒ በማረግ ከታሽ ባለው ሳጥን ላይ ፔስት በማረግ ይላኩት</p>
+            </div>
+            <textarea id="ref-input" class="w-full border p-4 rounded-2xl h-24 mb-4" placeholder="Enter Message"></textarea>
+            <button onclick="sendVerification()" class="w-full bg-green-500 text-white py-4 rounded-2xl font-black shadow-lg uppercase">Send for Verification</button>
+            <p class="mt-4 text-[11px] text-gray-500">የሚያጋጥማቹ የክፍያ ችግር ካለ @ardibingosupport ያዋሩ።</p>
         </div>
     </div>
 
-    <div id="stake-page" class="hidden flex flex-col items-center justify-center min-h-screen p-4 bg-white">
+    <div id="stake-page" class="hidden flex flex-col items-center justify-center min-h-screen p-4">
         <button onclick="showPage('home-page')" class="back-btn">←</button>
         <h1 class="text-3xl font-black mb-12 text-purple-900 uppercase">Stake (መደብ ይምረጡ)</h1>
-        <div class="grid grid-cols-2 gap-8 mb-16">
+        <div class="grid grid-cols-2 gap-8">
             <button onclick="selectStake(10)" class="stake-3d bg-orange-500 w-28 h-28 rounded-[30px] text-3xl font-black text-white">10</button>
             <button onclick="selectStake(20)" class="stake-3d bg-orange-500 w-28 h-28 rounded-[30px] text-3xl font-black text-white">20</button>
             <button onclick="selectStake(50)" class="stake-3d bg-orange-500 w-28 h-28 rounded-[30px] text-3xl font-black text-white">50</button>
@@ -86,24 +85,25 @@
             <div>Wallet<br><span>0.00 ETB</span></div>
             <div class="bg-yellow-400 text-blue-900 p-1 rounded-xl">Derrash<br><b id="potential-win" class="text-xs">0.00</b></div>
         </div>
-        <div id="cards-container" class="grid grid-cols-5 gap-3 p-3 bg-white rounded-[32px] shadow-inner flex-grow overflow-y-auto border-4 border-gray-100 max-h-[75vh]">
+        <p class="text-center font-black text-purple-900 mb-2 uppercase text-xs tracking-widest">ካርቴላ ይምረጡ</p>
+        <div id="cards-container" class="bg-white rounded-[32px] shadow-inner flex-grow overflow-y-auto border-4 border-gray-100 min-h-[500px]">
             </div>
     </div>
 
-    <div id="card-view" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
+    <div id="card-view" class="hidden fixed inset-0 modal-bg z-[100] flex items-center justify-center p-4">
         <div class="bg-white rounded-[40px] p-6 w-full max-w-sm text-center shadow-2xl border-4 border-orange-400">
-            <h2 class="text-2xl text-purple-900 font-black mb-4 uppercase">Card #<span id="selected-card-num">0</span></h2>
-            <div class="rounded-2xl overflow-hidden border-2 border-gray-200">
-                <div class="grid grid-cols-5 bg-gray-100 font-black text-white">
-                    <div class="bg-green-600 py-2">B</div><div class="bg-red-600 py-2">I</div>
-                    <div class="bg-orange-500 py-2">N</div><div class="bg-blue-600 py-2">G</div>
-                    <div class="bg-pink-600 py-2">O</div>
+            <h2 class="text-2xl font-black mb-4">Card #<span id="selected-card-num">0</span></h2>
+            <div class="rounded-xl overflow-hidden border-2 border-gray-300">
+                <div class="grid grid-cols-5 bg-gray-200 font-black">
+                    <div class="bg-green-600 text-white py-2">B</div><div class="bg-red-600 text-white py-2">I</div>
+                    <div class="bg-orange-500 text-white py-2">N</div><div class="bg-blue-600 text-white py-2">G</div>
+                    <div class="bg-pink-600 text-white py-2">O</div>
                 </div>
                 <div id="card-numbers" class="card-grid"></div>
             </div>
             <div class="flex gap-4 mt-8">
-                <button onclick="acceptCard()" class="flex-1 bg-green-600 text-white py-5 rounded-[20px] font-black shadow-lg uppercase">ACCEPT</button>
-                <button onclick="hideModal('card-view')" class="flex-1 bg-red-600 text-white py-5 rounded-[20px] font-black shadow-lg uppercase">CANCEL</button>
+                <button onclick="acceptCard()" class="flex-1 bg-green-600 text-white py-4 rounded-2xl font-black">ACCEPT</button>
+                <button onclick="hideModal('card-view')" class="flex-1 bg-red-600 text-white py-4 rounded-2xl font-black">CANCEL</button>
             </div>
         </div>
     </div>
@@ -122,19 +122,15 @@
         }
 
         function showDeposit(method) {
-            const title = document.getElementById('bank-title');
             const acc = document.getElementById('acc-num');
             const name = document.getElementById('acc-name');
             if(method === 'TELEBIRR') {
-                title.innerText = "Deposit";
                 acc.innerText = "251979429028";
                 name.innerText = "YORDANOSE TETKEM";
             } else if(method === 'CBE') {
-                title.innerText = "Deposit";
                 acc.innerText = "1000277987067";
                 name.innerText = "YORDANOSE TETKEM";
             } else {
-                title.innerText = "Deposit";
                 acc.innerText = "0979429028";
                 name.innerText = "YORDANOSE TETKEM";
             }
@@ -153,11 +149,11 @@
 
         function initCards() {
             const container = document.getElementById('cards-container');
-            container.innerHTML = '';
+            container.innerHTML = ''; // Clear old cards
             for(let i=1; i<=100; i++) {
                 let btn = document.createElement('button');
                 btn.id = `card-btn-${i}`;
-                btn.className = "bg-orange-500 text-white py-4 rounded-2xl font-black shadow-md active:bg-orange-700 transition";
+                btn.className = "bg-orange-500 text-white py-5 rounded-2xl font-black shadow-md active:bg-orange-700 transition h-16 flex items-center justify-center";
                 btn.innerText = i;
                 btn.onclick = () => showBingoCard(i);
                 container.appendChild(btn);
@@ -184,8 +180,9 @@
 
         function acceptCard() {
             document.getElementById('potential-win').innerText = (selectedStake * 0.85).toFixed(2);
-            document.getElementById(`card-btn-${selectedCardId}`).classList.add('selected-card-green');
-            document.getElementById(`card-btn-${selectedCardId}`).innerText = "✓";
+            let btn = document.getElementById(`card-btn-${selectedCardId}`);
+            btn.classList.add('selected-card-green');
+            btn.innerText = "✓";
             hideModal('card-view');
         }
 
@@ -201,7 +198,7 @@
         }
 
         function sendVerification() {
-            alert("የላኩት መረጃ ለአድሚን ደርሷል!");
+            alert("መረጃው ለአድሚን ደርሷል!");
             hideModal('deposit-modal');
         }
     </script>
