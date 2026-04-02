@@ -8,97 +8,104 @@
     <style>
         .stake-3d { box-shadow: 0 8px 0 #c2410c, 0 15px 20px rgba(0,0,0,.3); transition: all 0.2s; }
         .stake-3d:active { transform: translateY(4px); box-shadow: 0 4px 0 #c2410c; }
-        .selected-card { background-color: #16a34a !important; color: white; cursor: not-allowed; }
-        .back-btn { position: absolute; top: 10px; left: 10px; cursor: pointer; background: #eee; padding: 5px 10px; border-radius: 50%; font-weight: bold; z-index: 50; }
+        .back-btn { position: absolute; top: 10px; left: 10px; cursor: pointer; background: #eee; padding: 8px 12px; border-radius: 50%; font-weight: bold; z-index: 100; border: none; }
         .modal-bg { background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); }
+        .card-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; background-color: #ddd; border: 2px solid #ddd; }
+        .card-cell { background: white; padding: 10px 2px; text-align: center; font-weight: bold; font-size: 14px; }
     </style>
 </head>
-<body class="bg-white font-sans min-h-screen overflow-x-hidden text-gray-900">
+<body class="bg-gray-100 font-sans min-h-screen overflow-x-hidden text-gray-900">
 
     <div id="home-page" class="flex flex-col items-center justify-center min-h-screen p-4 text-center">
-        <img src="ardi.jpg" alt="Ardi Logo" class="w-32 h-32 rounded-full shadow-xl mb-8 object-cover">
-        <h1 class="text-3xl font-black mb-10 text-purple-900">Ardi Bingo</h1>
+        <img src="ardi.jpg" alt="Logo" class="w-28 h-28 rounded-full shadow-2xl mb-8 border-4 border-white">
+        <h1 class="text-4xl font-black mb-12 text-purple-900 tracking-tighter">ARDI BINGO</h1>
         <div class="grid grid-cols-1 gap-6 w-full max-w-xs">
-            <button onclick="showPage('stake-page')" class="bg-green-600 text-white py-4 rounded-2xl font-black text-xl shadow-lg active:scale-95 transition">🕹 PLAY NOW</button>
-            <button onclick="showPage('deposit-methods')" class="bg-blue-600 text-white py-4 rounded-2xl font-black text-xl shadow-lg active:scale-95 transition">💰 DEPOSIT</button>
+            <button onclick="showPage('stake-page')" class="bg-green-600 text-white py-5 rounded-3xl font-black text-xl shadow-xl active:scale-95 transition">🕹 PLAY NOW</button>
+            <button onclick="showPage('deposit-methods')" class="bg-blue-600 text-white py-5 rounded-3xl font-black text-xl shadow-xl active:scale-95 transition">💰 DEPOSIT</button>
         </div>
     </div>
 
     <div id="deposit-methods" class="hidden flex flex-col items-center justify-center min-h-screen p-4">
         <button onclick="showPage('home-page')" class="back-btn">←</button>
-        <img src="ardi.jpg" class="w-20 mb-4 rounded-full">
-        <h2 class="text-purple-700 font-bold mb-6 text-xl">Manual Deposit</h2>
+        <img src="ardi.jpg" class="w-20 mb-6 rounded-full shadow-lg">
+        <h2 class="text-purple-800 font-black mb-8 text-2xl uppercase">Manual Deposit</h2>
         <div class="grid grid-cols-3 gap-4 w-full max-w-sm">
-            <div onclick="showDeposit('CBE')" class="border rounded-xl p-3 text-center cursor-pointer shadow bg-white">
-                <img src="cbe.png" class="h-12 mx-auto mb-2">
-                <p class="text-[10px] font-bold">CBE Bank</p>
+            <div onclick="showDeposit('CBE')" class="border-2 border-white rounded-3xl p-4 text-center cursor-pointer shadow-lg bg-white active:scale-90 transition">
+                <img src="cbe.png" class="h-14 mx-auto mb-2">
+                <p class="text-[10px] font-black uppercase">CBE Bank</p>
             </div>
-            <div onclick="showDeposit('CBE_BIRR')" class="border rounded-xl p-3 text-center cursor-pointer shadow bg-white">
-                <img src="cbebirr.png" class="h-12 mx-auto mb-2">
-                <p class="text-[10px] font-bold">CBE Birr</p>
+            <div onclick="showDeposit('CBE_BIRR')" class="border-2 border-white rounded-3xl p-4 text-center cursor-pointer shadow-lg bg-white active:scale-90 transition">
+                <img src="cbebirr.png" class="h-14 mx-auto mb-2">
+                <p class="text-[10px] font-black uppercase">CBE Birr</p>
             </div>
-            <div onclick="showDeposit('TELEBIRR')" class="border rounded-xl p-3 text-center cursor-pointer shadow bg-white">
-                <img src="telebirr.png" class="h-12 mx-auto mb-2">
-                <p class="text-[10px] font-bold">Telebirr</p>
+            <div onclick="showDeposit('TELEBIRR')" class="border-2 border-white rounded-3xl p-4 text-center cursor-pointer shadow-lg bg-white active:scale-90 transition">
+                <img src="telebirr.png" class="h-14 mx-auto mb-2">
+                <p class="text-[10px] font-black uppercase">Telebirr</p>
             </div>
         </div>
+        <p class="mt-24 text-gray-400 font-bold text-xs uppercase tracking-widest">Copyright © Allora-Groups 2025</p>
     </div>
 
     <div id="deposit-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl relative">
-            <button onclick="hideModal('deposit-modal')" class="absolute top-4 right-4 text-xl font-bold">✕</button>
-            <div class="p-6 text-center">
-                <h3 id="bank-title" class="font-bold text-lg mb-6"></h3>
-                <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 mb-6">
-                    <p id="acc-num" class="text-blue-700 text-3xl font-black tracking-widest mb-2 select-all"></p>
-                    <p id="acc-name" class="text-sm font-bold text-gray-500 uppercase tracking-wide"></p>
+        <div class="bg-white rounded-[40px] w-full max-w-sm overflow-hidden shadow-2xl relative animate-in fade-in zoom-in duration-300">
+            <button onclick="hideModal('deposit-modal')" class="absolute top-5 right-6 text-2xl font-bold text-gray-400">✕</button>
+            <div class="p-8 text-center">
+                <h3 id="bank-title" class="font-black text-xl mb-6 text-gray-800"></h3>
+                <div class="bg-gray-50 p-8 rounded-[32px] border-2 border-gray-100 mb-6">
+                    <p id="acc-num" class="text-blue-700 text-3xl font-black tracking-widest mb-2"></p>
+                    <p id="acc-name" class="text-sm font-black text-gray-500 uppercase tracking-widest"></p>
                 </div>
-                <div class="text-left text-[12px] space-y-2 mb-6 px-2 text-gray-700 font-medium">
-                    <p>1. ከላይ ያለውን አካውንት ኮፒ አድርገው ብር ያስገቡ</p>
-                    <p>2. የደረሰኝ ቁጥር ወይም የዲጂት ኮድ ከታች ያስገቡ</p>
+                <div class="text-left text-[13px] space-y-3 mb-6 px-2 text-gray-700 font-bold leading-relaxed">
+                    <p>1. ከላይ ባለው የቴሌብር አካውንት ብር ያስገቡ</p>
+                    <p>2. የደረሳችሁን አጭር የጹሁፍ መለክት (SMS) ሙሉዉን ኮፒ (COPY) በማረግ ከታሽ ባለው የጹሁፍ ማስገቢያው ላይ ፔስት (PASTE) በማረግ ይላኩት</p>
                 </div>
-                <textarea id="ref-input" class="w-full border-2 border-gray-100 bg-gray-50 p-4 rounded-xl text-sm h-28 focus:border-green-500 outline-none transition" placeholder="Transaction Number እዚህ ጋር ያስገቡ..."></textarea>
-                <button onclick="sendVerification()" class="w-full bg-green-500 text-white py-4 mt-6 rounded-2xl font-black shadow-lg hover:bg-green-600 transition">Send for Verification</button>
+                <p class="text-left text-[11px] text-gray-400 font-bold mb-2 ml-2">Enter Message</p>
+                <textarea id="ref-input" class="w-full border-2 border-gray-100 bg-gray-50 p-4 rounded-2xl text-sm h-32 focus:border-green-500 outline-none transition font-medium" placeholder="Transaction Number እዚህ ጋር ያስገቡ..."></textarea>
+                <button onclick="sendVerification()" class="w-full bg-green-500 text-white py-5 mt-6 rounded-[24px] font-black shadow-lg hover:bg-green-600 transition uppercase tracking-wider">Send for Verification</button>
+                <p class="mt-6 text-[10px] text-gray-400 font-bold italic">E.g Format: CA999DASAD</p>
+                <p class="mt-4 text-[11px] text-gray-600 font-bold px-4 leading-relaxed">የሚያጋጥማቹ የክፍያ ችግር ካለ ኤጀንቱን ማዋራት ይችላሉ ወይም <span class="text-blue-600">@ardibingosupport</span> በዚ ሰፖርት ማዉራት ይችላሉ።</p>
             </div>
         </div>
     </div>
 
     <div id="stake-page" class="hidden flex flex-col items-center justify-center min-h-screen p-4 bg-purple-50">
         <button onclick="showPage('home-page')" class="back-btn">←</button>
-        <h1 class="text-3xl font-black mb-12 text-purple-900">Stake (መደብ ይምረጡ)</h1>
+        <h1 class="text-3xl font-black mb-12 text-purple-900 uppercase">Stake (መደብ ይምረጡ)</h1>
         <div class="grid grid-cols-2 gap-8 mb-16">
-            <button onclick="selectStake(10)" class="stake-3d bg-orange-500 w-28 h-28 rounded-2xl text-3xl font-black text-white">10</button>
-            <button onclick="selectStake(20)" class="stake-3d bg-orange-500 w-28 h-28 rounded-2xl text-3xl font-black text-white">20</button>
-            <button onclick="selectStake(50)" class="stake-3d bg-orange-500 w-28 h-28 rounded-2xl text-3xl font-black text-white">50</button>
-            <button onclick="selectStake(100)" class="stake-3d bg-orange-500 w-28 h-28 rounded-2xl text-3xl font-black text-white">100</button>
+            <button onclick="selectStake(10)" class="stake-3d bg-orange-500 w-28 h-28 rounded-[30px] text-3xl font-black text-white">10</button>
+            <button onclick="selectStake(20)" class="stake-3d bg-orange-500 w-28 h-28 rounded-[30px] text-3xl font-black text-white">20</button>
+            <button onclick="selectStake(50)" class="stake-3d bg-orange-500 w-28 h-28 rounded-[30px] text-3xl font-black text-white">50</button>
+            <button onclick="selectStake(100)" class="stake-3d bg-orange-500 w-28 h-28 rounded-[30px] text-3xl font-black text-white">100</button>
         </div>
     </div>
 
-    <div id="game-page" class="hidden p-2 min-h-screen bg-gray-50">
-        <div class="flex justify-between items-center bg-blue-600 text-white p-3 rounded-2xl text-[10px] font-bold mb-4 shadow-lg">
+    <div id="game-page" class="hidden p-2 min-h-screen bg-gray-50 flex flex-col">
+        <div class="grid grid-cols-5 gap-2 bg-blue-600 text-white p-4 rounded-[24px] text-[10px] font-black mb-4 shadow-xl text-center">
             <div>Game<br><span>27721</span></div>
             <div>Bet<br><span id="display-bet">0 ETB</span></div>
-            <div class="bg-white text-blue-900 px-3 py-1 rounded-lg">Timer<br><span id="timer" class="text-red-600 text-sm font-black">60s</span></div>
+            <div class="bg-white text-blue-900 p-1 rounded-xl">Timer<br><span id="timer" class="text-red-600 text-sm">60s</span></div>
             <div>Wallet<br><span>0.00 ETB</span></div>
-            <div class="bg-yellow-400 text-blue-900 p-1 rounded-lg">Derrash<br><b id="potential-win" class="text-xs">0.00</b></div>
+            <div class="bg-yellow-400 text-blue-900 p-1 rounded-xl">Derrash<br><b id="potential-win" class="text-xs">0.00</b></div>
         </div>
-        <p class="text-center font-black text-purple-900 mb-4 uppercase text-sm tracking-widest">ካርቴላ ይምረጡ</p>
-        <div id="cards-container" class="grid grid-cols-5 gap-3 p-2 bg-white rounded-3xl shadow-inner max-h-[70vh] overflow-y-auto border-2 border-gray-100">
+        <p class="text-center font-black text-purple-900 mb-4 uppercase text-xs tracking-[0.2em]">ካርቴላ ይምረጡ</p>
+        <div id="cards-container" class="grid grid-cols-5 gap-3 p-3 bg-white rounded-[32px] shadow-inner flex-grow overflow-y-auto border-4 border-gray-100 max-h-[70vh]">
             </div>
     </div>
 
     <div id="card-view" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl border-4 border-orange-400">
-            <h2 class="text-2xl text-purple-900 font-black mb-4">Card #<span id="selected-card-num">0</span></h2>
-            <div class="grid grid-cols-5 bg-gray-100 rounded-xl overflow-hidden border-2 border-gray-200 text-black font-bold">
-                <div class="bg-green-600 text-white p-2">B</div><div class="bg-red-600 text-white p-2">I</div>
-                <div class="bg-orange-500 text-white p-2">N</div><div class="bg-blue-600 text-white p-2">G</div>
-                <div class="bg-pink-600 text-white p-2">O</div>
-                <div id="card-numbers" class="contents"></div>
+        <div class="bg-white rounded-[40px] p-6 w-full max-w-sm text-center shadow-2xl border-4 border-orange-400 scale-in-center">
+            <h2 class="text-2xl text-purple-900 font-black mb-4 uppercase">Card #<span id="selected-card-num">0</span></h2>
+            <div class="rounded-2xl overflow-hidden border-2 border-gray-200">
+                <div class="grid grid-cols-5 bg-gray-100 font-black text-white">
+                    <div class="bg-green-600 py-2">B</div><div class="bg-red-600 py-2">I</div>
+                    <div class="bg-orange-500 py-2">N</div><div class="bg-blue-600 py-2">G</div>
+                    <div class="bg-pink-600 py-2">O</div>
+                </div>
+                <div id="card-numbers" class="card-grid"></div>
             </div>
             <div class="flex gap-4 mt-8">
-                <button id="accept-btn" onclick="acceptCard()" class="flex-1 bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg">ACCEPT</button>
-                <button id="cancel-btn" onclick="closeCard()" class="flex-1 bg-red-600 text-white py-4 rounded-2xl font-black shadow-lg">CANCEL</button>
+                <button id="accept-btn" onclick="acceptCard()" class="flex-1 bg-green-600 text-white py-5 rounded-[20px] font-black shadow-lg uppercase tracking-wider">ACCEPT</button>
+                <button onclick="hideModal('card-view')" class="flex-1 bg-red-600 text-white py-5 rounded-[20px] font-black shadow-lg uppercase tracking-wider">CANCEL</button>
             </div>
         </div>
     </div>
@@ -106,7 +113,6 @@
     <script>
         let selectedStake = 0;
         let selectedCardId = null;
-        let isCardAccepted = false;
         let timerVal = 60;
 
         function showPage(pageId) {
@@ -114,6 +120,7 @@
                 if(!['deposit-modal', 'card-view', 'card-numbers'].includes(d.id)) d.classList.add('hidden');
             });
             document.getElementById(pageId).classList.remove('hidden');
+            if(pageId === 'home-page') window.scrollTo(0,0);
         }
 
         function showDeposit(method) {
@@ -123,17 +130,17 @@
             const name = document.getElementById('acc-name');
 
             if(method === 'TELEBIRR') {
-                title.innerText = "";
+                title.innerText = "Telebirr ";
                 acc.innerText = "251979429028";
                 name.innerText = "YORDANOSE";
             } else if(method === 'CBE') {
                 title.innerText = "Commercial Bank of Ethiopia Deposit";
                 acc.innerText = "1000277987067";
-                name.innerText = "";
+                name.innerText = "YORDANOSE";
             } else {
                 title.innerText = "CBE Birr Deposit";
                 acc.innerText = "0979429028";
-                name.innerText = "YORDANOS";
+                name.innerText = "YORDANOSE TETKEM";
             }
             modal.classList.remove('hidden');
         }
@@ -144,62 +151,67 @@
             selectedStake = amount;
             document.getElementById('display-bet').innerText = amount + " ETB";
             showPage('game-page');
-            initCards();
+            initCardsList();
             startTimer();
         }
 
-        function initCards() {
+        function initCardsList() {
             const container = document.getElementById('cards-container');
             container.innerHTML = '';
             for(let i=1; i<=100; i++) {
                 let btn = document.createElement('button');
                 btn.id = `card-btn-${i}`;
-                btn.className = "bg-white border-2 border-gray-100 text-purple-900 p-4 rounded-xl font-black shadow-sm active:bg-orange-100 transition";
+                btn.className = "bg-orange-500 text-white py-4 rounded-2xl font-black shadow-md active:bg-orange-700 transition";
                 btn.innerText = i;
-                btn.onclick = () => showCard(i);
+                btn.onclick = () => showBingoCard(i);
                 container.appendChild(btn);
             }
         }
 
-        function showCard(num) {
-            if(isCardAccepted) return;
+        function showBingoCard(num) {
             selectedCardId = num;
             document.getElementById('selected-card-num').innerText = num;
-            const container = document.getElementById('card-numbers');
-            container.innerHTML = '';
+            const grid = document.getElementById('card-numbers');
+            grid.innerHTML = '';
             const ranges = [[1,15], [16,30], [31,45], [46,60], [61,75]];
             for(let r=0; r<5; r++) {
                 for(let c=0; c<5; c++) {
-                    if(r===2 && c===2) container.innerHTML += `<div class="p-3 border border-gray-200 bg-yellow-50 text-center">⭐</div>`;
-                    else {
-                        let val = Math.floor(Math.random() * (ranges[c][1] - ranges[c][0] + 1)) + ranges[c][0];
-                        container.innerHTML += `<div class="p-3 border border-gray-200 bg-white text-sm text-center">${val}</div>`;
+                    let cell = document.createElement('div');
+                    cell.className = "card-cell border border-gray-100";
+                    if(r===2 && c===2) {
+                        cell.innerText = "⭐";
+                        cell.classList.add('bg-yellow-50');
+                    } else {
+                        cell.innerText = Math.floor(Math.random() * (ranges[c][1] - ranges[c][0] + 1)) + ranges[c][0];
                     }
+                    grid.appendChild(cell);
                 }
             }
             document.getElementById('card-view').classList.remove('hidden');
         }
 
         function acceptCard() {
-            isCardAccepted = true;
             document.getElementById('potential-win').innerText = (selectedStake * 0.85).toFixed(2);
-            document.getElementById(`card-btn-${selectedCardId}`).classList.add('selected-card');
+            document.getElementById(`card-btn-${selectedCardId}`).style.backgroundColor = "#16a34a";
+            document.getElementById(`card-btn-${selectedCardId}`).innerText = "✓";
             hideModal('card-view');
         }
 
-        function closeCard() { hideModal('card-view'); }
-
         function startTimer() {
-            setInterval(() => {
+            const t = setInterval(() => {
                 if(timerVal > 0) {
                     timerVal--;
                     document.getElementById('timer').innerText = timerVal + "s";
-                }
+                } else clearInterval(t);
             }, 1000);
         }
 
         function sendVerification() {
-            alert("Verification Sent! Admin will approve soon.");
+            if(document.getElementById('ref-input').value.length < 5) {
+                alert("እባክዎ ትክክለኛ የደረሰኝ ቁጥር ያስገቡ!");
+                return;
+            }
+            alert("የላኩት መረጃ ለአድሚን ደርሷል። ሲረጋገጥ ባላንስዎ ላይ ይጨመራል!");
             hideModal('deposit-modal');
         }
     </script>
