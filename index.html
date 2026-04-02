@@ -6,51 +6,66 @@
     <title>Ardi Bingo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .selected-card { background-color: #16a34a !important; border: 2px solid white; } /* Green for selected */
-        .stake-active { border: 4px solid #facc15; transform: scale(1.1); }
+        /* 3D Stake Buttons Design */
+        .stake-3d {
+            transition: all 0.2s ease;
+            box-shadow: 0 8px 0 #c2410c, 0 15px 20px rgba(0,0,0,.3);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .stake-3d:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #c2410c, 0 8px 10px rgba(0,0,0,.3);
+        }
+        .selected-card { 
+            background-color: #16a34a !important; 
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            cursor: not-allowed;
+        }
+        /* ነጭ ዳራ */
+        body { background-color: #ffffff; color: #1e1b4b; }
     </style>
 </head>
-<body class="bg-purple-900 text-white font-sans min-h-screen overflow-x-hidden">
+<body class="font-sans min-h-screen overflow-x-hidden">
 
     <div id="stake-page" class="flex flex-col items-center justify-center min-h-screen p-4">
-        <h1 class="text-2xl font-bold mb-8">Stake (መደብ ይምረጡ)</h1>
-        <div class="grid grid-cols-2 gap-6 mb-10">
-            <button onclick="selectStake(10)" class="stake-btn bg-orange-500 w-24 h-24 rounded-full text-2xl font-bold shadow-2xl">10</button>
-            <button onclick="selectStake(20)" class="stake-btn bg-orange-500 w-24 h-24 rounded-full text-2xl font-bold shadow-2xl">20</button>
-            <button onclick="selectStake(50)" class="stake-btn bg-orange-500 w-24 h-24 rounded-full text-2xl font-bold shadow-2xl">50</button>
-            <button onclick="selectStake(100)" class="stake-btn bg-orange-500 w-24 h-24 rounded-full text-2xl font-bold shadow-2xl">100</button>
+        <h1 class="text-3xl font-black mb-12 text-purple-900">Stake (መደብ ይምረጡ)</h1>
+        <div class="grid grid-cols-2 gap-8 mb-16">
+            <button onclick="selectStake(10)" class="stake-3d bg-orange-500 w-28 h-28 rounded-2xl text-3xl font-black text-white">10</button>
+            <button onclick="selectStake(20)" class="stake-3d bg-orange-500 w-28 h-28 rounded-2xl text-3xl font-black text-white">20</button>
+            <button onclick="selectStake(50)" class="stake-3d bg-orange-500 w-28 h-28 rounded-2xl text-3xl font-black text-white">50</button>
+            <button onclick="selectStake(100)" class="stake-3d bg-orange-500 w-28 h-28 rounded-2xl text-3xl font-black text-white">100</button>
         </div>
-        <p class="text-purple-300">@ArdiiiBingoBot</p>
+        <p class="text-gray-400 font-bold">@ArdiiiBingoBot</p>
     </div>
 
     <div id="game-page" class="hidden p-2">
-        <div class="flex justify-between items-center bg-blue-100 text-blue-900 p-2 rounded-lg text-[10px] font-bold mb-4 shadow-lg">
+        <div class="flex justify-between items-center bg-blue-600 text-white p-3 rounded-xl text-[10px] font-bold mb-4 shadow-xl">
             <div class="text-center">Game<br><span id="game-id">27721</span></div>
             <div class="text-center">Bet<br><span id="display-bet">0 ETB</span></div>
-            <div class="text-center">Timer<br><span id="timer" class="text-red-600 text-sm">60s</span></div>
+            <div class="text-center bg-white text-blue-900 px-2 py-1 rounded-lg">Timer<br><span id="timer" class="text-red-600 text-sm">60s</span></div>
             <div class="text-center">Wallet<br>0.00 ETB</div>
-            <div class="text-center bg-blue-200 p-1 rounded">Derrash<br><b id="potential-win" class="text-xs text-red-600">0.00</b></div>
+            <div class="text-center bg-yellow-400 text-blue-900 p-1 rounded">Derrash<br><b id="potential-win" class="text-xs">0.00</b></div>
         </div>
 
-        <p class="text-center mb-2 font-bold text-orange-400">ካርቴላ ይምረጡ</p>
+        <p class="text-center mb-4 font-black text-purple-900 uppercase tracking-widest">ካርቴላ ይምረጡ</p>
 
-        <div id="cards-container" class="grid grid-cols-5 gap-2 overflow-y-auto max-h-[70vh] p-1">
+        <div id="cards-container" class="grid grid-cols-5 gap-3 overflow-y-auto max-h-[70vh] p-2 bg-gray-100 rounded-2xl shadow-inner">
             </div>
-        <p class="text-center mt-4 text-[10px] text-purple-300">@ArdiiiBingoBot</p>
+        <p class="text-center mt-6 text-[10px] text-gray-400 font-bold">@ArdiiiBingoBot</p>
     </div>
 
-    <div id="card-view" class="hidden fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-50">
-        <div class="bg-orange-200 rounded-2xl p-4 w-full max-w-sm text-center shadow-2xl">
-            <h2 class="text-black font-bold mb-2">Card #<span id="selected-card-num">0</span></h2>
-            <div class="grid grid-cols-5 bg-white rounded-lg overflow-hidden border-2 border-orange-400 text-black font-bold">
-                <div class="bg-green-500 text-white p-1">B</div><div class="bg-red-500 text-white p-1">I</div>
-                <div class="bg-orange-400 text-white p-1">N</div><div class="bg-blue-600 text-white p-1">G</div>
-                <div class="bg-pink-500 text-white p-1">O</div>
+    <div id="card-view" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl border-4 border-orange-500">
+            <h2 class="text-2xl text-purple-900 font-black mb-4">Card #<span id="selected-card-num">0</span></h2>
+            <div class="grid grid-cols-5 bg-gray-200 rounded-xl overflow-hidden border-2 border-gray-300 text-black font-bold">
+                <div class="bg-green-600 text-white p-2">B</div><div class="bg-red-600 text-white p-2">I</div>
+                <div class="bg-orange-500 text-white p-2">N</div><div class="bg-blue-600 text-white p-2">G</div>
+                <div class="bg-pink-600 text-white p-2">O</div>
                 <div id="card-numbers" class="contents"></div>
             </div>
-            <div class="flex gap-4 mt-6">
-                <button onclick="acceptCard()" class="flex-1 bg-green-600 text-white py-3 rounded-full font-bold">Accept</button>
-                <button onclick="closeCard()" class="flex-1 bg-orange-600 text-white py-3 rounded-full font-bold">Cancel</button>
+            <div class="flex gap-4 mt-8">
+                <button id="accept-btn" onclick="acceptCard()" class="flex-1 bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg hover:bg-green-700 transition">ACCEPT</button>
+                <button id="cancel-btn" onclick="closeCard()" class="flex-1 bg-red-600 text-white py-4 rounded-2xl font-black shadow-lg hover:bg-red-700 transition">CANCEL</button>
             </div>
         </div>
     </div>
@@ -58,47 +73,49 @@
     <script>
         let selectedStake = 0;
         let selectedCardId = null;
-        let timeLeft = 60;
         let isCardAccepted = false;
+        let timers = { 10: 60, 20: 60, 50: 60, 100: 60 }; // እያንዳንዱ Stake የራሱ ታይመር አለው
+        let currentTimerInterval = null;
 
-        // 1. Stake መምረጥ እና ወደ ጌም መግባት
         function selectStake(amount) {
             selectedStake = amount;
             document.getElementById('display-bet').innerText = amount + " ETB";
             document.getElementById('stake-page').classList.add('hidden');
             document.getElementById('game-page').classList.remove('hidden');
             initCards();
-            startTimer();
+            startTimer(amount);
         }
 
-        // 2. ካርቴላዎችን መፍጠር
         function initCards() {
             const container = document.getElementById('cards-container');
+            container.innerHTML = '';
             for(let i=1; i<=100; i++) {
                 let btn = document.createElement('button');
                 btn.id = `card-btn-${i}`;
-                btn.className = "bg-orange-700 p-3 rounded text-sm font-bold shadow";
+                btn.className = "bg-white text-purple-900 p-4 rounded-xl font-black shadow-md border-b-4 border-gray-300 hover:border-none hover:translate-y-1 transition-all";
                 btn.innerText = i;
                 btn.onclick = () => showCard(i);
                 container.appendChild(btn);
             }
         }
 
-        // 3. ታይመር ማስጀመር
-        function startTimer() {
+        function startTimer(stakeAmount) {
             const timerEl = document.getElementById('timer');
-            const interval = setInterval(() => {
-                timeLeft--;
-                timerEl.innerText = timeLeft + "s";
-                if(timeLeft <= 0) {
-                    clearInterval(interval);
-                    alert("ጊዜው አልቋል! ወደ ዋናው ጨዋታ (Call Numbers) በመሄድ ላይ...");
+            if(currentTimerInterval) clearInterval(currentTimerInterval);
+            
+            currentTimerInterval = setInterval(() => {
+                timers[stakeAmount]--;
+                timerEl.innerText = timers[stakeAmount] + "s";
+                if(timers[stakeAmount] <= 0) {
+                    clearInterval(currentTimerInterval);
+                    alert("ለዚህ Stake የተሰጠው ጊዜ አልቋል!");
                 }
             }, 1000);
         }
 
-        // 4. የካርቴላ ቁጥሮችን መፍጠር (ቁጥሮች እንዳይደገሙ)
         function showCard(num) {
+            if(isCardAccepted) return; // ካርቴላ ከተገዛ በኋላ ሌላ መክፈት አይቻልም
+            
             selectedCardId = num;
             document.getElementById('selected-card-num').innerText = num;
             const container = document.getElementById('card-numbers');
@@ -108,12 +125,11 @@
             for(let row=0; row<5; row++) {
                 for(let col=0; col<5; col++) {
                     if(row === 2 && col === 2) {
-                        container.innerHTML += `<div class="p-2 border border-gray-200 bg-gray-100 text-xs">⭐</div>`;
+                        container.innerHTML += `<div class="p-3 border border-gray-300 bg-yellow-100 flex items-center justify-center">⭐</div>`;
                     } else {
-                        // ቁጥሮች እንዳይደገሙ ሎጂክ
                         let min = ranges[col][0], max = ranges[col][1];
                         let val = Math.floor(Math.random() * (max - min + 1)) + min;
-                        container.innerHTML += `<div class="p-2 border border-gray-200 bg-white text-xs">${val}</div>`;
+                        container.innerHTML += `<div class="p-3 border border-gray-300 bg-white text-sm flex items-center justify-center">${val}</div>`;
                     }
                 }
             }
@@ -122,18 +138,24 @@
 
         function acceptCard() {
             isCardAccepted = true;
-            // Derrash ስሌት [Stake * 0.85]
             let derrash = (selectedStake * 0.85).toFixed(2);
             document.getElementById('potential-win').innerText = derrash;
             
-            // የተመረጠው ካርቴላ አረንጓዴ እንዲሆን
-            document.querySelectorAll('#cards-container button').forEach(b => b.classList.remove('selected-card'));
+            // ካርቴላውን አረንጓዴ ማድረግ
             document.getElementById(`card-btn-${selectedCardId}`).classList.add('selected-card');
             
+            // ቁልፎቹን ማጥፋት (መቀየር ወይም መሰረዝ እንዳይቻል)
+            document.getElementById('accept-btn').disabled = true;
+            document.getElementById('accept-btn').classList.add('opacity-50', 'cursor-not-allowed');
+            document.getElementById('cancel-btn').classList.add('hidden');
+            
+            alert("ካርቴላ ተገዝቷል! አሁን መቀየር ወይም መሰረዝ አይችሉም።");
             closeCard();
         }
 
-        function closeCard() { document.getElementById('card-view').classList.add('hidden'); }
+        function closeCard() { 
+            document.getElementById('card-view').classList.add('hidden'); 
+        }
     </script>
 </body>
 </html>
