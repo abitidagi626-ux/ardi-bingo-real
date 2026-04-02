@@ -28,22 +28,23 @@
         }
         .birr-label { font-size: 12px; font-weight: 800; opacity: 0.9; margin-bottom: -4px; }
 
-        /* Image 2: Compact Card Grid */
+        /* Image 1 & 2 Fix: 10 Cards Per Row + Blue Background */
         #cards-display {
             display: grid;
-            grid-template-columns: repeat(20, 1fr); /* 20 cards per row */
-            gap: 4px;
-            padding: 8px;
+            grid-template-columns: repeat(10, 1fr); /* 10 cards per row */
+            gap: 6px;
+            padding: 12px;
+            background-color: #1e40af; /* Blue Background as requested */
+            border-radius: 12px;
             width: 100%;
-            overflow-x: auto;
         }
         .compact-card {
             background: white;
             border: 1px solid #d1d5db;
             border-radius: 6px;
-            padding: 8px 0;
+            padding: 10px 0;
             font-weight: 900;
-            font-size: 10px;
+            font-size: 12px;
             color: #1f2937;
             text-align: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
@@ -89,13 +90,12 @@
             <h3 class="font-black text-xl mb-6">Deposit</h3>
             <div class="bg-slate-50 p-6 rounded-[32px] border-2 border-dashed border-slate-200 mb-6">
                 <p id="acc-num" class="text-blue-600 text-2xl font-black tracking-tighter mb-1 select-all"></p>
-                <p id="acc-name" class="text-sm font-black text-slate-900 uppercase tracking-widest"></p>
+                <p id="acc-name" class="text-sm font-black text-slate-900 uppercase tracking-widest">YARED MOLLA</p>
             </div>
-            <div class="text-left text-[12px] space-y-3 mb-6 font-bold text-slate-700 leading-snug">
-                <p>1. ከላይ ያለውን አካውንት ኮፒ አድርገው ብር ያስገቡ</p>
-                <p>2. የደረሳችሁን SMS (የዲጂት ኮድ) ከታች ባለው ሳጥን ላይ ይላኩ</p>
-            </div>
-            <textarea id="ref-input" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl h-28 mb-4 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium" placeholder="Enter Message"></textarea>
+            
+            <input type="number" id="deposit-amount" class="w-full bg-slate-100 border border-slate-200 p-4 rounded-2xl mb-4 focus:ring-2 focus:ring-blue-500 outline-none font-bold" placeholder="Enter Amount (ETB)">
+            
+            <textarea id="ref-input" class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl h-24 mb-4 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium" placeholder="Enter Message (SMS Code)"></textarea>
             <button onclick="sendVerification()" class="w-full bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg uppercase tracking-wider">Send for Verification</button>
         </div>
     </div>
@@ -125,18 +125,20 @@
         <div class="bg-black text-white p-4 flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
             <div class="flex flex-col"><span>Game ID</span><span class="text-orange-500">#27721</span></div>
             <div class="flex flex-col items-center"><span>Timer</span><span id="timer" class="text-sm text-red-500">60s</span></div>
-            <div class="flex flex-col items-end"><span>Wallet</span><span class="text-green-500">0.00 ETB</span></div>
+            <div class="flex flex-col items-end"><span>Wallet</span><span id="wallet-balance" class="text-green-500">0.00 ETB</span></div>
         </div>
 
         <div class="bg-slate-100 p-2 border-b border-slate-200">
              <div class="flex justify-between items-center px-2">
-                <p class="text-[9px] font-black text-slate-500 uppercase">Select Card (ረድፍ 20)</p>
+                <p class="text-[9px] font-black text-slate-500 uppercase">Select Card (ረድፍ 10)</p>
                 <p class="text-[9px] font-black text-orange-600 uppercase">Bet: <span id="display-bet">0</span></p>
              </div>
         </div>
         
-        <div id="cards-display" class="flex-grow bg-white">
-            </div>
+        <div class="p-2">
+            <div id="cards-display">
+                </div>
+        </div>
     </div>
 
     <div id="card-view" class="hidden fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-4">
@@ -152,7 +154,7 @@
             </div>
             <div class="flex gap-3">
                 <button onclick="acceptCard()" class="flex-1 bg-green-600 text-white py-5 rounded-3xl font-black uppercase tracking-widest shadow-lg">Accept</button>
-                <button onclick="hideModal('card-view')" class="flex-1 bg-slate-100 text-slate-400 py-5 rounded-3xl font-black uppercase tracking-widest">Cancel</button>
+                <button onclick="hideModal('card-view')" class="flex-1 bg-slate-100 text-slate-400 py-5 rounded-3xl font-black uppercase tracking-widest">Back</button>
             </div>
         </div>
     </div>
@@ -161,6 +163,7 @@
         let selectedStake = 0;
         let timerVal = 60;
         let timerInterval;
+        let currentWallet = 0.00;
 
         function showPage(pageId) {
             document.querySelectorAll('div[id]').forEach(d => {
@@ -171,13 +174,10 @@
 
         function showDeposit(method) {
             const acc = document.getElementById('acc-num');
-            const name = document.getElementById('acc-name');
             if(method === 'TELEBIRR') {
                 acc.innerText = "0993697243";
-                name.innerText = "YARED MOLLA";
             } else {
                 acc.innerText = "1000261501396";
-                name.innerText = "YARED MOLLA";
             }
             document.getElementById('deposit-modal').classList.remove('hidden');
         }
@@ -223,7 +223,8 @@
         }
 
         function acceptCard() {
-            alert("ካርቴላ ተመርጧል!");
+            let cardNum = document.getElementById('selected-card-num').innerText;
+            document.getElementById(`card-btn-${cardNum}`).classList.add('selected-card-green');
             hideModal('card-view');
         }
 
@@ -239,7 +240,23 @@
         }
 
         function sendVerification() {
-            alert("መረጃው ተልኳል! አድሚን እስኪያጸድቅ ይጠብቁ።");
+            const amountInput = document.getElementById('deposit-amount').value;
+            const amount = parseFloat(amountInput);
+
+            if (isNaN(amount) || amount <= 0) {
+                alert("እባክዎ ትክክለኛ የብር መጠን ያስገቡ!");
+                return;
+            }
+
+            // Simulate Admin Approval & Balance Update
+            alert("መረጃው ተልኳል! አድሚን ሲያጸድቀው " + amount + " ETB ባላንስዎ ላይ ይደመራል።");
+            
+            // This part simulates the balance update upon "approval"
+            currentWallet += amount;
+            document.getElementById('wallet-balance').innerText = currentWallet.toFixed(2) + " ETB";
+
+            document.getElementById('deposit-amount').value = '';
+            document.getElementById('ref-input').value = '';
             hideModal('deposit-modal');
         }
     </script>
