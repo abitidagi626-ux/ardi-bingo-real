@@ -12,23 +12,24 @@
         .modal-bg { background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); }
         .card-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; background-color: #ddd; border: 2px solid #ddd; }
         .card-cell { background: white; padding: 10px 2px; text-align: center; font-weight: bold; font-size: 14px; }
+        .selected-card-green { background-color: #16a34a !important; color: white !important; }
     </style>
 </head>
-<body class="bg-gray-100 font-sans min-h-screen overflow-x-hidden text-gray-900">
+<body class="bg-white font-sans min-h-screen overflow-x-hidden text-gray-900">
 
     <div id="home-page" class="flex flex-col items-center justify-center min-h-screen p-4 text-center">
         <img src="ardi.jpg" alt="Logo" class="w-28 h-28 rounded-full shadow-2xl mb-8 border-4 border-white">
         <h1 class="text-4xl font-black mb-12 text-purple-900 tracking-tighter">ARDI BINGO</h1>
         <div class="grid grid-cols-1 gap-6 w-full max-w-xs">
-            <button onclick="showPage('stake-page')" class="bg-green-600 text-white py-5 rounded-3xl font-black text-xl shadow-xl active:scale-95 transition">🕹 PLAY NOW</button>
-            <button onclick="showPage('deposit-methods')" class="bg-blue-600 text-white py-5 rounded-3xl font-black text-xl shadow-xl active:scale-95 transition">💰 DEPOSIT</button>
+            <button onclick="showPage('stake-page')" class="bg-green-600 text-white py-5 rounded-3xl font-black text-xl shadow-lg active:scale-95 transition">🕹 PLAY NOW</button>
+            <button onclick="showPage('deposit-methods')" class="bg-blue-600 text-white py-5 rounded-3xl font-black text-xl shadow-lg active:scale-95 transition">💰 DEPOSIT</button>
         </div>
     </div>
 
     <div id="deposit-methods" class="hidden flex flex-col items-center justify-center min-h-screen p-4">
         <button onclick="showPage('home-page')" class="back-btn">←</button>
         <img src="ardi.jpg" class="w-20 mb-6 rounded-full shadow-lg">
-        <h2 class="text-purple-800 font-black mb-8 text-2xl uppercase">Manual Deposit</h2>
+        <h2 class="text-purple-800 font-black mb-8 text-2xl uppercase text-center">Manual Deposit</h2>
         <div class="grid grid-cols-3 gap-4 w-full max-w-sm">
             <div onclick="showDeposit('CBE')" class="border-2 border-white rounded-3xl p-4 text-center cursor-pointer shadow-lg bg-white active:scale-90 transition">
                 <img src="cbe.png" class="h-14 mx-auto mb-2">
@@ -43,32 +44,30 @@
                 <p class="text-[10px] font-black uppercase">Telebirr</p>
             </div>
         </div>
-        <p class="mt-24 text-gray-400 font-bold text-xs uppercase tracking-widest">Copyright © Allora-Groups 2025</p>
     </div>
 
     <div id="deposit-modal" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-[40px] w-full max-w-sm overflow-hidden shadow-2xl relative animate-in fade-in zoom-in duration-300">
+        <div class="bg-white rounded-[40px] w-full max-w-sm overflow-hidden shadow-2xl relative">
             <button onclick="hideModal('deposit-modal')" class="absolute top-5 right-6 text-2xl font-bold text-gray-400">✕</button>
             <div class="p-8 text-center">
-                <h3 id="bank-title" class="font-black text-xl mb-6 text-gray-800"></h3>
+                <h3 id="bank-title" class="font-black text-xl mb-6 text-gray-800">Deposit</h3>
                 <div class="bg-gray-50 p-8 rounded-[32px] border-2 border-gray-100 mb-6">
-                    <p id="acc-num" class="text-blue-700 text-3xl font-black tracking-widest mb-2"></p>
+                    <p id="acc-num" class="text-blue-700 text-2xl font-black tracking-widest mb-2"></p>
                     <p id="acc-name" class="text-sm font-black text-gray-500 uppercase tracking-widest"></p>
                 </div>
                 <div class="text-left text-[13px] space-y-3 mb-6 px-2 text-gray-700 font-bold leading-relaxed">
                     <p>1. ከላይ ባለው የቴሌብር አካውንት ብር ያስገቡ</p>
                     <p>2. የደረሳችሁን አጭር የጹሁፍ መለክት (SMS) ሙሉዉን ኮፒ (COPY) በማረግ ከታሽ ባለው የጹሁፍ ማስገቢያው ላይ ፔስት (PASTE) በማረግ ይላኩት</p>
                 </div>
-                <p class="text-left text-[11px] text-gray-400 font-bold mb-2 ml-2">Enter Message</p>
-                <textarea id="ref-input" class="w-full border-2 border-gray-100 bg-gray-50 p-4 rounded-2xl text-sm h-32 focus:border-green-500 outline-none transition font-medium" placeholder="Transaction Number እዚህ ጋር ያስገቡ..."></textarea>
-                <button onclick="sendVerification()" class="w-full bg-green-500 text-white py-5 mt-6 rounded-[24px] font-black shadow-lg hover:bg-green-600 transition uppercase tracking-wider">Send for Verification</button>
-                <p class="mt-6 text-[10px] text-gray-400 font-bold italic">E.g Format: CA999DASAD</p>
+                <textarea id="ref-input" class="w-full border-2 border-gray-100 bg-gray-50 p-4 rounded-2xl text-sm h-32 outline-none font-medium" placeholder="Enter Message"></textarea>
+                <button onclick="sendVerification()" class="w-full bg-green-500 text-white py-5 mt-6 rounded-[24px] font-black shadow-lg uppercase tracking-wider">Send for Verification</button>
+                <p class="mt-4 text-[10px] text-gray-400 font-bold italic">E.g Format: CA999DASAD</p>
                 <p class="mt-4 text-[11px] text-gray-600 font-bold px-4 leading-relaxed">የሚያጋጥማቹ የክፍያ ችግር ካለ ኤጀንቱን ማዋራት ይችላሉ ወይም <span class="text-blue-600">@ardibingosupport</span> በዚ ሰፖርት ማዉራት ይችላሉ።</p>
             </div>
         </div>
     </div>
 
-    <div id="stake-page" class="hidden flex flex-col items-center justify-center min-h-screen p-4 bg-purple-50">
+    <div id="stake-page" class="hidden flex flex-col items-center justify-center min-h-screen p-4 bg-white">
         <button onclick="showPage('home-page')" class="back-btn">←</button>
         <h1 class="text-3xl font-black mb-12 text-purple-900 uppercase">Stake (መደብ ይምረጡ)</h1>
         <div class="grid grid-cols-2 gap-8 mb-16">
@@ -87,13 +86,12 @@
             <div>Wallet<br><span>0.00 ETB</span></div>
             <div class="bg-yellow-400 text-blue-900 p-1 rounded-xl">Derrash<br><b id="potential-win" class="text-xs">0.00</b></div>
         </div>
-        <p class="text-center font-black text-purple-900 mb-4 uppercase text-xs tracking-[0.2em]">ካርቴላ ይምረጡ</p>
-        <div id="cards-container" class="grid grid-cols-5 gap-3 p-3 bg-white rounded-[32px] shadow-inner flex-grow overflow-y-auto border-4 border-gray-100 max-h-[70vh]">
+        <div id="cards-container" class="grid grid-cols-5 gap-3 p-3 bg-white rounded-[32px] shadow-inner flex-grow overflow-y-auto border-4 border-gray-100 max-h-[75vh]">
             </div>
     </div>
 
     <div id="card-view" class="hidden fixed inset-0 modal-bg z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-[40px] p-6 w-full max-w-sm text-center shadow-2xl border-4 border-orange-400 scale-in-center">
+        <div class="bg-white rounded-[40px] p-6 w-full max-w-sm text-center shadow-2xl border-4 border-orange-400">
             <h2 class="text-2xl text-purple-900 font-black mb-4 uppercase">Card #<span id="selected-card-num">0</span></h2>
             <div class="rounded-2xl overflow-hidden border-2 border-gray-200">
                 <div class="grid grid-cols-5 bg-gray-100 font-black text-white">
@@ -104,8 +102,8 @@
                 <div id="card-numbers" class="card-grid"></div>
             </div>
             <div class="flex gap-4 mt-8">
-                <button id="accept-btn" onclick="acceptCard()" class="flex-1 bg-green-600 text-white py-5 rounded-[20px] font-black shadow-lg uppercase tracking-wider">ACCEPT</button>
-                <button onclick="hideModal('card-view')" class="flex-1 bg-red-600 text-white py-5 rounded-[20px] font-black shadow-lg uppercase tracking-wider">CANCEL</button>
+                <button onclick="acceptCard()" class="flex-1 bg-green-600 text-white py-5 rounded-[20px] font-black shadow-lg uppercase">ACCEPT</button>
+                <button onclick="hideModal('card-view')" class="flex-1 bg-red-600 text-white py-5 rounded-[20px] font-black shadow-lg uppercase">CANCEL</button>
             </div>
         </div>
     </div>
@@ -114,35 +112,33 @@
         let selectedStake = 0;
         let selectedCardId = null;
         let timerVal = 60;
+        let timerInterval;
 
         function showPage(pageId) {
             document.querySelectorAll('div[id]').forEach(d => {
                 if(!['deposit-modal', 'card-view', 'card-numbers'].includes(d.id)) d.classList.add('hidden');
             });
             document.getElementById(pageId).classList.remove('hidden');
-            if(pageId === 'home-page') window.scrollTo(0,0);
         }
 
         function showDeposit(method) {
-            const modal = document.getElementById('deposit-modal');
             const title = document.getElementById('bank-title');
             const acc = document.getElementById('acc-num');
             const name = document.getElementById('acc-name');
-
             if(method === 'TELEBIRR') {
-                title.innerText = "Telebirr ";
+                title.innerText = "Deposit";
                 acc.innerText = "251979429028";
-                name.innerText = "YORDANOSE";
+                name.innerText = "YORDANOSE TETKEM";
             } else if(method === 'CBE') {
-                title.innerText = "Commercial Bank of Ethiopia Deposit";
+                title.innerText = "Deposit";
                 acc.innerText = "1000277987067";
-                name.innerText = "YORDANOSE";
+                name.innerText = "YORDANOSE TETKEM";
             } else {
-                title.innerText = "CBE Birr Deposit";
+                title.innerText = "Deposit";
                 acc.innerText = "0979429028";
-                name.innerText = "YORDANOSE";
+                name.innerText = "YORDANOSE TETKEM";
             }
-            modal.classList.remove('hidden');
+            document.getElementById('deposit-modal').classList.remove('hidden');
         }
 
         function hideModal(id) { document.getElementById(id).classList.add('hidden'); }
@@ -151,11 +147,11 @@
             selectedStake = amount;
             document.getElementById('display-bet').innerText = amount + " ETB";
             showPage('game-page');
-            initCardsList();
+            initCards();
             startTimer();
         }
 
-        function initCardsList() {
+        function initCards() {
             const container = document.getElementById('cards-container');
             container.innerHTML = '';
             for(let i=1; i<=100; i++) {
@@ -178,12 +174,8 @@
                 for(let c=0; c<5; c++) {
                     let cell = document.createElement('div');
                     cell.className = "card-cell border border-gray-100";
-                    if(r===2 && c===2) {
-                        cell.innerText = "⭐";
-                        cell.classList.add('bg-yellow-50');
-                    } else {
-                        cell.innerText = Math.floor(Math.random() * (ranges[c][1] - ranges[c][0] + 1)) + ranges[c][0];
-                    }
+                    if(r===2 && c===2) cell.innerText = "⭐";
+                    else cell.innerText = Math.floor(Math.random() * (ranges[c][1] - ranges[c][0] + 1)) + ranges[c][0];
                     grid.appendChild(cell);
                 }
             }
@@ -192,26 +184,24 @@
 
         function acceptCard() {
             document.getElementById('potential-win').innerText = (selectedStake * 0.85).toFixed(2);
-            document.getElementById(`card-btn-${selectedCardId}`).style.backgroundColor = "#16a34a";
+            document.getElementById(`card-btn-${selectedCardId}`).classList.add('selected-card-green');
             document.getElementById(`card-btn-${selectedCardId}`).innerText = "✓";
             hideModal('card-view');
         }
 
         function startTimer() {
-            const t = setInterval(() => {
+            if(timerInterval) clearInterval(timerInterval);
+            timerVal = 60;
+            timerInterval = setInterval(() => {
                 if(timerVal > 0) {
                     timerVal--;
                     document.getElementById('timer').innerText = timerVal + "s";
-                } else clearInterval(t);
+                }
             }, 1000);
         }
 
         function sendVerification() {
-            if(document.getElementById('ref-input').value.length < 5) {
-                alert("እባክዎ ትክክለኛ የደረሰኝ ቁጥር ያስገቡ!");
-                return;
-            }
-            alert("የላኩት መረጃ ለአድሚን ደርሷል። ሲረጋገጥ ባላንስዎ ላይ ይጨመራል!");
+            alert("የላኩት መረጃ ለአድሚን ደርሷል!");
             hideModal('deposit-modal');
         }
     </script>
