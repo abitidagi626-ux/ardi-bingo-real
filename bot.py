@@ -1,6 +1,6 @@
 import logging
 import random
-from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
+from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove, WebAppInfo
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
 # ⚠️ ቦት ቶከንህን እዚህ ተካ
@@ -8,6 +8,9 @@ TOKEN = "8684712579:AAE9JK0cdSK-cVeycF7xAd_KSrUUqmN5HWI"
 
 # ሎጊንግ
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+
+# የዌብሳይት ሊንኮች
+BASE_URL = "https://abitidagi626-ux.github.io/ardi-bingo-real/index.html"
 
 # 1. /start ሲባል የሚመጣ መጀመሪያ
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -19,16 +22,15 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=reply_markup
     )
 
-# 2. ስልክ ሲላክ እና ዋና ሜኑ (Main Menu)
+# 2. ስልክ ሲላክ የሚመጣ ዋና ሜኑ (Main Menu)
 async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.message.from_user
-    # 5 digit random ID መስጠት
     user_random_id = random.randint(10000, 99999)
     
-    # ዋና ሜኑ ቁልፎች
+    # 🕹 Play Now እና 💵 Deposit በቀጥታ Web App እንዲከፍቱ ተደርገዋል
     keyboard = [
-        [KeyboardButton("🕹 Play Now")],
-        [KeyboardButton("💰 Check Balance"), KeyboardButton("💵 Deposit")],
+        [KeyboardButton("🕹 Play Now", web_app=WebAppInfo(url=f"{BASE_URL}#stake-page"))],
+        [KeyboardButton("💰 Check Balance"), KeyboardButton("💵 Deposit", web_app=WebAppInfo(url=f"{BASE_URL}#deposit-methods"))],
         [KeyboardButton("👥 Invite"), KeyboardButton("ℹ️ Instruction")],
         [KeyboardButton("🏆 Win Pattern"), KeyboardButton("✍️ Change Username")],
         [KeyboardButton("👨‍💻 Support")]
@@ -40,26 +42,13 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=reply_markup
     )
 
-# 3. ለሁሉም ቁልፎች ምላሽ መስጫ
+# 3. ለቀሩት የጽሁፍ ቁልፎች ምላሽ መስጫ
 async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
     user_id = update.message.from_user.id
-    
-    # የዌብሳይት ሊንኮች (እንደጠየቅከው የተስተካከሉ)
-    base_url = "https://abitidagi626-ux.github.io/ardi-bingo-real/index.html"
-    stake_url = f"{base_url}#stake-page"    # በቀጥታ ስቴክ ገጽ ላይ እንዲከፍት
-    deposit_url = f"{base_url}#deposit-methods" # በቀጥታ ዲፖዚት ገጽ ላይ እንዲከፍት
 
-    if text == "🕹 Play Now":
-        keyboard = [[InlineKeyboardButton("🎮 መጫወት ጀምር (Play Now)", url=stake_url)]]
-        await update.message.reply_text("የመጫወቻ የብር መጠን ለመምረጥ ከታች ያለውን ቁልፍ ይጫኑ፡", reply_markup=InlineKeyboardMarkup(keyboard))
-
-    elif text == "💰 Check Balance":
+    if text == "💰 Check Balance":
         await update.message.reply_text("💵 የአሁኑ ባላንስዎ፡ 0.00 ETB")
-
-    elif text == "💵 Deposit":
-        keyboard = [[InlineKeyboardButton("💳 አሁኑኑ ብር ይሙሉ (Deposit)", url=deposit_url)]]
-        await update.message.reply_text("ብር ለመሙላት የባንክ አማራጭ ለመምረጥ ከታች ያለውን ቁልፍ ይጫኑ፡", reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif text == "👥 Invite":
         invite_link = f"https://t.me/{(await context.bot.get_me()).username}?start={user_id}"
@@ -101,7 +90,7 @@ def main():
     app.add_handler(MessageHandler(filters.CONTACT, handle_contact))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_messages))
     
-    print("🚀 Ardi Bingo Bot is running with all features...")
+    print("🚀 Ardi Bingo Bot is running with WebApp features...")
     app.run_polling()
 
 if __name__ == '__main__':
