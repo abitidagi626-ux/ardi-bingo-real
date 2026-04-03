@@ -6,7 +6,7 @@ from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboard
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, CallbackQueryHandler
 
 # ⚠️ 1. ቦት ቶከን (አዲሱን ቶከን እዚህ ጋር ይተኩ)
-TOKEN = "8684712579:AAE9JK0cdSK-cVeycf7xAd_KSrUUqmN5HWI"
+TOKEN = "8684712579:AAE9JK0cdSK-cVeycF7xAd_KSrUUqmN5HWI"
 
 # ⚠️ 2. አድሚን ID (በምስል 10 ላይ ያረጋገጥከው ID)
 ADMIN_ID = 1046142540
