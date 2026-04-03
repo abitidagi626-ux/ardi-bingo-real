@@ -3,7 +3,7 @@ from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboard
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
 # ያንተ ቦት ቶከን
-TOKEN = "8684712579:AAE9JK0cdSK-cVeycf7xAd_KSrUUqmN5HWI"
+TOKEN = "8684712579:AAE9JK0cdSK-cVeycF7xAd_KSrUUqmN5HWI"
 
 # 1. /start ሲባል ስልክ ቁጥር መጠየቂያ
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
