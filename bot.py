@@ -44,18 +44,22 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
     user_id = update.message.from_user.id
-    # ጌም ሊንክ
-    game_url = f"https://abitidagi626-ux.github.io/ardi-bingo-real/index.html?id={user_id}"
+    
+    # የዌብሳይት ሊንኮች (እንደጠየቅከው የተስተካከሉ)
+    base_url = "https://abitidagi626-ux.github.io/ardi-bingo-real/index.html"
+    stake_url = f"{base_url}#stake-page"    # በቀጥታ ስቴክ ገጽ ላይ እንዲከፍት
+    deposit_url = f"{base_url}#deposit-methods" # በቀጥታ ዲፖዚት ገጽ ላይ እንዲከፍት
 
     if text == "🕹 Play Now":
-        keyboard = [[InlineKeyboardButton("🎮 መጫወት ጀምር (Open Game)", url=game_url)]]
-        await update.message.reply_text("ጌሙን ለመክፈት ከታች ያለውን ቁልፍ ይጫኑ፡", reply_markup=InlineKeyboardMarkup(keyboard))
+        keyboard = [[InlineKeyboardButton("🎮 መጫወት ጀምር (Play Now)", url=stake_url)]]
+        await update.message.reply_text("የመጫወቻ የብር መጠን ለመምረጥ ከታች ያለውን ቁልፍ ይጫኑ፡", reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif text == "💰 Check Balance":
         await update.message.reply_text("💵 የአሁኑ ባላንስዎ፡ 0.00 ETB")
 
     elif text == "💵 Deposit":
-        await update.message.reply_text("ብር ለመሙላት (Deposit) በዌብ አፑ ውስጥ ያለውን የ Deposit አማራጭ ይጠቀሙ።")
+        keyboard = [[InlineKeyboardButton("💳 አሁኑኑ ብር ይሙሉ (Deposit)", url=deposit_url)]]
+        await update.message.reply_text("ብር ለመሙላት የባንክ አማራጭ ለመምረጥ ከታች ያለውን ቁልፍ ይጫኑ፡", reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif text == "👥 Invite":
         invite_link = f"https://t.me/{(await context.bot.get_me()).username}?start={user_id}"
