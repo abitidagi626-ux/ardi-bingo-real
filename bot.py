@@ -65,12 +65,12 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=reply_markup
     )
 
-# 3. WebApp ዳታ ሲልክ (Deposit Verification) - እዚህ ጋር ነው ቁልፎቹ የተጨመሩት
+# 3. WebApp ዳታ ሲልክ (Deposit Verification)
 async def handle_web_app_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data_raw = update.message.web_app_data.data
     user = update.effective_user
 
-    # ከጽሁፉ ውስጥ የብር መጠኑን ብቻ መለየት (ለምሳሌ "200 ETB" ከሆነ 200ን ብቻ ይወስዳል)
+    # ከጽሁፉ ውስጥ የብር መጠኑን ብቻ መለየት
     amount = "".join(filter(str.isdigit, data_raw)) or "0"
 
     # አድሚን ላይ የሚመጡ የማጽደቂያ ቁልፎች (Inline Buttons)
@@ -174,7 +174,7 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.CONTACT, handle_contact))
     app.add_handler(MessageHandler(filters.StatusUpdate.WEB_APP_DATA, handle_web_app_data))
-    app.add_handler(CallbackQueryHandler(admin_callback)) # ይህ ለአዝራሮቹ ስራ አስፈላጊ ነው
+    app.add_handler(CallbackQueryHandler(admin_callback))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_messages))
     
     print("🚀 Ardi Bingo Bot is running with Admin Approval Buttons...")
