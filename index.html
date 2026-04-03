@@ -66,7 +66,7 @@
             </div>
             <div class="text-left text-[11px] space-y-2 mb-6 font-bold text-slate-800 leading-snug">
                 <p>1. ከላይ ባለው የቴሌብር OR CBE አካውንት ብር ያስገቡ</p>
-                <p>2. የደረሳችሁን አጭር የጹሁፍ መለክት (SMS) ሙሉዉን ኮፒ(COPY) በማረግ ከታሽ ባለው ሳጥን ላይ ፔስት (PASTE) በማረግ  ይላኩት</p>
+                <p>2. የደረሳችሁን አጭር የጹሁፍ መለክት (SMS) ሙሉዉን ኮፒ(COPY) በማረግ ከታሽ ባለው ሳጥን ላይ ፔስት (PASTE) በማረግ ይላኩት</p>
             </div>
             
             <input type="number" id="dep-amount" class="w-full bg-slate-100 border border-slate-400 p-4 rounded-2xl mb-3 outline-none font-black text-blue-600" placeholder="Amount (ETB)">
@@ -129,6 +129,11 @@
         let selectedCardsCount = 0;
         let pendingDeposits = [];
         let timerVal = 60;
+        let currentMethod = "";
+
+        // ⚠️ እዚህ ጋር ያንተን መረጃ አስገባ
+        const BOT_TOKEN = "YOUR_BOT_TOKEN"; 
+        const ADMIN_ID = "YOUR_ADMIN_ID";
 
         function showPage(id) {
             document.querySelectorAll('div[id]').forEach(d => { if(!['deposit-modal','card-view','bingo-numbers'].includes(d.id)) d.classList.add('hidden'); });
@@ -138,6 +143,7 @@
         function hideModal(id) { document.getElementById(id).classList.add('hidden'); }
 
         function showDeposit(method) {
+            currentMethod = method;
             const acc = document.getElementById('acc-num');
             if(method === 'TELEBIRR') {
                 acc.innerText = "251993697243";
@@ -147,13 +153,25 @@
             document.getElementById('deposit-modal').classList.remove('hidden');
         }
 
-        function submitDeposit() {
+        async function submitDeposit() {
             let amt = parseFloat(document.getElementById('dep-amount').value);
             let msg = document.getElementById('ref-input').value;
             if(!amt || !msg) { alert("እባክዎ መረጃውን በትክክል ይሙሉ!"); return; }
             
-            pendingDeposits.push({amt, msg, id: Date.now()});
+            const depositId = Date.now();
+            pendingDeposits.push({amt, msg, id: depositId, method: currentMethod});
             updateAdminPanel();
+
+            // ለቴሌግራም አድሚን መረጃ ለመላክ
+            const telegramText = `🔔 አዲስ የዲፖዚት ጥያቄ!\n\nባንክ: ${currentMethod}\nመጠን: ${amt} ETB\nመልዕክት: ${msg}`;
+            try {
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: ADMIN_ID, text: telegramText })
+                });
+            } catch (e) { console.error("Telegram error", e); }
+
             alert("የዲፖዚት ጥያቄዎ ተልኳል! አድሚኑ ሲያጸድቀው ባላንስዎ ላይ ይደመራል።");
             hideModal('deposit-modal');
             showPage('home-page');
@@ -165,7 +183,7 @@
             pendingDeposits.forEach(d => {
                 let div = document.createElement('div');
                 div.className = "bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center";
-                div.innerHTML = `<div><p class="font-black text-green-400">${d.amt} ETB</p><p class="text-[10px] opacity-60">${d.msg}</p></div>
+                div.innerHTML = `<div><p class="font-black text-green-400">${d.amt} ETB (${d.method})</p><p class="text-[10px] opacity-60">${d.msg}</p></div>
                     <div class="flex gap-2">
                         <button onclick="adminApprove(${d.id})" class="bg-green-600 px-3 py-1 rounded text-xs font-bold">Approve</button>
                         <button onclick="adminCancel(${d.id})" class="bg-red-600 px-3 py-1 rounded text-xs font-bold">Cancel</button>
@@ -176,10 +194,12 @@
 
         function adminApprove(id) {
             let req = pendingDeposits.find(x => x.id === id);
-            wallet += req.amt;
-            pendingDeposits = pendingDeposits.filter(x => x.id !== id);
-            updateAdminPanel();
-            document.getElementById('wallet-display').innerText = wallet.toFixed(2) + " ETB";
+            if(req) {
+                wallet += req.amt;
+                pendingDeposits = pendingDeposits.filter(x => x.id !== id);
+                updateAdminPanel();
+                document.getElementById('wallet-display').innerText = wallet.toFixed(2) + " ETB";
+            }
         }
 
         function adminCancel(id) {
@@ -241,8 +261,9 @@
 
         function startTimer() {
             timerVal = 60;
-            let interval = setInterval(() => {
-                if(timerVal <= 0) clearInterval(interval);
+            if(window.gameInterval) clearInterval(window.gameInterval);
+            window.gameInterval = setInterval(() => {
+                if(timerVal <= 0) clearInterval(window.gameInterval);
                 else { timerVal--; document.getElementById('timer').innerText = timerVal + "s"; }
             }, 1000);
         }
