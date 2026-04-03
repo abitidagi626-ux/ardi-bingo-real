@@ -131,7 +131,7 @@
         let timerVal = 60;
         let currentMethod = "";
 
-        // ተቀይሯል ✅
+        // አድሚን መረጃ
         const BOT_TOKEN = "8684712579:AAE9JK0cdSK-cVeycF7xAd_KSrUUqmN5HWI"; 
         const ADMIN_ID = "1046142540";
 
@@ -162,8 +162,8 @@
             pendingDeposits.push({amt, msg, id: depositId, method: currentMethod});
             updateAdminPanel();
 
-            // ለቴሌግራም አድሚን መረጃ ለመላክ
-            const telegramText = `🔔 አዲስ የዲፖዚት ጥያቄ!\n\nባንክ: ${currentMethod}\nመጠን: ${amt} ETB\nመልዕክት: ${msg}`;
+            // ለአድሚኑ ቴሌግራም ላይ እንዲደርስ መላክ
+            const telegramText = `🔔 አዲስ የዲፖዚት ጥያቄ!\n\nባንክ: ${currentMethod}\nመጠን: ${amt} ETB\nመልዕክት: ${msg}\nID: ${depositId}`;
             try {
                 await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                     method: 'POST',
@@ -182,11 +182,11 @@
             list.innerHTML = pendingDeposits.length ? '' : '<p class="text-slate-500 italic text-center mt-20">No pending requests.</p>';
             pendingDeposits.forEach(d => {
                 let div = document.createElement('div');
-                div.className = "bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center";
+                div.className = "bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center mb-2";
                 div.innerHTML = `<div><p class="font-black text-green-400">${d.amt} ETB (${d.method})</p><p class="text-[10px] opacity-60">${d.msg}</p></div>
                     <div class="flex gap-2">
-                        <button onclick="adminApprove(${d.id})" class="bg-green-600 px-3 py-1 rounded text-xs font-bold">Approve</button>
-                        <button onclick="adminCancel(${d.id})" class="bg-red-600 px-3 py-1 rounded text-xs font-bold">Cancel</button>
+                        <button onclick="adminApprove(${d.id})" class="bg-green-600 px-3 py-1 rounded text-xs font-bold hover:bg-green-700 transition">Approve</button>
+                        <button onclick="adminCancel(${d.id})" class="bg-red-600 px-3 py-1 rounded text-xs font-bold hover:bg-red-700 transition">Cancel</button>
                     </div>`;
                 list.appendChild(div);
             });
@@ -195,16 +195,18 @@
         function adminApprove(id) {
             let req = pendingDeposits.find(x => x.id === id);
             if(req) {
-                wallet += req.amt;
+                wallet += req.amt; // እዚህ ጋር ባላንሱ ላይ ይደመራል
                 pendingDeposits = pendingDeposits.filter(x => x.id !== id);
                 updateAdminPanel();
                 document.getElementById('wallet-display').innerText = wallet.toFixed(2) + " ETB";
+                alert("ተቀብለሃል! " + req.amt + " ETB ባላንስ ላይ ተጨምሯል።");
             }
         }
 
         function adminCancel(id) {
             pendingDeposits = pendingDeposits.filter(x => x.id !== id);
             updateAdminPanel();
+            alert("ጥያቄው ተሰርዟል።");
         }
 
         function selectStake(amt) {
