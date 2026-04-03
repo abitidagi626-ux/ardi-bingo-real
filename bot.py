@@ -1,16 +1,18 @@
 import logging
 import random
+import json
 from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove, WebAppInfo
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, CallbackQueryHandler
 
 # ⚠️ ቦት ቶከንህን እዚህ ተካ
 TOKEN = "8684712579:AAE9JK0cdSK-cVeycF7xAd_KSrUUqmN5HWI"
+# ⚠️ አድሚን ID
+ADMIN_ID = 1046142540
 
 # ሎጊንግ
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 # የዌብሳይት ሊንኮች
-# እዚህ ጋር በቀጥታ ወደ ሚከፈቱት ገጾች የሚወስዱ ሊንኮችን አዘጋጅቻለሁ
 BASE_URL = "https://abitidagi626-ux.github.io/ardi-bingo-real/index.html"
 STAKE_PAGE_URL = f"{BASE_URL}#stake-page"
 DEPOSIT_PAGE_URL = f"{BASE_URL}#deposit-methods"
@@ -30,7 +32,6 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.message.from_user
     user_random_id = random.randint(10000, 99999)
     
-    # እዚህ ጋር ቁልፎቹ በቀጥታ ወደ ተፈለገው ገጽ እንዲወስዱ ተደርገዋል
     keyboard = [
         [KeyboardButton("🕹 Play Now", web_app=WebAppInfo(url=STAKE_PAGE_URL))],
         [KeyboardButton("💰 Check Balance"), KeyboardButton("💵 Deposit", web_app=WebAppInfo(url=DEPOSIT_PAGE_URL))],
@@ -45,7 +46,62 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=reply_markup
     )
 
-# 3. ለቀሩት የጽሁፍ ቁልፎች ምላሽ መስጫ
+# 3. WebApp ዳታ ሲልክ (Deposit Verification)
+async def handle_web_app_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    data_raw = update.message.web_app_data.data
+    user = update.effective_user
+
+    # አድሚን ላይ የሚመጡ የማጽደቂያ ቁልፎች
+    keyboard = [
+        [
+            InlineKeyboardButton("✅ Approve", callback_data=f"app_{user.id}"),
+            InlineKeyboardButton("❌ Cancel", callback_data=f"rej_{user.id}")
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    admin_msg = (
+        f"🔔 *አዲስ የዲፖዚት ጥያቄ*\n\n"
+        f"👤 ተጠቃሚ: {user.first_name}\n"
+        f"🆔 ID: `{user.id}`\n"
+        f"📝 መረጃ: {data_raw}"
+    )
+
+    # ለአድሚኑ መላክ
+    await context.bot.send_message(
+        chat_id=ADMIN_ID,
+        text=admin_msg,
+        reply_markup=reply_markup,
+        parse_mode="Markdown"
+    )
+
+    # ለተጠቃሚው ማረጋገጫ መስጠት
+    await update.message.reply_text("✅ የዲፖዚት መረጃዎ ለአድሚን ተልኳል። እባክዎ እስኪረጋገጥ ይጠብቁ።")
+
+# 4. የአድሚን ውሳኔ ማስተናገጃ (Approve/Cancel Click)
+async def admin_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    
+    # ዳታውን መለየት
+    data_parts = query.data.split("_")
+    action = data_parts[0]
+    user_id = data_parts[1]
+    
+    if action == "app":
+        try:
+            await context.bot.send_message(chat_id=user_id, text="🎉 እንኳን ደስ አለዎት! የዲፖዚት ጥያቄዎ በአድሚን ጸድቋል። ባላንስዎ ላይ ተጨምሯል።")
+            await query.edit_message_text(text=f"{query.message.text}\n\n✅ ተቀባይነት አግኝቷል (Approved)")
+        except Exception as e:
+            logging.error(f"Error in approve: {e}")
+    elif action == "rej":
+        try:
+            await context.bot.send_message(chat_id=user_id, text="❌ ይቅርታ፣ የዲፖዚት ጥያቄዎ ውድቅ ተደርጓል። እባክዎ መረጃውን በድጋሚ በትክክል ይላኩ።")
+            await query.edit_message_text(text=f"{query.message.text}\n\n❌ ውድቅ ተደርጓል (Cancelled)")
+        except Exception as e:
+            logging.error(f"Error in reject: {e}")
+
+# 5. ለቀሩት የጽሁፍ ቁልፎች ምላሽ መስጫ
 async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
     user_id = update.message.from_user.id
@@ -91,9 +147,11 @@ def main():
     
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.CONTACT, handle_contact))
+    app.add_handler(MessageHandler(filters.StatusUpdate.WEB_APP_DATA, handle_web_app_data))
+    app.add_handler(CallbackQueryHandler(admin_callback))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_messages))
     
-    print("🚀 Ardi Bingo Bot is running with Direct WebApp access...")
+    print("🚀 Ardi Bingo Bot is running with Admin Approval System...")
     app.run_polling()
 
 if __name__ == '__main__':
