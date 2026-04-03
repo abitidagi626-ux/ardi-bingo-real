@@ -6,7 +6,7 @@ from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboard
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, CallbackQueryHandler
 
 # --- CONFIGURATION ---
-TOKEN = "8684712579:AAE9JK0cdSK-cVeycf7xAd_KSrUUqmN5HWI" # @BotFather ላይ አዲስ ቶከን ቀይረህ እዚህ ጋር ተካው
+TOKEN = "8684712579:AAE9JK0cdSK-cVeycF7xAd_KSrUUqmN5HWI" # @BotFather ላይ አዲስ ቶከን ቀይረህ እዚህ ጋር ተካው
 ADMIN_ID = 1046142540
 BALANCE_FILE = "balances.json"
 
