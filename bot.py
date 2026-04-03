@@ -6,7 +6,7 @@ from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboard
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, CallbackQueryHandler
 
 # ⚠️ ቦት ቶከን (አዲሱን ተጠቀም)
-TOKEN = "8684712579:AAE9JK0cdSK-cVeycf7xAd_KSrUUqmN5HWI"
+TOKEN = "8684712579:AAE9JK0cdSK-cVeycF7xAd_KSrUUqmN5HWI"
 # ⚠️ አድሚን ID (ይህ ቁጥር ያንተ መሆኑን በ @userinfobot አረጋግጥ)
 ADMIN_ID = 1046142540 
 BALANCE_FILE = "balances.json"
