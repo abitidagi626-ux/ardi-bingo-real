@@ -1,37 +1,50 @@
 import logging
 import random
 import json
+import os
 from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove, WebAppInfo
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, CallbackQueryHandler
 
-# ⚠️ ቦት ቶከንህን እዚህ ተካ
+# --- CONFIGURATION ---
 TOKEN = "8684712579:AAE9JK0cdSK-cVeycF7xAd_KSrUUqmN5HWI"
-# ⚠️ አድሚን ID
 ADMIN_ID = 1046142540
-
-# ሎጊንግ
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-
-# የዌብሳይት ሊንኮች
 BASE_URL = "https://abitidagi626-ux.github.io/ardi-bingo-real/index.html"
 STAKE_PAGE_URL = f"{BASE_URL}#stake-page"
 DEPOSIT_PAGE_URL = f"{BASE_URL}#deposit-methods"
+BALANCE_FILE = "balances.json"
 
-# 1. /start ሲባል የሚመጣ መጀመሪያ
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+
+# --- BALANCE MANAGEMENT ---
+def load_balances():
+    if os.path.exists(BALANCE_FILE):
+        with open(BALANCE_FILE, "r") as f:
+            return json.load(f)
+    return {}
+
+def save_balance(user_id, amount):
+    balances = load_balances()
+    user_id = str(user_id)
+    balances[user_id] = balances.get(user_id, 0) + float(amount)
+    with open(BALANCE_FILE, "w") as f:
+        json.dump(balances, f)
+
+def get_user_balance(user_id):
+    balances = load_balances()
+    return balances.get(str(user_id), 0.0)
+
+# --- HANDLERS ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     contact_button = KeyboardButton("📲 ስልክ ቁጥርዎን ያጋሩ (Share Contact)", request_contact=True)
     reply_markup = ReplyKeyboardMarkup([[contact_button]], resize_keyboard=True, one_time_keyboard=True)
-    
     await update.message.reply_text(
         "እንኳን ወደ Ardi Bingo በሰላም መጡ! 🎰\n\nለመመዝገብ እና ሙሉ አገልግሎቱን ለማግኘት እባክዎ ስልክ ቁጥርዎን ያጋሩ።",
         reply_markup=reply_markup
     )
 
-# 2. ስልክ ሲላክ የሚመጣ ዋና ሜኑ (Main Menu)
 async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.message.from_user
     user_random_id = random.randint(10000, 99999)
-    
     keyboard = [
         [KeyboardButton("🕹 Play Now", web_app=WebAppInfo(url=STAKE_PAGE_URL))],
         [KeyboardButton("💰 Check Balance"), KeyboardButton("💵 Deposit", web_app=WebAppInfo(url=DEPOSIT_PAGE_URL))],
@@ -40,74 +53,51 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [KeyboardButton("👨‍💻 Support")]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-
     await update.message.reply_text(
         f"✅ ምዝገባዎ ተጠናቋል!\n👤 ስም: {user.first_name}\n🆔 የእርስዎ መለያ ID: {user_random_id}\n\nምን ማድረግ ይፈልጋሉ? ከታች ካሉት አማራጮች ይምረጡ።",
         reply_markup=reply_markup
     )
 
-# 3. WebApp ዳታ ሲልክ (Deposit Verification)
 async def handle_web_app_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data_raw = update.message.web_app_data.data
     user = update.effective_user
-
-    # አድሚን ላይ የሚመጡ የማጽደቂያ ቁልፎች
-    keyboard = [
-        [
-            InlineKeyboardButton("✅ Approve", callback_data=f"app_{user.id}"),
-            InlineKeyboardButton("❌ Cancel", callback_data=f"rej_{user.id}")
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    admin_msg = (
-        f"🔔 *አዲስ የዲፖዚት ጥያቄ*\n\n"
-        f"👤 ተጠቃሚ: {user.first_name}\n"
-        f"🆔 ID: `{user.id}`\n"
-        f"📝 መረጃ: {data_raw}"
-    )
-
-    # ለአድሚኑ መላክ
-    await context.bot.send_message(
-        chat_id=ADMIN_ID,
-        text=admin_msg,
-        reply_markup=reply_markup,
-        parse_mode="Markdown"
-    )
-
-    # ለተጠቃሚው ማረጋገጫ መስጠት
+    
+    # ዳታውን ለይቶ ማውጣት (WebApp ላይ Amount እንደሚላክ በማሰብ)
+    # ለምሳሌ ዳታው "200" ከሆነ
+    amount = "".join(filter(str.isdigit, data_raw)) or "0"
+    
+    keyboard = [[InlineKeyboardButton("✅ Approve", callback_data=f"app_{user.id}_{amount}"),
+                 InlineKeyboardButton("❌ Cancel", callback_data=f"rej_{user.id}")]]
+    
+    admin_msg = f"🔔 *አዲስ የዲፖዚት ጥያቄ*\n\n👤 ተጠቃሚ: {user.first_name}\n🆔 ID: `{user.id}`\n💰 መጠን: {amount} ETB\n📝 መረጃ: {data_raw}"
+    
+    await context.bot.send_message(chat_id=ADMIN_ID, text=admin_msg, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
     await update.message.reply_text("✅ የዲፖዚት መረጃዎ ለአድሚን ተልኳል። እባክዎ እስኪረጋገጥ ይጠብቁ።")
 
-# 4. የአድሚን ውሳኔ ማስተናገጃ (Approve/Cancel Click)
 async def admin_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     
-    # ዳታውን መለየት
-    data_parts = query.data.split("_")
-    action = data_parts[0]
-    user_id = data_parts[1]
+    data = query.data.split("_")
+    action = data[0]
+    user_id = data[1]
     
     if action == "app":
-        try:
-            await context.bot.send_message(chat_id=user_id, text="🎉 እንኳን ደስ አለዎት! የዲፖዚት ጥያቄዎ በአድሚን ጸድቋል። ባላንስዎ ላይ ተጨምሯል።")
-            await query.edit_message_text(text=f"{query.message.text}\n\n✅ ተቀባይነት አግኝቷል (Approved)")
-        except Exception as e:
-            logging.error(f"Error in approve: {e}")
-    elif action == "rej":
-        try:
-            await context.bot.send_message(chat_id=user_id, text="❌ ይቅርታ፣ የዲፖዚት ጥያቄዎ ውድቅ ተደርጓል። እባክዎ መረጃውን በድጋሚ በትክክል ይላኩ።")
-            await query.edit_message_text(text=f"{query.message.text}\n\n❌ ውድቅ ተደርጓል (Cancelled)")
-        except Exception as e:
-            logging.error(f"Error in reject: {e}")
+        amount = data[2]
+        save_balance(user_id, amount)
+        await context.bot.send_message(chat_id=user_id, text=f"🎉 እንኳን ደስ አለዎት! የ {amount} ETB ዲፖዚት ጥያቄዎ በአድሚን ጸድቋል። ባላንስዎ ላይ ተጨምሯል።")
+        await query.edit_message_text(text=f"{query.message.text}\n\n✅ ጸድቋል (Approved)")
+    else:
+        await context.bot.send_message(chat_id=user_id, text="❌ ይቅርታ፣ የዲፖዚት ጥያቄዎ ውድቅ ተደርጓል። እባክዎ መረጃውን በድጋሚ በትክክል ይላኩ።")
+        await query.edit_message_text(text=f"{query.message.text}\n\n❌ ውድቅ ተደርጓል (Cancelled)")
 
-# 5. ለቀሩት የጽሁፍ ቁልፎች ምላሽ መስጫ
 async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
     user_id = update.message.from_user.id
 
     if text == "💰 Check Balance":
-        await update.message.reply_text("💵 የአሁኑ ባላንስዎ፡ 0.00 ETB")
+        balance = get_user_balance(user_id)
+        await update.message.reply_text(f"💵 የአሁኑ ባላንስዎ፡ {balance:.2f} ETB")
 
     elif text == "👥 Invite":
         invite_link = f"https://t.me/{(await context.bot.get_me()).username}?start={user_id}"
@@ -115,10 +105,9 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     elif text == "ℹ️ Instruction":
         instruction_text = (
-            "📖 የጨዋታው ህግጋት፡\n"
-            "1. ለመጫወት ወደቦቱ ሲገቡ register የሚለውን በመንካት ስልክ ቁጥሮትን ያጋሩ\n\n"
+            "📖 የጨዋታው ህግጋት፡\n1. ለመጫወት ወደቦቱ ሲገቡ register የሚለውን በመንካት ስልክ ቁጥሮትን ያጋሩ\n\n"
             "2. menu ውስጥ በመግባት deposit fund የሚለውን በመንካት በሚፈልጉት የባንክ አካውንት ገንዘብ ገቢ ያድርጉ\n\n"
-            "3. menu ውስጥ በመግባት start play የሚለውን በመንካት መወራረድ የሚፈልጉበትን የብር መጠን ይምረጡ።\n\n\n"
+            "3. menu ውስጥ በመግባት start play የሚለውን በመንካት መወራረድ የሚፈልጉበትን የብር መጠን ይምረጡ።\n\n"
             "1. ወደጨዋታው ሲገቡ ከሚመጣሎት 100 የመጫወቻ ቁጥሮች መርጠው accept የሚለውን በመንካት ይቀጥሉ\n\n"
             "2. ጨዋታው ለመጀመር የተሰጠው ጊዜ ሲያልቅ ቁጥሮች መውጣት ይጀምራል\n\n"
             "3. የሚወጡት ቁጥሮች የመረጡት ካርቴላ ላይ መኖሩን እያረጋገጡ ያቅልሙ\n\n"
@@ -126,10 +115,8 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "— አንድ መስመር ማለት፡ አንድ ወደጎን ወይንም ወደታች ወይንም ዲያጎናል ሲዘጉ\n"
             "— አራት ጠርዝ ላይ ሲመጣሎት\n\n"
             "5. እነዚህ ማሸነፊያ ቁጥሮች ሳይመጣሎት bingo የሚለውን ከነኩ ከጨዋታው ይባረራሉ\n\n"
-            "⚠️ ማሳሰቢያ፡\n"
-            "1. የጨዋታ ማስጀመሪያ ሰከንድ (countdown) ሲያልቅ ያሉት ተጫዋች ብዛት ከ2 በታች ከሆነ ያ ጨዋታ አይጀምርም\n"
-            "2. ጨዋታ ከጀመረ በኋላ ካርቴላ መምረጫ ቦርዱ ይጸዳል\n"
-            "3. እርሶ በዘጉበት ቁጥር ሌላ ተጫዋች ዘግቶ ቀድሞ bingo ካለ አሸናፊነትዎን ያጣሉ"
+            "⚠️ ማሳሰቢያ፡\n1. የጨዋታ ማስጀመሪያ ሰከንድ (countdown) ሲያልቅ ያሉት ተጫዋች ብዛት ከ2 በታች ከሆነ ያ ጨዋታ አይጀምርም\n"
+            "2. ጨዋታ ከጀመረ በኋላ ካርቴላ መምረጫ ቦርዱ ይጸዳል\n3. እርሶ በዘጉበት ቁጥር ሌላ ተጫዋች ዘግቶ ቀድሞ bingo ካለ አሸናፊነትዎን ያጣሉ"
         )
         await update.message.reply_text(instruction_text)
 
@@ -144,14 +131,12 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main():
     app = Application.builder().token(TOKEN).build()
-    
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.CONTACT, handle_contact))
     app.add_handler(MessageHandler(filters.StatusUpdate.WEB_APP_DATA, handle_web_app_data))
     app.add_handler(CallbackQueryHandler(admin_callback))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_messages))
-    
-    print("🚀 Ardi Bingo Bot is running with Admin Approval System...")
+    print("🚀 Ardi Bingo Bot with Balance System is running...")
     app.run_polling()
 
 if __name__ == '__main__':
