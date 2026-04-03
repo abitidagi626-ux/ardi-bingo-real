@@ -5,7 +5,7 @@ import os
 from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove, WebAppInfo
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, CallbackQueryHandler
 
-# ⚠️ ቦት ቶከንህን እዚህ ተካ (በምስል 15 ላይ የታየው Invalid Token ስህተት እንዳይመጣ አዲሱን ተጠቀም)
+# ⚠️ ቦት ቶከንህን እዚህ ተካ
 TOKEN = "8684712579:AAE9JK0cdSK-cVeycF7xAd_KSrUUqmN5HWI"
 # ⚠️ አድሚን ID
 ADMIN_ID = 1046142540
@@ -19,7 +19,7 @@ BASE_URL = "https://abitidagi626-ux.github.io/ardi-bingo-real/index.html"
 STAKE_PAGE_URL = f"{BASE_URL}#stake-page"
 DEPOSIT_PAGE_URL = f"{BASE_URL}#deposit-methods"
 
-# --- የባላንስ መቆጣጠሪያ (በምስል 14 ላይ ለታየው balances.json ፋይል) ---
+# --- የባላንስ መቆጣጠሪያ ---
 def load_balances():
     if os.path.exists(BALANCE_FILE):
         try:
@@ -64,7 +64,7 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=reply_markup
     )
 
-# 3. WebApp ዳታ ሲልክ (Deposit Verification) - የአድሚን ቁልፎች እዚህ ተካተዋል
+# 3. WebApp ዳታ ሲልክ (Deposit Verification) - ምልክት በተደረገበት ቦታ ቁልፎቹን ይጨምራል
 async def handle_web_app_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data_raw = update.message.web_app_data.data
     user = update.effective_user
@@ -72,7 +72,7 @@ async def handle_web_app_data(update: Update, context: ContextTypes.DEFAULT_TYPE
     # ከዳታው ውስጥ ቁጥሩን (Amount) መለየት
     amount = "".join(filter(str.isdigit, data_raw)) or "0"
 
-    # አድሚን ላይ የሚመጡ የማጽደቂያ ቁልፎች (Inline Buttons)
+    # አድሚን ላይ የሚመጡ የማጽደቂያ ቁልፎች (Approve/Cancel)
     keyboard = [
         [
             InlineKeyboardButton("✅ Approve", callback_data=f"app_{user.id}_{amount}"),
@@ -83,10 +83,10 @@ async def handle_web_app_data(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     admin_msg = (
         f"🔔 *አዲስ የዲፖዚት ጥያቄ*\n\n"
-        f"👤 ተጠቃሚ: {user.first_name}\n"
-        f"🆔 ID: `{user.id}`\n"
-        f"💰 መጠን: {amount} ETB\n"
-        f"📝 መረጃ: {data_raw}"
+        f"ባንክ: CBE\n"
+        f"መጠን: {amount} ETB\n"
+        f"መልዕክት: {data_raw}\n"
+        f"ID: {user.id}"
     )
 
     await context.bot.send_message(
@@ -98,7 +98,7 @@ async def handle_web_app_data(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     await update.message.reply_text("✅ የዲፖዚት መረጃዎ ለአድሚን ተልኳል። እባክዎ እስኪረጋገጥ ይጠብቁ።")
 
-# 4. የአድሚን የቁልፍ ትዕዛዝ (Callback Query) - እዚህ ተጨምሯል
+# 4. የአድሚን የቁልፍ ትዕዛዝ (Callback Query)
 async def admin_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -165,14 +165,14 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif text == "👨‍💻 Support":
         await update.message.reply_text("የቴክኒክ ችግር ካጋጠመዎት አድሚኑን ያነጋግሩ፡ @ardibingobot")
 
-# ሜይን ፋንክሽን - አስፈላጊዎቹ ሀንድለሮች እዚህ ተጨምረዋል
+# ሜይን ፋንክሽን
 def main():
     app = Application.builder().token(TOKEN).build()
     
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.CONTACT, handle_contact))
     app.add_handler(MessageHandler(filters.StatusUpdate.WEB_APP_DATA, handle_web_app_data))
-    app.add_handler(CallbackQueryHandler(admin_callback)) # ለአድሚን ቁልፎች ምላሽ መስጫ
+    app.add_handler(CallbackQueryHandler(admin_callback))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_messages))
     
     print("🚀 Ardi Bingo Bot is running with Admin Approval System...")
