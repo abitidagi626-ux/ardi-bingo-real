@@ -2,22 +2,16 @@ import logging
 import random
 import json
 import os
-from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove, WebAppInfo
+from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, CallbackQueryHandler
 
-# ⚠️ ቦት ቶከንህን እዚህ ተካ
+# ⚠️ ቦት ቶከን (አዲሱን ቶከን መጠቀምህን እርግጠኛ ሁን)
 TOKEN = "8684712579:AAE9JK0cdSK-cVeycF7xAd_KSrUUqmN5HWI"
 # ⚠️ አድሚን ID
 ADMIN_ID = 1046142540
 BALANCE_FILE = "balances.json"
 
-# ሎጊንግ
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-
-# የዌብሳይት ሊንኮች
-BASE_URL = "https://abitidagi626-ux.github.io/ardi-bingo-real/index.html"
-STAKE_PAGE_URL = f"{BASE_URL}#stake-page"
-DEPOSIT_PAGE_URL = f"{BASE_URL}#deposit-methods"
 
 # --- የባላንስ መቆጣጠሪያ ---
 def load_balances():
@@ -35,44 +29,29 @@ def save_balance(user_id, amount):
     with open(BALANCE_FILE, "w") as f:
         json.dump(balances, f)
 
-# 1. /start ሲባል የሚመጣ መጀመሪያ
+# 1. /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     contact_button = KeyboardButton("📲 ስልክ ቁጥርዎን ያጋሩ (Share Contact)", request_contact=True)
     reply_markup = ReplyKeyboardMarkup([[contact_button]], resize_keyboard=True, one_time_keyboard=True)
-    
-    await update.message.reply_text(
-        "እንኳን ወደ Ardi Bingo በሰላም መጡ! 🎰\n\nለመመዝገብ እና ሙሉ አገልግሎቱን ለማግኘት እባክዎ ስልክ ቁጥርዎን ያጋሩ።",
-        reply_markup=reply_markup
-    )
+    await update.message.reply_text("እንኳን ወደ Ardi Bingo መጡ! 🎰\n\nለመመዝገብ እባክዎ ስልክ ቁጥርዎን ያጋሩ።", reply_markup=reply_markup)
 
-# 2. ስልክ ሲላክ የሚመጣ ዋና ሜኑ (Main Menu)
+# 2. handle_contact
 async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.message.from_user
-    user_random_id = random.randint(10000, 99999)
-    
     keyboard = [
-        [KeyboardButton("🕹 Play Now", web_app=WebAppInfo(url=STAKE_PAGE_URL))],
-        [KeyboardButton("💰 Check Balance"), KeyboardButton("💵 Deposit", web_app=WebAppInfo(url=DEPOSIT_PAGE_URL))],
-        [KeyboardButton("👥 Invite"), KeyboardButton("ℹ️ Instruction")],
-        [KeyboardButton("🏆 Win Pattern"), KeyboardButton("✍️ Change Username")],
-        [KeyboardButton("👨‍💻 Support")]
+        [KeyboardButton("🕹 Play Now", web_app=WebAppInfo(url="https://abitidagi626-ux.github.io/ardi-bingo-real/index.html#stake-page"))],
+        [KeyboardButton("💰 Check Balance"), KeyboardButton("💵 Deposit", web_app=WebAppInfo(url="https://abitidagi626-ux.github.io/ardi-bingo-real/index.html#deposit-methods"))]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    await update.message.reply_text(f"✅ ምዝገባዎ ተጠናቋል!\n👤 ስም: {user.first_name}", reply_markup=reply_markup)
 
-    await update.message.reply_text(
-        f"✅ ምዝገባዎ ተጠናቋል!\n👤 ስም: {user.first_name}\n🆔 የእርስዎ መለያ ID: {user_random_id}\n\nምን ማድረግ ይፈልጋሉ? ከታች ካሉት አማራጮች ይምረጡ።",
-        reply_markup=reply_markup
-    )
-
-# 3. WebApp ዳታ ሲልክ (Deposit Verification) - ምልክት በተደረገበት ቦታ ቁልፎቹን ይጨምራል
+# 3. WebApp Data Handler - እዚህ ጋር ነው ቁልፎቹን የሚያወጣው
 async def handle_web_app_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data_raw = update.message.web_app_data.data
     user = update.effective_user
-
-    # ከዳታው ውስጥ ቁጥሩን (Amount) መለየት
     amount = "".join(filter(str.isdigit, data_raw)) or "0"
 
-    # አድሚን ላይ የሚመጡ የማጽደቂያ ቁልፎች (Approve/Cancel)
+    # አድሚን ላይ የሚመጡ የማጽደቂያ ቁልፎች
     keyboard = [
         [
             InlineKeyboardButton("✅ Approve", callback_data=f"app_{user.id}_{amount}"),
@@ -83,99 +62,46 @@ async def handle_web_app_data(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     admin_msg = (
         f"🔔 *አዲስ የዲፖዚት ጥያቄ*\n\n"
-        f"ባንክ: CBE\n"
-        f"መጠን: {amount} ETB\n"
-        f"መልዕክት: {data_raw}\n"
-        f"ID: {user.id}"
+        f"👤 ተጠቃሚ: {user.first_name}\n"
+        f"🆔 ID: `{user.id}`\n"
+        f"💰 መጠን: {amount} ETB\n"
+        f"📝 መረጃ: {data_raw}"
     )
 
+    # ለአድሚኑ መላክ
     await context.bot.send_message(
         chat_id=ADMIN_ID,
         text=admin_msg,
         reply_markup=reply_markup,
         parse_mode="Markdown"
     )
+    await update.message.reply_text("✅ የዲፖዚት መረጃዎ ለአድሚን ተልኳል።")
 
-    await update.message.reply_text("✅ የዲፖዚት መረጃዎ ለአድሚን ተልኳል። እባክዎ እስኪረጋገጥ ይጠብቁ።")
-
-# 4. የአድሚን የቁልፍ ትዕዛዝ (Callback Query)
+# 4. የአድሚን ውሳኔ ማስተናገጃ
 async def admin_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     
     data_parts = query.data.split("_")
-    action = data_parts[0]
-    user_id = data_parts[1]
+    action, user_id = data_parts[0], data_parts[1]
     
     if action == "app":
         amount = data_parts[2]
         save_balance(user_id, amount)
-        try:
-            await context.bot.send_message(chat_id=user_id, text=f"🎉 እንኳን ደስ አለዎት! የ {amount} ETB ዲፖዚት ጥያቄዎ በአድሚን ጸድቋል። ባላንስዎ ላይ ተጨምሯል።")
-            await query.edit_message_text(text=f"{query.message.text}\n\n✅ ተቀባይነት አግኝቷል (Approved)")
-        except Exception as e:
-            logging.error(f"Error in approve: {e}")
+        await context.bot.send_message(chat_id=user_id, text=f"🎉 የ {amount} ETB ዲፖዚትዎ ጸድቋል!")
+        await query.edit_message_text(text=f"{query.message.text}\n\n✅ ጸድቋል (Approved)")
     elif action == "rej":
-        try:
-            await context.bot.send_message(chat_id=user_id, text="❌ ይቅርታ፣ የዲፖዚት ጥያቄዎ ውድቅ ተደርጓል። እባክዎ መረጃውን በድጋሚ በትክክል ይላኩ።")
-            await query.edit_message_text(text=f"{query.message.text}\n\n❌ ውድቅ ተደርጓል (Cancelled)")
-        except Exception as e:
-            logging.error(f"Error in reject: {e}")
+        await context.bot.send_message(chat_id=user_id, text="❌ የዲፖዚት ጥያቄዎ ውድቅ ተደርጓል።")
+        await query.edit_message_text(text=f"{query.message.text}\n\n❌ ውድቅ ተደርጓል (Cancelled)")
 
-# 5. ለቀሩት የጽሁፍ ቁልፎች ምላሽ መስጫ
-async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    text = update.message.text
-    user_id = update.message.from_user.id
-
-    if text == "💰 Check Balance":
-        balances = load_balances()
-        current_balance = balances.get(str(user_id), 0.0)
-        await update.message.reply_text(f"💵 የአሁኑ ባላንስዎ፡ {current_balance:.2f} ETB")
-
-    elif text == "👥 Invite":
-        invite_link = f"https://t.me/{(await context.bot.get_me()).username}?start={user_id}"
-        await update.message.reply_text(f"ጓደኞችዎን ይጋብዙና ቦነስ ያግኙ!🎁\n\nየእርስዎ መጋበዣ ሊንክ፡\n{invite_link}")
-
-    elif text == "ℹ️ Instruction":
-        instruction_text = (
-            "📖 የጨዋታው ህግጋት፡\n"
-            "1. ለመጫወት ወደቦቱ ሲገቡ register የሚለውን በመንካት ስልክ ቁጥሮትን ያጋሩ\n\n"
-            "2. menu ውስጥ በመግባት deposit fund የሚለውን በመንካት በሚፈልጉት የባንክ አካውንት ገንዘብ ገቢ ያድርጉ\n\n"
-            "3. menu ውስጥ በመግባት start play የሚለውን በመንካት መወራረድ የሚፈልጉበትን የብር መጠን ይምረጡ።\n\n"
-            "1. ወደጨዋታው ሲገቡ ከሚመጣሎት 100 የመጫወቻ ቁጥሮች መርጠው accept የሚለውን በመንካት ይቀጥሉ\n\n"
-            "2. ጨዋታው ለመጀመር የተሰጠው ጊዜ ሲያልቅ ቁጥሮች መውጣት ይጀምራል\n\n"
-            "3. የሚወጡት ቁጥሮች የመረጡት ካርቴላ ላይ መኖሩን እያረጋገጡ ያቅልሙ\n\n"
-            "4. ያቀለሙት አንድ መስመር ወይንም አራት ጠርዝ ላይ ሲመጣ ቢንጎ በማለት ማሸነፍ ይችላሉ\n"
-            "— አንድ መስመር ማለት፡ አንድ ወደጎን ወይንም ወደታች ወይንም ዲያጎናል ሲዘጉ\n"
-            "— አራት ጠርዝ ላይ ሲመጣሎት\n\n"
-            "5. እነዚህ ማሸነፊያ ቁጥሮች ሳይመጣሎት bingo የሚለውን ከነኩ ከጨዋታው ይባረራሉ\n\n"
-            "⚠️ ማሳሰቢያ፡\n"
-            "1. የጨዋታ ማስጀመሪያ ሰከንድ (countdown) ሲያልቅ ያሉት ተጫዋች ብዛት ከ2 በታች ከሆነ ያ ጨዋታ አይጀምርም\n"
-            "2. ጨዋታ ከጀመረ በኋላ ካርቴላ መምረጫ ቦርዱ ይጸዳል\n"
-            "3. እርሶ በዘጉበት ቁጥር ሌላ ተጫዋች ዘግቶ ቀድሞ bingo ካለ አሸናፊነትዎን ያጣሉ"
-        )
-        await update.message.reply_text(instruction_text)
-
-    elif text == "🏆 Win Pattern":
-        await update.message.reply_text("🏆 የማሸነፊያ መንገዶች (Patterns):\n- አግድም (Horizontal)\n- ቁልቁል (Vertical)\n- አያያዝ (Diagonal)\n- አራቱም ማዕዘን (4 Corners)")
-
-    elif text == "✍️ Change Username":
-        await update.message.reply_text("ስምዎን ለመቀየር በዌብ አፑ Profile ሴቲንግ ውስጥ መቀየር ይችላሉ።")
-
-    elif text == "👨‍💻 Support":
-        await update.message.reply_text("የቴክኒክ ችግር ካጋጠመዎት አድሚኑን ያነጋግሩ፡ @ardibingobot")
-
-# ሜይን ፋንክሽን
 def main():
     app = Application.builder().token(TOKEN).build()
-    
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.CONTACT, handle_contact))
     app.add_handler(MessageHandler(filters.StatusUpdate.WEB_APP_DATA, handle_web_app_data))
     app.add_handler(CallbackQueryHandler(admin_callback))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_messages))
     
-    print("🚀 Ardi Bingo Bot is running with Admin Approval System...")
+    print("🚀 Ardi Bingo Bot is running...")
     app.run_polling()
 
 if __name__ == '__main__':
