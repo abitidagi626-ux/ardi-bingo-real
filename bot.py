@@ -10,7 +10,10 @@ TOKEN = "8684712579:AAE9JK0cdSK-cVeycF7xAd_KSrUUqmN5HWI"
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 # የዌብሳይት ሊንኮች
+# እዚህ ጋር በቀጥታ ወደ ሚከፈቱት ገጾች የሚወስዱ ሊንኮችን አዘጋጅቻለሁ
 BASE_URL = "https://abitidagi626-ux.github.io/ardi-bingo-real/index.html"
+STAKE_PAGE_URL = f"{BASE_URL}#stake-page"
+DEPOSIT_PAGE_URL = f"{BASE_URL}#deposit-methods"
 
 # 1. /start ሲባል የሚመጣ መጀመሪያ
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -27,10 +30,10 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.message.from_user
     user_random_id = random.randint(10000, 99999)
     
-    # 🕹 Play Now እና 💵 Deposit በቀጥታ Web App እንዲከፍቱ ተደርገዋል
+    # እዚህ ጋር ቁልፎቹ በቀጥታ ወደ ተፈለገው ገጽ እንዲወስዱ ተደርገዋል
     keyboard = [
-        [KeyboardButton("🕹 Play Now", web_app=WebAppInfo(url=f"{BASE_URL}#stake-page"))],
-        [KeyboardButton("💰 Check Balance"), KeyboardButton("💵 Deposit", web_app=WebAppInfo(url=f"{BASE_URL}#deposit-methods"))],
+        [KeyboardButton("🕹 Play Now", web_app=WebAppInfo(url=STAKE_PAGE_URL))],
+        [KeyboardButton("💰 Check Balance"), KeyboardButton("💵 Deposit", web_app=WebAppInfo(url=DEPOSIT_PAGE_URL))],
         [KeyboardButton("👥 Invite"), KeyboardButton("ℹ️ Instruction")],
         [KeyboardButton("🏆 Win Pattern"), KeyboardButton("✍️ Change Username")],
         [KeyboardButton("👨‍💻 Support")]
@@ -90,7 +93,7 @@ def main():
     app.add_handler(MessageHandler(filters.CONTACT, handle_contact))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_messages))
     
-    print("🚀 Ardi Bingo Bot is running with WebApp features...")
+    print("🚀 Ardi Bingo Bot is running with Direct WebApp access...")
     app.run_polling()
 
 if __name__ == '__main__':
