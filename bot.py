@@ -1,242 +1,147 @@
-<!DOCTYPE html>
-<html lang="am">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ardi Bingo - Elite</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; touch-action: manipulation; }
-        .stake-3d { 
-            position: relative; background: linear-gradient(to bottom, #f97316, #ea580c);
-            border-radius: 24px; box-shadow: 0 10px 0 #9a3412, 0 15px 25px rgba(0,0,0,0.25);
-            transition: all 0.1s ease; display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .stake-3d:active { transform: translateY(6px); box-shadow: 0 4px 0 #9a3412; }
-        #cards-display { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; padding: 12px; background-color: #1e40af; border-radius: 12px; }
-        .compact-card { background: #3b82f6; border: 1px solid #60a5fa; border-radius: 8px; padding: 10px 0; font-weight: 900; font-size: 12px; color: white; text-align: center; }
-        .selected-card-green { background: #22c55e !important; border: none !important; }
-        .bingo-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; background: #cbd5e1; padding: 2px; }
-        .bingo-cell { background: white; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; }
-    </style>
-</head>
-<body class="min-h-screen">
+import logging
+import random
+import json
+import os
+from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, CallbackQueryHandler
 
-    <div id="home-page" class="flex flex-col items-center justify-center min-h-screen p-6">
-        <img src="ardi.jpg" class="w-24 h-24 rounded-full border-4 border-white shadow-xl mb-6 object-cover">
-        <h1 class="text-3xl font-black text-slate-900 mb-10 italic">ARDI BINGO</h1>
-        <div class="space-y-4 w-full max-w-xs">
-            <button onclick="showPage('stake-page')" class="w-full bg-green-600 text-white py-4 rounded-[20px] font-black shadow-lg">🕹 PLAY NOW</button>
-            <button onclick="showPage('deposit-methods')" class="w-full bg-blue-700 text-white py-4 rounded-[20px] font-black shadow-lg">💰 DEPOSIT</button>
-            <button onclick="showPage('admin-page')" class="w-full bg-slate-800 text-white py-2 rounded-xl text-xs font-bold opacity-50">ADMIN PANEL</button>
-        </div>
-    </div>
+# ⚠️ 1. ቦት ቶከን
+TOKEN = "8684712579:AAE9JK0cdSK-cVeycF7xAd_KSrUUqmN5HWI"
 
-    <div id="deposit-methods" class="hidden min-h-screen p-6">
-        <button onclick="showPage('home-page')" class="absolute top-4 left-4 bg-white p-2 rounded-full shadow">←</button>
-        <div class="mt-16 text-center">
-            <h2 class="text-xl font-black text-slate-800 mb-8 uppercase tracking-widest italic">Choose Method</h2>
-            <div class="grid grid-cols-1 gap-4 max-w-sm mx-auto">
-                <div onclick="showDeposit('TELEBIRR')" class="flex items-center p-5 bg-white rounded-3xl border border-slate-200 shadow-sm cursor-pointer active:scale-95 transition">
-                    <img src="telebirr.png" class="w-12 h-12 rounded-xl mr-4">
-                    <div class="text-left">
-                        <p class="font-black text-slate-1000">Telebirr</p>
-                        <p class="text-[10px] text-slate-600 font-bold">Fast & Secure</p>
-                    </div>
-                </div>
-                <div onclick="showDeposit('CBE')" class="flex items-center p-5 bg-white rounded-3xl border border-slate-200 shadow-sm cursor-pointer active:scale-95 transition">
-                    <img src="cbe.png" class="w-12 h-12 rounded-xl mr-4">
-                    <div class="text-left">
-                        <p class="font-black text-slate-1000">CBE (Commercial Bank)</p>
-                        <p class="text-[10px] text-slate-600 font-bold">Manual Transfer</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+# ⚠️ 2. አድሚን ID
+ADMIN_ID = 1046142540
 
-    <div id="deposit-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-[40px] w-full max-w-sm overflow-hidden shadow-2xl relative p-8 text-center">
-            <button onclick="hideModal('deposit-modal')" class="absolute top-6 right-6 text-slate-400 font-bold">✕</button>
-            <h3 class="font-black text-xl mb-6 italic text-blue-800">Deposit</h3>
-            <div class="bg-blue-50 p-6 rounded-[32px] border-2 border-dashed border-blue-200 mb-6">
-                <p id="acc-num" class="text-blue-700 text-xl font-black tracking-tighter mb-1"></p>
-                <p id="acc-name" class="text-sm font-blue text-slate-1000 uppercase">yared molla📋</p>
-            </div>
-            <div class="text-left text-[11px] space-y-2 mb-6 font-bold text-slate-800 leading-snug">
-                <p>1. ከላይ ባለው የቴሌብር OR CBE አካውንት ብር ያስገቡ</p>
-                <p>2. የደረሳችሁን አጭር የጹሁፍ መለክት (SMS) ሙሉዉን ኮፒ(COPY) በማረግ ከታሽ ባለው ሳጥን ላይ ፔስት (PASTE) በማረግ ይላኩት</p>
-            </div>
-            
-            <input type="number" id="dep-amount" class="w-full bg-slate-100 border border-slate-400 p-4 rounded-2xl mb-3 outline-none font-black text-blue-600" placeholder="Amount (ETB)">
-            <textarea id="ref-input" class="w-full bg-slate-100 border border-slate-200 p-4 rounded-2xl h-24 mb-4 outline-none text-xs font-medium" placeholder="Enter Message (E.g Format: CA999DASAD)"></textarea>
-            
-            <button onclick="submitDeposit()" class="w-full bg-green-800 text-white py-4 rounded-2xl font-black shadow-lg uppercase tracking-wider">Send for Verification</button>
-            <p class="mt-4 text-[10px] text-slate-600 font-bold italic">የሚያጋጥማቹ የክፍያ ችግር ካለ ኤጀንቱን በዚ @ardibingobot ማዋራት ይችላሉ</p>
-        </div>
-    </div>
+BALANCE_FILE = "balances.json"
 
-    <div id="admin-page" class="hidden min-h-screen p-6 bg-slate-900 text-white">
-        <button onclick="showPage('home-page')" class="mb-6 text-sm bg-white/10 px-4 py-2 rounded-lg">← Back</button>
-        <h2 class="text-xl font-black mb-4 italic">Pending Deposits</h2>
-        <div id="pending-list" class="space-y-3">
-            <p class="text-slate-500 italic text-sm text-center mt-20">No pending requests.</p>
-        </div>
-    </div>
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
-    <div id="stake-page" class="hidden min-h-screen p-6 text-center">
-        <button onclick="showPage('home-page')" class="absolute top-4 left-4 bg-white p-2 rounded-full shadow">←</button>
-        <h1 class="mt-16 text-xl font-black mb-10 italic">CHOOSE STAKE</h1>
-        <div class="grid grid-cols-2 gap-6 max-w-xs mx-auto">
-            <button onclick="selectStake(10)" class="stake-3d aspect-square text-white"><span class="text-3xl font-black">10</span></button>
-            <button onclick="selectStake(20)" class="stake-3d aspect-square text-white"><span class="text-3xl font-black">20</span></button>
-            <button onclick="selectStake(50)" class="stake-3d aspect-square text-white"><span class="text-3xl font-black">50</span></button>
-            <button onclick="selectStake(100)" class="stake-3d aspect-square text-white"><span class="text-3xl font-black">100</span></button>
-        </div>
-    </div>
+# --- የባላንስ መቆጣጠሪያ (Save/Load) ---
+def load_balances():
+    if os.path.exists(BALANCE_FILE):
+        try:
+            with open(BALANCE_FILE, "r") as f:
+                return json.load(f)
+        except: return {}
+    return {}
 
-    <div id="game-page" class="hidden min-h-screen bg-white flex flex-col">
-        <div class="bg-black text-white p-4 flex justify-between items-center text-[10px] font-black uppercase">
-            <div class="flex flex-col"><span>Timer</span><span id="timer" class="text-sm text-red-500">60s</span></div>
-            <div class="flex flex-col items-center"><span>Derrash (85%)</span><span id="derrash-display" class="text-sm text-green-400 font-black">0.00</span></div>
-            <div class="flex flex-col items-end"><span>Wallet</span><span id="wallet-display" class="text-sm text-blue-400">0.00 ETB</span></div>
-        </div>
-        <div class="p-2 overflow-y-auto"><div id="cards-display"></div></div>
-    </div>
+def get_user_balance(user_id):
+    balances = load_balances()
+    return float(balances.get(str(user_id), 0.0))
 
-    <div id="card-view" class="hidden fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-4">
-        <div class="bg-white rounded-[40px] p-6 w-full max-w-sm text-center">
-            <h2 class="text-xl font-black mb-4">Card #<span id="sel-card-num"></span></h2>
-            <div class="bingo-grid mb-6 rounded-lg overflow-hidden">
-                <div class="bg-blue-600 text-white font-black py-1">B</div>
-                <div class="bg-blue-600 text-white font-black py-1">I</div>
-                <div class="bg-blue-600 text-white font-black py-1">N</div>
-                <div class="bg-blue-600 text-white font-black py-1">G</div>
-                <div class="bg-blue-600 text-white font-black py-1">O</div>
-                <div id="bingo-numbers" class="contents"></div>
-            </div>
-            <div class="flex gap-2">
-                <button onclick="buyCard()" class="flex-1 bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg">ACCEPT</button>
-                <button onclick="hideModal('card-view')" class="flex-1 bg-slate-100 text-slate-500 py-4 rounded-2xl font-black">BACK</button>
-            </div>
-        </div>
-    </div>
+def save_balance(user_id, amount):
+    balances = load_balances()
+    u_id = str(user_id)
+    try:
+        # አሁን ያለውን ባላንስ ላይ አዲሱን መጨመር
+        current = float(balances.get(u_id, 0.0))
+        balances[u_id] = current + float(amount)
+        with open(BALANCE_FILE, "w") as f:
+            json.dump(balances, f)
+    except Exception as e:
+        logging.error(f"Error saving balance: {e}")
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
+# --- 1. /start ---
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    contact_button = KeyboardButton("📲 ስልክ ቁጥርዎን ያጋሩ (Share Contact)", request_contact=True)
+    reply_markup = ReplyKeyboardMarkup([[contact_button]], resize_keyboard=True, one_time_keyboard=True)
+    await update.message.reply_text(
+        "እንኳን ወደ Ardi Bingo በሰላም መጡ! 🎰\n\nለመመዝገብ እባክዎ ስልክ ቁጥርዎን ያጋሩ።",
+        reply_markup=reply_markup
+    )
 
-        // --- ባላንስን ከ URL የመቀበያ Logic ---
-        const urlParams = new URLSearchParams(window.location.search);
-        let wallet = parseFloat(urlParams.get('balance')) || 0.0;
+# --- 2. ስልክ ቁጥር ሲላክ (ሊንኩ ተስተካክሏል) ---
+async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.message.from_user
+    balance = get_user_balance(user.id)
+    
+    # ማሳሰቢያ፡ የ # ምልክት በሊንኩ መጨረሻ ላይ መኖር የለበትም
+    web_app_url = f"https://abitidagi626-ux.github.io/ardi-bingo-real/index.html?balance={balance}"
+    
+    keyboard = [
+        [KeyboardButton("🕹 Play Now", web_app=WebAppInfo(url=web_app_url))],
+        [KeyboardButton("💰 Check Balance"), KeyboardButton("💵 Deposit", web_app=WebAppInfo(url=web_app_url))],
+        [KeyboardButton("👨‍💻 Support")]
+    ]
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    await update.message.reply_text(
+        f"✅ ምዝገባዎ ተጠናቋል!\n👤 ስም: {user.first_name}\n🆔 ID: {user.id}\n💵 ባላንስ: {balance} ETB",
+        reply_markup=reply_markup
+    )
+
+# --- 3. የዲፖዚት ጥያቄ መቀበያ ---
+async def handle_web_app_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    data_raw = update.message.web_app_data.data
+    user = update.effective_user
+    
+    try:
+        data = json.loads(data_raw)
+        amount = data.get("amount", "0")
+        method = data.get("method", "Unknown")
+        msg = data.get("message", "No message")
+    except:
+        amount = "".join(filter(str.isdigit, data_raw)) or "0"
+        method = "Unknown"
+        msg = data_raw
+
+    keyboard = [[InlineKeyboardButton("✅ Approve", callback_data=f"app_{user.id}_{amount}"),
+                 InlineKeyboardButton("❌ Cancel", callback_data=f"rej_{user.id}")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    admin_msg = (f"🔔 *አዲስ የዲፖዚት ጥያቄ*\n\n👤 ተጠቃሚ: {user.first_name}\n🏦 ባንክ: {method}\n"
+                 f"💰 መጠን: {amount} ETB\n📝 መረጃ: {msg}\n🆔 User ID: `{user.id}`")
+
+    await context.bot.send_message(chat_id=ADMIN_ID, text=admin_msg, reply_markup=reply_markup, parse_mode="Markdown")
+    await update.message.reply_text("✅ የዲፖዚት መረጃዎ ለአድሚን ተልኳል። እባክዎ እስኪረጋገጥ ይጠብቁ።")
+
+# --- 4. አድሚኑ ቁልፉን ሲጫን ---
+async def admin_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    
+    data_parts = query.data.split("_")
+    action = data_parts[0]
+    user_id = data_parts[1]
+    
+    if action == "app":
+        amount = data_parts[2]
+        save_balance(user_id, amount)
+        await context.bot.send_message(chat_id=user_id, text=f"🎉 የ {amount} ETB ዲፖዚትዎ በአድሚን ጸድቋል!")
+        await query.edit_message_text(text=f"{query.message.text}\n\n✅ ጸድቋል (Approved)")
+    elif action == "rej":
+        await context.bot.send_message(chat_id=user_id, text="❌ የዲፖዚት ጥያቄዎ ውድቅ ተደርጓል።")
+        await query.edit_message_text(text=f"{query.message.text}\n\n❌ ውድቅ ተደርጓል (Rejected)")
+
+# --- 5. ሜሴጆችን ማስተናገድ ---
+async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.message.from_user.id
+    text = update.message.text
+    
+    if text == "💰 Check Balance":
+        balance = get_user_balance(user_id)
+        web_app_url = f"https://abitidagi626-ux.github.io/ardi-bingo-real/index.html?balance={balance}"
         
-        // ገጹ ሲከፈት Wallet ላይ ያሳየዋል
-        document.addEventListener('DOMContentLoaded', () => {
-            updateWalletDisplay();
-        });
+        keyboard = [
+            [KeyboardButton("🕹 Play Now", web_app=WebAppInfo(url=web_app_url))],
+            [KeyboardButton("💰 Check Balance"), KeyboardButton("💵 Deposit", web_app=WebAppInfo(url=web_app_url))],
+            [KeyboardButton("👨‍💻 Support")]
+        ]
+        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+        await update.message.reply_text(f"💵 የአሁኑ ባላንስዎ፡ {balance} ETB", reply_markup=reply_markup)
+    
+    elif text == "👨‍💻 Support":
+        await update.message.reply_text("ማንኛውንም ጥያቄ ካለዎት አድሚኑን ያነጋግሩ @Yordi_Bingo_Admin")
 
-        function updateWalletDisplay() {
-            const displays = document.querySelectorAll('#wallet-display');
-            displays.forEach(el => el.innerText = wallet.toFixed(2) + " ETB");
-        }
+def main():
+    app = Application.builder().token(TOKEN).build()
+    
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(MessageHandler(filters.CONTACT, handle_contact))
+    app.add_handler(MessageHandler(filters.StatusUpdate.WEB_APP_DATA, handle_web_app_data))
+    app.add_handler(CallbackQueryHandler(admin_callback))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_messages))
+    
+    print("🚀 Ardi Bingo Bot is running correctly...")
+    app.run_polling()
 
-        let stake = 0;
-        let selectedCardsCount = 0;
-        let timerVal = 60;
-        let currentMethod = "";
-
-        function showPage(id) {
-            document.querySelectorAll('div[id]').forEach(d => { if(!['deposit-modal','card-view','bingo-numbers'].includes(d.id)) d.classList.add('hidden'); });
-            document.getElementById(id).classList.remove('hidden');
-        }
-
-        function hideModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-        function showDeposit(method) {
-            currentMethod = method;
-            const acc = document.getElementById('acc-num');
-            if(method === 'TELEBIRR') { acc.innerText = "251993697243"; } 
-            else { acc.innerText = "1000261501396"; }
-            document.getElementById('deposit-modal').classList.remove('hidden');
-        }
-
-        function submitDeposit() {
-            let amt = document.getElementById('dep-amount').value;
-            let msg = document.getElementById('ref-input').value;
-            if(!amt || !msg) { alert("እባክዎ መረጃውን በትክክል ይሙሉ!"); return; }
-            const data = { method: currentMethod, amount: amt, message: msg };
-            tg.sendData(JSON.stringify(data));
-            alert("የዲፖዚት ጥያቄዎ ተልኳል! ቦቱ ላይ ውጤቱን ይጠብቁ።");
-            tg.close();
-        }
-
-        function selectStake(amt) {
-            stake = amt;
-            showPage('game-page');
-            initCards();
-            startTimer();
-        }
-
-        function initCards() {
-            const container = document.getElementById('cards-display');
-            container.innerHTML = '';
-            for(let i=1; i<=100; i++) {
-                let b = document.createElement('button');
-                b.id = `card-btn-${i}`; b.className = "compact-card"; b.innerText = i;
-                b.onclick = () => openCard(i);
-                container.appendChild(b);
-            }
-        }
-
-        function openCard(num) {
-            document.getElementById('sel-card-num').innerText = num;
-            const grid = document.getElementById('bingo-numbers');
-            grid.innerHTML = '';
-            const columns = [[1,15], [16,30], [31,45], [46,60], [61,75]];
-            let cardData = [];
-            for(let r=0; r<5; r++) {
-                for(let c=0; c<5; c++) {
-                    if(r===2 && c===2) { cardData.push("⭐"); continue; }
-                    let n;
-                    do { n = Math.floor(Math.random() * (columns[c][1] - columns[c][0] + 1)) + columns[c][0]; } while(cardData.includes(n));
-                    cardData.push(n);
-                }
-            }
-            cardData.forEach(v => {
-                let cell = document.createElement('div');
-                cell.className = "bingo-cell"; cell.innerText = v;
-                grid.appendChild(cell);
-            });
-            document.getElementById('card-view').classList.remove('hidden');
-        }
-
-        // --- ካርድ ሲገዛ ባላንስ የሚቀንስበት Logic ---
-        function buyCard() {
-            if(wallet < stake) { 
-                alert("ባላንስዎ በቂ አይደለም! እባክዎ ዲፖዚት ያድርጉ።"); 
-                return; 
-            }
-            wallet -= stake;
-            selectedCardsCount++;
-            updateWalletDisplay(); // ባላንሱ ወዲያው እንዲቀንስ
-
-            let num = document.getElementById('sel-card-num').innerText;
-            document.getElementById(`card-btn-${num}`).classList.add('selected-card-green');
-            document.getElementById(`card-btn-${num}`).innerText = "✓";
-            document.getElementById('derrash-display').innerText = (selectedCardsCount * stake * 0.85).toFixed(2);
-            hideModal('card-view');
-        }
-
-        function startTimer() {
-            timerVal = 60;
-            if(window.gameInterval) clearInterval(window.gameInterval);
-            window.gameInterval = setInterval(() => {
-                if(timerVal <= 0) clearInterval(window.gameInterval);
-                else { timerVal--; document.getElementById('timer').innerText = timerVal + "s"; }
-            }, 1000);
-        }
-    </script>
-</body>
-</html>
+if __name__ == '__main__':
+    main()
