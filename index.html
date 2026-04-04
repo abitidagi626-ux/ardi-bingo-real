@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ardi Bingo - Elite</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
@@ -124,16 +125,16 @@
     </div>
 
     <script>
+        // Telegram WebApp Initialize
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
         let wallet = 0;
         let stake = 0;
         let selectedCardsCount = 0;
         let pendingDeposits = [];
         let timerVal = 60;
         let currentMethod = "";
-
-        // አድሚን መረጃ
-        const BOT_TOKEN = "8684712579:AAE9JK0cdSK-cVeycF7xAd_KSrUUqmN5HWI"; 
-        const ADMIN_ID = "1046142540";
 
         function showPage(id) {
             document.querySelectorAll('div[id]').forEach(d => { if(!['deposit-modal','card-view','bingo-numbers'].includes(d.id)) d.classList.add('hidden'); });
@@ -153,62 +154,28 @@
             document.getElementById('deposit-modal').classList.remove('hidden');
         }
 
-        async function submitDeposit() {
-            let amt = parseFloat(document.getElementById('dep-amount').value);
+        // --- የተስተካከለው የዲፖዚት መላኪያ ---
+        function submitDeposit() {
+            let amt = document.getElementById('dep-amount').value;
             let msg = document.getElementById('ref-input').value;
+            
             if(!amt || !msg) { alert("እባክዎ መረጃውን በትክክል ይሙሉ!"); return; }
             
-            const depositId = Date.now();
-            pendingDeposits.push({amt, msg, id: depositId, method: currentMethod});
-            updateAdminPanel();
+            // ለቦቱ በ JSON format መላክ
+            const data = {
+                method: currentMethod,
+                amount: amt,
+                message: msg
+            };
 
-            // ለአድሚኑ ቴሌግራም ላይ እንዲደርስ መላክ
-            const telegramText = `🔔 አዲስ የዲፖዚት ጥያቄ!\n\nባንክ: ${currentMethod}\nመጠን: ${amt} ETB\nመልዕክት: ${msg}\nID: ${depositId}`;
-            try {
-                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: ADMIN_ID, text: telegramText })
-                });
-            } catch (e) { console.error("Telegram error", e); }
-
-            alert("የዲፖዚት ጥያቄዎ ተልኳል! አድሚኑ ሲያጸድቀው ባላንስዎ ላይ ይደመራል።");
-            hideModal('deposit-modal');
-            showPage('home-page');
+            // ይህ መስመር መረጃውን ለ bot.py ይልካል
+            tg.sendData(JSON.stringify(data));
+            
+            alert("የዲፖዚት ጥያቄዎ ተልኳል! ቦቱ ላይ ውጤቱን ይጠብቁ።");
+            tg.close(); // መረጃው ሲላክ ዌብ አፑን ይዘጋዋል (አማራጭ ነው)
         }
 
-        function updateAdminPanel() {
-            const list = document.getElementById('pending-list');
-            list.innerHTML = pendingDeposits.length ? '' : '<p class="text-slate-500 italic text-center mt-20">No pending requests.</p>';
-            pendingDeposits.forEach(d => {
-                let div = document.createElement('div');
-                div.className = "bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center mb-2";
-                div.innerHTML = `<div><p class="font-black text-green-400">${d.amt} ETB (${d.method})</p><p class="text-[10px] opacity-60">${d.msg}</p></div>
-                    <div class="flex gap-2">
-                        <button onclick="adminApprove(${d.id})" class="bg-green-600 px-3 py-1 rounded text-xs font-bold hover:bg-green-700 transition">Approve</button>
-                        <button onclick="adminCancel(${d.id})" class="bg-red-600 px-3 py-1 rounded text-xs font-bold hover:bg-red-700 transition">Cancel</button>
-                    </div>`;
-                list.appendChild(div);
-            });
-        }
-
-        function adminApprove(id) {
-            let req = pendingDeposits.find(x => x.id === id);
-            if(req) {
-                wallet += req.amt; // እዚህ ጋር ባላንሱ ላይ ይደመራል
-                pendingDeposits = pendingDeposits.filter(x => x.id !== id);
-                updateAdminPanel();
-                document.getElementById('wallet-display').innerText = wallet.toFixed(2) + " ETB";
-                alert("ተቀብለሃል! " + req.amt + " ETB ባላንስ ላይ ተጨምሯል።");
-            }
-        }
-
-        function adminCancel(id) {
-            pendingDeposits = pendingDeposits.filter(x => x.id !== id);
-            updateAdminPanel();
-            alert("ጥያቄው ተሰርዟል።");
-        }
-
+        // የተቀሩት ተግባራት (initCards, selectStake, ወዘተ) እንዳሉ ናቸው...
         function selectStake(amt) {
             stake = amt;
             showPage('game-page');
