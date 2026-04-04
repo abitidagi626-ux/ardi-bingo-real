@@ -125,14 +125,25 @@
     </div>
 
     <script>
-        // Telegram WebApp Initialize
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        let wallet = 0;
+        // --- ባላንስን ከ URL የመቀበያ Logic ---
+        const urlParams = new URLSearchParams(window.location.search);
+        let wallet = parseFloat(urlParams.get('balance')) || 0.0;
+        
+        // ገጹ ሲከፈት Wallet ላይ ያሳየዋል
+        document.addEventListener('DOMContentLoaded', () => {
+            updateWalletDisplay();
+        });
+
+        function updateWalletDisplay() {
+            const displays = document.querySelectorAll('#wallet-display');
+            displays.forEach(el => el.innerText = wallet.toFixed(2) + " ETB");
+        }
+
         let stake = 0;
         let selectedCardsCount = 0;
-        let pendingDeposits = [];
         let timerVal = 60;
         let currentMethod = "";
 
@@ -146,36 +157,21 @@
         function showDeposit(method) {
             currentMethod = method;
             const acc = document.getElementById('acc-num');
-            if(method === 'TELEBIRR') {
-                acc.innerText = "251993697243";
-            } else {
-                acc.innerText = "1000261501396";
-            }
+            if(method === 'TELEBIRR') { acc.innerText = "251993697243"; } 
+            else { acc.innerText = "1000261501396"; }
             document.getElementById('deposit-modal').classList.remove('hidden');
         }
 
-        // --- የተስተካከለው የዲፖዚት መላኪያ ---
         function submitDeposit() {
             let amt = document.getElementById('dep-amount').value;
             let msg = document.getElementById('ref-input').value;
-            
             if(!amt || !msg) { alert("እባክዎ መረጃውን በትክክል ይሙሉ!"); return; }
-            
-            // ለቦቱ በ JSON format መላክ
-            const data = {
-                method: currentMethod,
-                amount: amt,
-                message: msg
-            };
-
-            // ይህ መስመር መረጃውን ለ bot.py ይልካል
+            const data = { method: currentMethod, amount: amt, message: msg };
             tg.sendData(JSON.stringify(data));
-            
             alert("የዲፖዚት ጥያቄዎ ተልኳል! ቦቱ ላይ ውጤቱን ይጠብቁ።");
-            tg.close(); // መረጃው ሲላክ ዌብ አፑን ይዘጋዋል (አማራጭ ነው)
+            tg.close();
         }
 
-        // የተቀሩት ተግባራት (initCards, selectStake, ወዘተ) እንዳሉ ናቸው...
         function selectStake(amt) {
             stake = amt;
             showPage('game-page');
@@ -216,14 +212,19 @@
             document.getElementById('card-view').classList.remove('hidden');
         }
 
+        // --- ካርድ ሲገዛ ባላንስ የሚቀንስበት Logic ---
         function buyCard() {
-            if(wallet < stake) { alert("ባላንስዎ በቂ አይደለም!"); return; }
+            if(wallet < stake) { 
+                alert("ባላንስዎ በቂ አይደለም! እባክዎ ዲፖዚት ያድርጉ።"); 
+                return; 
+            }
             wallet -= stake;
             selectedCardsCount++;
+            updateWalletDisplay(); // ባላንሱ ወዲያው እንዲቀንስ
+
             let num = document.getElementById('sel-card-num').innerText;
             document.getElementById(`card-btn-${num}`).classList.add('selected-card-green');
             document.getElementById(`card-btn-${num}`).innerText = "✓";
-            document.getElementById('wallet-display').innerText = wallet.toFixed(2) + " ETB";
             document.getElementById('derrash-display').innerText = (selectedCardsCount * stake * 0.85).toFixed(2);
             hideModal('card-view');
         }
