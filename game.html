@@ -2,153 +2,185 @@
 <html lang="am">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ardi Bingo - Play</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background-color: #0f172a; 
-            color: white; 
-            margin: 0; 
-            padding: 20px; 
-            text-align: center; 
-        }
-        .container { 
-            max-width: 400px; 
-            margin: auto; 
-            background: #1e293b; 
-            padding: 25px; 
-            border-radius: 20px; 
-            border: 2px solid #3b82f6; 
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-        }
-        .balance-display { 
-            background: #334155; 
-            padding: 10px; 
-            border-radius: 10px; 
-            margin-bottom: 20px; 
-            font-size: 18px;
-        }
-        #balance-amount { color: #10b981; font-weight: bold; }
-        
-        .bingo-ball-container {
-            width: 150px;
-            height: 150px;
-            background: radial-gradient(circle at 30% 30%, #3b82f6, #1d4ed8);
-            border-radius: 50%;
-            margin: 30px auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 60px;
-            font-weight: bold;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            border: 4px solid #fff;
-        }
-        
-        .play-btn {
-            background: linear-gradient(45deg, #10b981, #059669);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 50px;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            transition: 0.3s;
-        }
-        .play-btn:disabled { background: #475569; cursor: not-allowed; }
-        .play-btn:active { transform: scale(0.95); }
-
-        .back-link { 
-            display: block; 
-            margin-top: 20px; 
-            color: #94a3b8; 
-            text-decoration: none; 
-            font-size: 14px;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: white; overflow-x: hidden; }
+        .bingo-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; background: #334155; padding: 2px; border-radius: 8px; }
+        .bingo-cell { background: white; color: #1e293b; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; position: relative; transition: all 0.3s; }
+        .marked { background: #fde047 !important; color: #000; border-radius: 50%; transform: scale(0.85); box-shadow: 0 0 10px #fde047; }
+        .calling-box { background: linear-gradient(135deg, #1e40af, #3b82f6); border-bottom: 4px solid #1d4ed8; }
+        .last-numbers { display: flex; gap: 8px; overflow-x: auto; padding: 10px; }
+        .prev-num { width: 35px; height: 35px; border-radius: 50%; background: #334155; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; flex-shrink: 0; }
+        @keyframes pulse-gold { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        .active-call { animation: pulse-gold 0.5s infinite; color: #fbbf24; }
     </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col">
 
-    <div class="container">
-        <h2>ቢንጎ ተጫወት 🎮</h2>
+    <div class="calling-box p-6 text-center sticky top-0 z-50">
+        <div class="flex justify-between items-center mb-4">
+            <div class="text-left">
+                <p class="text-[10px] uppercase font-bold text-blue-200">Total Prize</p>
+                <p id="prize-display" class="text-lg font-black text-green-400">0.00 ETB</p>
+            </div>
+            <div class="text-right">
+                <p class="text-[10px] uppercase font-bold text-blue-200">Status</p>
+                <p id="status-text" class="text-xs font-bold text-yellow-400 italic">CALLING...</p>
+            </div>
+        </div>
         
-        <div class="balance-display">
-            ያለዎት ሂሳብ: <span id="balance-amount">0</span> ETB
+        <div class="relative inline-block">
+            <svg class="w-32 h-32 transform -rotate-90">
+                <circle cx="64" cy="64" r="60" stroke="currentColor" stroke-width="8" fill="transparent" class="text-blue-900"/>
+                <circle id="timer-circle" cx="64" cy="64" r="60" stroke="currentColor" stroke-width="8" fill="transparent" stroke-dasharray="377" stroke-dashoffset="0" class="text-yellow-400 transition-all duration-1000"/>
+            </svg>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <span id="current-number" class="text-5xl font-black active-call">--</span>
+            </div>
         </div>
 
-        <div class="bingo-ball-container" id="ball">?</div>
-        
-        <p style="color: #94a3b8;">የአንድ ጊዜ ጨዋታ 10 ETB</p>
-        
-        <button id="playBtn" class="play-btn" onclick="playGame()">ተጫወት (Play)</button>
-
-        <a href="index.html" class="back-link">← ወደ ዋናው ገጽ ተመለስ</a>
+        <div class="last-numbers mt-4" id="history">
+            </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js"></script>
+    <div class="p-4 space-y-6 overflow-y-auto flex-1" id="cards-container">
+        </div>
+
+    <div id="win-modal" class="hidden fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-6">
+        <div class="bg-white rounded-[40px] p-8 w-full max-w-sm text-center">
+            <div class="text-6xl mb-4">🏆</div>
+            <h2 class="text-3xl font-black text-slate-900 mb-2 italic">BINGO!</h2>
+            <p class="text-slate-600 font-bold mb-6">እንኳን ደስ አለዎት! አሸንፈዋል!</p>
+            <div class="bg-slate-100 rounded-3xl p-6 mb-6">
+                <p class="text-xs text-slate-500 font-bold uppercase">Prize Won</p>
+                <p id="win-amount" class="text-3xl font-black text-green-600">0.00 ETB</p>
+            </div>
+            <button onclick="finishGame()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black shadow-lg">COLLECT & EXIT</button>
+        </div>
+    </div>
 
     <script>
-        // ያንተ Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyAPhAZp0ey0DHrzSYuiuPN6S818ymodDtY",
-            authDomain: "ardi-bingo-real.firebaseapp.com",
-            projectId: "ardi-bingo-real",
-            storageBucket: "ardi-bingo-real.firebasestorage.app",
-            messagingSenderId: "352198180987",
-            appId: "1:352198180987:web:d2c51b2a7391c3e862e2de"
-        };
+        const tg = window.Telegram.WebApp;
+        
+        // ዳታዎችን ከ URL መቀበያ
+        const params = new URLSearchParams(window.location.search);
+        let myCards = JSON.parse(decodeURIComponent(params.get('cards') || '[]'));
+        let stake = parseFloat(params.get('stake') || 0);
+        let wallet = parseFloat(params.get('balance') || 0);
+        
+        let calledNumbers = [];
+        let possibleNumbers = Array.from({length: 75}, (_, i) => i + 1);
+        let gameInterval;
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const myUserId = "yordanos_test_user"; // ተጠቃሚውን ለመለየት
+        // 1. ካርዶቹን መሳል
+        function renderCards() {
+            const container = document.getElementById('cards-container');
+            const prize = (myCards.length * stake * 0.85).toFixed(2);
+            document.getElementById('prize-display').innerText = prize + " ETB";
 
-        let currentBalance = 0;
-
-        // ባላንሱን በቅጽበት (Real-time) ለመከታተል
-        db.collection("users").doc(myUserId).onSnapshot((doc) => {
-            if (doc.exists) {
-                currentBalance = doc.data().balance || 0;
-                document.getElementById("balance-amount").innerText = currentBalance;
+            myCards.forEach(card => {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = "bg-slate-800 rounded-3xl p-4 shadow-2xl border border-slate-700";
+                cardDiv.innerHTML = `<p class="text-xs font-black text-slate-400 mb-3 uppercase tracking-widest text-center">Card ID: #${card.id}</p>`;
                 
-                // ከ 10 ብር በታች ከሆነ ቁልፉን መዝጋት
-                document.getElementById("playBtn").disabled = currentBalance < 10;
-            }
-        });
-
-        // የጨዋታው ሂደት
-        function playGame() {
-            if (currentBalance >= 10) {
-                const userRef = db.collection("users").doc(myUserId);
+                const grid = document.createElement('div');
+                grid.className = "bingo-grid";
                 
-                // 1. ከባላንስ ላይ 10 ብር መቀነስ
-                userRef.update({
-                    balance: firebase.firestore.FieldValue.increment(-10)
-                }).then(() => {
-                    // 2. የዘፈቀደ የቢንጎ ቁጥር ማውጣት (1-90)
-                    animateBall();
-                }).catch(err => {
-                    alert("ስህተት ተፈጥሯል: " + err.message);
+                card.numbers.forEach((num, idx) => {
+                    const cell = document.createElement('div');
+                    cell.id = `cell-${card.id}-${idx}`;
+                    cell.className = "bingo-cell " + (num === "F" ? "marked" : "");
+                    cell.innerText = num === "F" ? "FREE" : num;
+                    grid.appendChild(cell);
                 });
-            }
+                
+                cardDiv.appendChild(grid);
+                container.appendChild(cardDiv);
+            });
         }
 
-        // ቁጥሩ ሲወጣ ትንሽ እንዲሽከረከር ለማድረግ
-        function animateBall() {
-            let count = 0;
-            const interval = setInterval(() => {
-                document.getElementById("ball").innerText = Math.floor(Math.random() * 90) + 1;
-                count++;
-                if (count > 10) {
-                    clearInterval(interval);
-                    let finalNum = Math.floor(Math.random() * 90) + 1;
-                    document.getElementById("ball").innerText = finalNum;
+        // 2. ቁጥር መጥራት (በየ 3 ሰከንዱ)
+        function startCalling() {
+            gameInterval = setInterval(() => {
+                if (possibleNumbers.length === 0) {
+                    clearInterval(gameInterval);
+                    return;
                 }
-            }, 50);
+
+                const randomIndex = Math.floor(Math.random() * possibleNumbers.length);
+                const number = possibleNumbers.splice(randomIndex, 1)[0];
+                calledNumbers.push(number);
+
+                // UI Update
+                updateCallUI(number);
+                checkCards(number);
+            }, 3000);
         }
+
+        function updateCallUI(num) {
+            document.getElementById('current-number').innerText = num;
+            
+            // History
+            const history = document.getElementById('history');
+            const node = document.createElement('div');
+            node.className = "prev-num";
+            node.innerText = num;
+            history.prepend(node);
+
+            // Timer circle animation
+            const circle = document.getElementById('timer-circle');
+            circle.style.strokeDashoffset = "377";
+            setTimeout(() => { circle.style.strokeDashoffset = "0"; }, 100);
+        }
+
+        // 3. ካርዶችን ቼክ ማድረግ
+        function checkCards(num) {
+            myCards.forEach(card => {
+                const idx = card.numbers.indexOf(num);
+                if (idx !== -1) {
+                    card.marked.push(idx);
+                    const cell = document.getElementById(`cell-${card.id}-${idx}`);
+                    cell.classList.add('marked');
+                    
+                    if (checkWin(card.marked)) {
+                        triggerWin(card);
+                    }
+                }
+            });
+        }
+
+        function checkWin(marked) {
+            const patterns = [
+                [0,1,2,3,4], [5,6,7,8,9], [10,11,12,13,14], [15,16,17,18,19], [20,21,22,23,24], // Horiz
+                [0,5,10,15,20], [1,6,11,16,21], [2,7,12,17,22], [3,8,13,18,23], [4,9,14,19,24], // Vert
+                [0,6,12,18,24], [4,8,12,16,20], // Diag
+                [0,4,20,24] // 4 Corners
+            ];
+            return patterns.some(p => p.every(i => marked.includes(i)));
+        }
+
+        function triggerWin(card) {
+            clearInterval(gameInterval);
+            const prize = (myCards.length * stake * 0.85).toFixed(2);
+            document.getElementById('win-amount').innerText = prize + " ETB";
+            document.getElementById('win-modal').classList.remove('hidden');
+            
+            // Haptic feedback
+            if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+        }
+
+        function finishGame() {
+            // እዚህ ጋር ወደ ቦቱ ዳታ መላክ ወይም ገጹን መዝጋት ይቻላል
+            tg.close();
+        }
+
+        // Init
+        renderCards();
+        setTimeout(startCalling, 1000);
     </script>
 </body>
 </html>
