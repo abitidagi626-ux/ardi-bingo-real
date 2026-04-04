@@ -5,10 +5,10 @@ import os
 from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, CallbackQueryHandler
 
-# ⚠️ 1. ቦት ቶከን (አዲሱን ቶከን እዚህ ጋር ይተኩ)
+# ⚠️ 1. ቦት ቶከን
 TOKEN = "8684712579:AAE9JK0cdSK-cVeycF7xAd_KSrUUqmN5HWI"
 
-# ⚠️ 2. አድሚን ID (በምስል 10 ላይ ያረጋገጥከው ID)
+# ⚠️ 2. አድሚን ID
 ADMIN_ID = 1046142540
 
 BALANCE_FILE = "balances.json"
@@ -28,7 +28,6 @@ def save_balance(user_id, amount):
     balances = load_balances()
     u_id = str(user_id)
     try:
-        # የነበረው ላይ አዲሱን መጨመር
         balances[u_id] = balances.get(u_id, 0) + float(amount)
         with open(BALANCE_FILE, "w") as f:
             json.dump(balances, f)
@@ -58,15 +57,22 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=reply_markup
     )
 
-# --- 3. የዲፖዚት ጥያቄ (ቁልፎቹ እዚህ ጋር ተስተካክለዋል) ---
+# --- 3. የዲፖዚት ጥያቄ መቀበያ ---
 async def handle_web_app_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data_raw = update.message.web_app_data.data
     user = update.effective_user
     
-    # ከጽሁፍ ውስጥ ቁጥሩን ብቻ መለየት
-    amount = "".join(filter(str.isdigit, data_raw)) or "0"
+    try:
+        # Web App የላከው JSON መሆኑን ማረጋገጥ
+        data = json.loads(data_raw)
+        amount = data.get("amount", "0")
+        msg = data.get("message", "No message")
+        method = data.get("method", "Unknown")
+    except:
+        amount = "".join(filter(str.isdigit, data_raw)) or "0"
+        msg = data_raw
+        method = "Unknown"
 
-    # አድሚኑ ላይ የሚታዩት ቁልፎች
     keyboard = [
         [
             InlineKeyboardButton("✅ Approve", callback_data=f"app_{user.id}_{amount}"),
@@ -78,12 +84,12 @@ async def handle_web_app_data(update: Update, context: ContextTypes.DEFAULT_TYPE
     admin_msg = (
         f"🔔 *አዲስ የዲፖዚት ጥያቄ*\n\n"
         f"👤 ተጠቃሚ: {user.first_name}\n"
+        f"🏦 ባንክ: {method}\n"
         f"💰 መጠን: {amount} ETB\n"
-        f"📝 መረጃ: {data_raw}\n"
+        f"📝 መረጃ: {msg}\n"
         f"🆔 User ID: `{user.id}`"
     )
 
-    # ለአድሚኑ መላክ (የ Approve/Cancel ቁልፎች እዚህ ጋር ይያያዛሉ)
     await context.bot.send_message(
         chat_id=ADMIN_ID,
         text=admin_msg,
@@ -105,9 +111,7 @@ async def admin_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if action == "app":
         amount = data_parts[2]
         save_balance(user_id, amount)
-        # ለተጠቃሚው ማሳወቅ
         await context.bot.send_message(chat_id=user_id, text=f"🎉 የ {amount} ETB ዲፖዚትዎ በአድሚን ጸድቋል!")
-        # የአድሚኑን መልእክት መቀየር
         await query.edit_message_text(text=f"{query.message.text}\n\n✅ ጸድቋል (Approved)")
     
     elif action == "rej":
@@ -121,14 +125,13 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
         balance = balances.get(str(update.message.from_user.id), 0.0)
         await update.message.reply_text(f"💵 የአሁኑ ባላንስዎ፡ {balance} ETB")
 
-# --- ዋና ማስነሻ ---
 def main():
     app = Application.builder().token(TOKEN).build()
     
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.CONTACT, handle_contact))
     app.add_handler(MessageHandler(filters.StatusUpdate.WEB_APP_DATA, handle_web_app_data))
-    app.add_handler(CallbackQueryHandler(admin_callback)) # ለ Approve/Cancel ቁልፎች
+    app.add_handler(CallbackQueryHandler(admin_callback))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_messages))
     
     print("🚀 Ardi Bingo Bot is running...")
