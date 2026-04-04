@@ -32,9 +32,7 @@ def save_balance(user_id, amount):
     balances = load_balances()
     u_id = str(user_id)
     try:
-        # አሁን ያለውን ባላንስ ላይ አዲሱን መጨመር
-        current = float(balances.get(u_id, 0.0))
-        balances[u_id] = current + float(amount)
+        balances[u_id] = balances.get(u_id, 0) + float(amount)
         with open(BALANCE_FILE, "w") as f:
             json.dump(balances, f)
     except Exception as e:
@@ -49,17 +47,18 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=reply_markup
     )
 
-# --- 2. ስልክ ቁጥር ሲላክ (ሊንኩ ተስተካክሏል) ---
+# --- 2. ስልክ ቁጥር ሲላክ (ባላንስን ወደ Web App ለመላክ ተስተካክሏል) ---
 async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.message.from_user
     balance = get_user_balance(user.id)
     
-    # ማሳሰቢያ፡ የ # ምልክት በሊንኩ መጨረሻ ላይ መኖር የለበትም
-    web_app_url = f"https://abitidagi626-ux.github.io/ardi-bingo-real/index.html?balance={balance}"
+    # ባላንሱን በ URL parameters በኩል እናልፋለን
+    play_url = f"https://abitidagi626-ux.github.io/ardi-bingo-real/index.html?balance={balance}#stake-page"
+    dep_url = f"https://abitidagi626-ux.github.io/ardi-bingo-real/index.html?balance={balance}#deposit-methods"
     
     keyboard = [
-        [KeyboardButton("🕹 Play Now", web_app=WebAppInfo(url=web_app_url))],
-        [KeyboardButton("💰 Check Balance"), KeyboardButton("💵 Deposit", web_app=WebAppInfo(url=web_app_url))],
+        [KeyboardButton("🕹 Play Now", web_app=WebAppInfo(url=play_url))],
+        [KeyboardButton("💰 Check Balance"), KeyboardButton("💵 Deposit", web_app=WebAppInfo(url=dep_url))],
         [KeyboardButton("👨‍💻 Support")]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
@@ -76,12 +75,12 @@ async def handle_web_app_data(update: Update, context: ContextTypes.DEFAULT_TYPE
     try:
         data = json.loads(data_raw)
         amount = data.get("amount", "0")
-        method = data.get("method", "Unknown")
         msg = data.get("message", "No message")
+        method = data.get("method", "Unknown")
     except:
         amount = "".join(filter(str.isdigit, data_raw)) or "0"
-        method = "Unknown"
         msg = data_raw
+        method = "Unknown"
 
     keyboard = [[InlineKeyboardButton("✅ Approve", callback_data=f"app_{user.id}_{amount}"),
                  InlineKeyboardButton("❌ Cancel", callback_data=f"rej_{user.id}")]]
@@ -97,10 +96,8 @@ async def handle_web_app_data(update: Update, context: ContextTypes.DEFAULT_TYPE
 async def admin_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    
     data_parts = query.data.split("_")
-    action = data_parts[0]
-    user_id = data_parts[1]
+    action, user_id = data_parts[0], data_parts[1]
     
     if action == "app":
         amount = data_parts[2]
@@ -109,38 +106,34 @@ async def admin_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(text=f"{query.message.text}\n\n✅ ጸድቋል (Approved)")
     elif action == "rej":
         await context.bot.send_message(chat_id=user_id, text="❌ የዲፖዚት ጥያቄዎ ውድቅ ተደርጓል።")
-        await query.edit_message_text(text=f"{query.message.text}\n\n❌ ውድቅ ተደርጓል (Rejected)")
+        await query.edit_message_text(text=f"{query.message.text}\n\n❌ ውድቅ ተደርጓል (Cancelled)")
 
-# --- 5. ሜሴጆችን ማስተናገድ ---
+# --- 5. ባላንስ ቼክ ማድረግ ---
 async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
-    text = update.message.text
-    
-    if text == "💰 Check Balance":
+    if update.message.text == "💰 Check Balance":
         balance = get_user_balance(user_id)
-        web_app_url = f"https://abitidagi626-ux.github.io/ardi-bingo-real/index.html?balance={balance}"
+        
+        # ባላንስ ቼክ ሲያደርግም የዌብ አፑን ሊንኮች በባላንስ እናድሳለን
+        play_url = f"https://abitidagi626-ux.github.io/ardi-bingo-real/index.html?balance={balance}#stake-page"
+        dep_url = f"https://abitidagi626-ux.github.io/ardi-bingo-real/index.html?balance={balance}#deposit-methods"
         
         keyboard = [
-            [KeyboardButton("🕹 Play Now", web_app=WebAppInfo(url=web_app_url))],
-            [KeyboardButton("💰 Check Balance"), KeyboardButton("💵 Deposit", web_app=WebAppInfo(url=web_app_url))],
+            [KeyboardButton("🕹 Play Now", web_app=WebAppInfo(url=play_url))],
+            [KeyboardButton("💰 Check Balance"), KeyboardButton("💵 Deposit", web_app=WebAppInfo(url=dep_url))],
             [KeyboardButton("👨‍💻 Support")]
         ]
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
         await update.message.reply_text(f"💵 የአሁኑ ባላንስዎ፡ {balance} ETB", reply_markup=reply_markup)
-    
-    elif text == "👨‍💻 Support":
-        await update.message.reply_text("ማንኛውንም ጥያቄ ካለዎት አድሚኑን ያነጋግሩ @Yordi_Bingo_Admin")
 
 def main():
     app = Application.builder().token(TOKEN).build()
-    
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.CONTACT, handle_contact))
     app.add_handler(MessageHandler(filters.StatusUpdate.WEB_APP_DATA, handle_web_app_data))
     app.add_handler(CallbackQueryHandler(admin_callback))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_messages))
-    
-    print("🚀 Ardi Bingo Bot is running correctly...")
+    print("🚀 Ardi Bingo Bot is running...")
     app.run_polling()
 
 if __name__ == '__main__':
