@@ -1,105 +1,141 @@
+// 1. የጨዋታው መነሻ ዳታ (Initial Data)
+const stakes = [10, 20, 30, 50, 100, 150];
 let currentStake = 0;
 let timeLeft = 60;
-let pendingCardId = null;
-let boughtCards = new Set();
 let timerInterval;
 
-function init() {
-    const stakes = [10, 20, 30, 50, 100, 150];
-    const stakeList = document.getElementById('stake-list');
+// እያንዳንዱ ስቴክ የራሱ የተመረጡ ካርታዎች እንዲኖሩት በ Object እናስቀምጣለን
+let stakeData = {
+    10: new Set(),
+    20: new Set(),
+    30: new Set(),
+    50: new Set(),
+    100: new Set(),
+    150: new Set()
+};
+
+const stakeList = document.getElementById('stake-list');
+const cardGrid = document.getElementById('card-grid');
+
+// 2. የStake ዝርዝርን በስክሪኑ ላይ መፍጠር
+function initStakeScreen() {
     stakeList.innerHTML = "";
     stakes.forEach(s => {
         const row = document.createElement('div');
         row.className = 'stake-row';
         row.innerHTML = `
             <span><b>${s} birr</b></span>
-            <span class="timer-display">00:60</span>
+            <span class="timer-display" id="timer-${s}">01:00</span>
             <span id="win-${s}">0.00 Birr</span>
-            <button class="join-btn" style="background:#efae10; border:none; padding:5px 10px; border-radius:5px;" onclick="openCardSelection(${s})">Join »</button>
+            <button class="join-btn" onclick="openCardSelection(${s})">Join »</button>
         `;
         stakeList.appendChild(row);
     });
-    startTimer();
+    startMainTimers();
 }
 
-function startTimer() {
-    setInterval(() => {
+// 3. የ60 ሰከንድ Countdown Timer ሎጂክ
+function startMainTimers() {
+    if (timerInterval) clearInterval(timerInterval);
+    
+    timerInterval = setInterval(() => {
         timeLeft--;
-        if (timeLeft < 0) timeLeft = 60;
-        const timeStr = `00:${timeLeft < 10 ? '0' + timeLeft : timeLeft}`;
-        document.querySelectorAll('.timer-display').forEach(el => el.innerText = timeStr);
-        const modalTimer = document.getElementById('modal-timer');
-        if(modalTimer) modalTimer.innerText = timeStr;
+        if (timeLeft <= 0) {
+            timeLeft = 60;
+            checkGameStart();
+        }
+
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        const timeStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        
+        document.querySelectorAll('.timer-display').forEach(el => {
+            el.innerText = timeStr;
+            if (timeLeft <= 10) el.style.color = "red";
+            else el.style.color = "white";
+        });
     }, 1000);
 }
 
+// 4. የካርታ መምረጫ ገጽ መክፈት
 function openCardSelection(stake) {
     currentStake = stake;
     document.getElementById('stake-screen').classList.add('hidden');
     document.getElementById('card-screen').classList.remove('hidden');
     document.getElementById('selected-stake-val').innerText = stake;
-    generateCardGrid();
+    updatePossibleWinHeader();
+    generateCards();
 }
 
-function generateCardGrid() {
-    const grid = document.getElementById('card-grid');
-    grid.innerHTML = "";
-    for (let i = 1; i <= 143; i++) {
-        const card = document.createElement('div');
-        card.className = `card-num ${boughtCards.has(i) ? 'bought' : ''}`;
-        card.innerText = i;
-        card.onclick = () => showPreview(i);
-        grid.appendChild(card);
-    }
-}
-
-// Image 2 ላይ ያለውን የካርታ ገጽታ መፍጠር
-function showPreview(id) {
-    if(boughtCards.has(id)) return; // ተገዝቶ ከሆነ አይከፈትም
-    pendingCardId = id;
-    document.getElementById('modal-card-no').innerText = `Card No. ${id}`;
-    const previewGrid = document.getElementById('preview-grid');
-    previewGrid.innerHTML = "";
-
-    // የቢንጎ ቁጥሮችን በዘፈቀደ ማመንጨት (ለእያንዳንዱ ካርታ)
-    const cardNums = generateBingoNumbers();
-    cardNums.forEach((n, idx) => {
-        const cell = document.createElement('div');
-        cell.className = 'preview-cell';
-        if(idx === 12) {
-            cell.innerText = "F";
-            cell.classList.add('free');
-        } else {
-            cell.innerText = n;
-        }
-        previewGrid.appendChild(cell);
-    });
-
-    document.getElementById('card-modal').classList.remove('hidden');
-}
-
+// 5. የቢንጎ ካርታ ቁጥሮችን ማመንጨት (Image 2 መሰረት)
+// B:1-15, I:16-30, N:31-45, G:46-60, O:61-75
 function generateBingoNumbers() {
     let numbers = [];
-    for(let i=0; i<25; i++) numbers.push(Math.floor(Math.random() * 75) + 1);
+    const ranges = [
+        { min: 1, max: 15 },  // B
+        { min: 16, max: 30 }, // I
+        { min: 31, max: 45 }, // N
+        { min: 46, max: 60 }, // G
+        { min: 61, max: 75 }  // O
+    ];
+
+    ranges.forEach(range => {
+        let columnNumbers = [];
+        while (columnNumbers.length < 5) {
+            let num = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+            if (!columnNumbers.includes(num)) columnNumbers.push(num);
+        }
+        numbers.push(...columnNumbers);
+    });
     return numbers;
 }
 
-function confirmPurchase() {
-    boughtCards.add(pendingCardId);
-    updatePossibleWin();
-    closeModal();
-    generateCardGrid(); // ሰማያዊ እንዲሆን ለማደስ
+// 6. 143 ካርታዎችን መፍጠር
+function generateCards() {
+    cardGrid.innerHTML = "";
+    for (let i = 1; i <= 143; i++) {
+        const card = document.createElement('div');
+        card.className = 'card-num';
+        // ቀደም ብሎ በዚህ ስቴክ ተመርጦ ከሆነ ሰማያዊ እንዲሆን
+        if (stakeData[currentStake].has(i)) {
+            card.classList.add('selected');
+        }
+        card.innerText = i;
+        card.onclick = () => toggleCard(card, i);
+        cardGrid.appendChild(card);
+    }
 }
 
-function updatePossibleWin() {
-    const win = (currentStake * 0.85 * boughtCards.size).toFixed(2);
-    const winEl = document.getElementById(`win-${currentStake}`);
-    if(winEl) winEl.innerText = `${win} Birr`;
+// 7. ካርታ ሲመረጥ ሰማያዊ ማድረግ እና በየስቴኩ መለየት
+function toggleCard(element, cardId) {
+    if (stakeData[currentStake].has(cardId)) {
+        stakeData[currentStake].delete(cardId);
+        element.classList.remove('selected');
+    } else {
+        stakeData[currentStake].add(cardId);
+        element.classList.add('selected');
+    }
+    updatePossibleWinHeader();
 }
 
-function closeModal() {
-    document.getElementById('card-modal').classList.add('hidden');
-    pendingCardId = null;
+// 8. Possible Win ማስሊያ (stake * 0.85 * selected_cards)
+function updatePossibleWinHeader() {
+    const count = stakeData[currentStake].size;
+    const possibleWin = (currentStake * 0.85 * count).toFixed(2);
+    
+    const winDisplay = document.getElementById(`win-${currentStake}`);
+    if (winDisplay) winDisplay.innerText = `${possibleWin} Birr`;
+}
+
+// 9. ጊዜው ሲያልቅ (Game Logic)
+function checkGameStart() {
+    let totalSelected = 0;
+    stakes.forEach(s => totalSelected += stakeData[s].size);
+
+    if (totalSelected > 0) {
+        console.log("ጨዋታው እየጀመረ ነው...");
+        // ወደ ኳስ መጥሪያ ገጽ ይወስዳል
+    }
 }
 
 function showStakeScreen() {
@@ -107,4 +143,5 @@ function showStakeScreen() {
     document.getElementById('stake-screen').classList.remove('hidden');
 }
 
-init();
+// ፕሮግራሙን ማስጀመር
+initStakeScreen();
