@@ -1,49 +1,118 @@
-<!DOCTYPE html>
-<html lang="am">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ardi Bingo</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div id="app">
-        <header class="main-header">
-            <div class="top-bar">
-                <span class="icon">❓</span>
-                <div class="toggle-switch"><div class="switch-ball"></div></div>
-                <button class="refresh-btn" onclick="location.reload()">Refresh</button>
-                <div class="balance-box">💰 ETB <span id="balance">0.00</span></div>
-            </div>
-            <div class="sub-header">
-                <button class="menu-btn">☰</button>
-                <button class="deposit-btn">+ Deposit</button>
-                <div class="logo">ARDI BINGO</div>
-            </div>
-        </header>
+// 1. የጨዋታው መነሻ ዳታ (Initial Data)
+const stakes = [10, 20, 30, 50, 100, 150];
+let currentStake = 0;
+let timeLeft = 60; // 60 ሰከንድ ካውንት ዳውን
+let selectedCards = new Set();
+let timerInterval;
 
-        <div id="stake-screen" class="screen">
-            <h2 class="title">Please Choose Your Stake</h2>
-            <div class="stake-table">
-                <div class="table-header">
-                    <span>Stake</span><span>Active</span><span>Possible Win</span><span>Join</span>
-                </div>
-                <div id="stake-list"></div>
-            </div>
-        </div>
+const stakeList = document.getElementById('stake-list');
+const cardGrid = document.getElementById('card-grid');
 
-        <div id="card-screen" class="screen hidden">
-            <div class="card-header">
-                <button class="back-btn" onclick="showStakeScreen()">⬅️</button>
-                <div class="stake-info"><span id="selected-stake-val">0</span> Birr Per Card</div>
-                <button class="random-btn">🔀</button>
-            </div>
-            <div id="card-grid" class="card-grid"></div>
-            <div class="footer-actions">
-                <button class="buy-btn" onclick="buyCards()">BUY SELECTED CARDS</button>
-            </div>
-        </div>
-    </div>
-    <script src="app.js"></script>
-</body>
-</html>
+// 2. የStake ዝርዝርን በስክሪኑ ላይ መፍጠር
+function initStakeScreen() {
+    stakeList.innerHTML = "";
+    stakes.forEach(s => {
+        const row = document.createElement('div');
+        row.className = 'stake-row';
+        // Possible win መጀመሪያ ላይ 0 ነው (ምክንያቱም ማንም ገና አልገዛም)
+        row.innerHTML = `
+            <span><b>${s} birr</b></span>
+            <span class="timer-display" id="timer-${s}">01:00</span>
+            <span id="win-${s}">0.00 Birr</span>
+            <button class="join-btn" onclick="openCardSelection(${s})">Join »</button>
+        `;
+        stakeList.appendChild(row);
+    });
+    startMainTimers();
+}
+
+// 3. የ60 ሰከንድ Countdown Timer ሎጂክ
+function startMainTimers() {
+    if (timerInterval) clearInterval(timerInterval);
+    
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 0) {
+            timeLeft = 60; // እንደገና ይጀምራል (ለሚቀጥለው ዙር)
+            checkGameStart();
+        }
+
+        // ሁሉንም የሰከንድ ማሳያዎች ማደስ
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        const timeStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        
+        document.querySelectorAll('.timer-display').forEach(el => {
+            el.innerText = timeStr;
+            if (timeLeft <= 10) el.style.color = "red"; // ከ10 ሰከንድ በታች ሲሆን ቀይ ይበራል
+            else el.style.color = "white";
+        });
+    }, 1000);
+}
+
+// 4. የካርታ መምረጫ ገጽ መክፈት
+function openCardSelection(stake) {
+    currentStake = stake;
+    selectedCards.clear();
+    document.getElementById('stake-screen').classList.add('hidden');
+    document.getElementById('card-screen').classList.remove('hidden');
+    document.getElementById('selected-stake-val').innerText = stake;
+    updatePossibleWinHeader();
+    generateCards();
+}
+
+// 5. 143 ካርታዎችን መፍጠር (Image 2 መሰረት)
+function generateCards() {
+    cardGrid.innerHTML = "";
+    for (let i = 1; i <= 143; i++) {
+        const card = document.createElement('div');
+        card.className = 'card-num';
+        card.innerText = i;
+        card.onclick = () => toggleCard(card, i);
+        cardGrid.appendChild(card);
+    }
+}
+
+// 6. ካርታ ሲመረጥ ሰማያዊ ማድረግ እና "Possible Win" ማስላት
+function toggleCard(element, cardId) {
+    if (selectedCards.has(cardId)) {
+        selectedCards.delete(cardId);
+        element.classList.remove('selected');
+    } else {
+        selectedCards.add(cardId);
+        element.classList.add('selected');
+    }
+    updatePossibleWinHeader();
+}
+
+// 7. Possible Win ማስሊያ ፎርሙላ (stake * 0.85 * selected_cards)
+function updatePossibleWinHeader() {
+    const count = selectedCards.size;
+    const possibleWin = (currentStake * 0.85 * count).toFixed(2);
+    
+    // በስክሪኑ ላይ ያለውን Win መጠን ማደስ
+    const winDisplay = document.getElementById(`win-${currentStake}`);
+    if (winDisplay) winDisplay.innerText = `${possibleWin} Birr`;
+    
+    // ለተመረጡት ካርታዎች ማሳያ (አማራጭ)
+    console.log(`Stake: ${currentStake}, Cards: ${count}, Win: ${possibleWin}`);
+}
+
+// 8. ጊዜው ሲያልቅ ወደ ጨዋታው መውሰጃ
+function checkGameStart() {
+    if (selectedCards.size > 0) {
+        alert("ጊዜው አልቋል! ወደ ጨዋታው እየገባህ ነው...");
+        // እዚህ ጋር ወደ እውነተኛው የቢንጎ ኳስ መጥሪያ ገጽ ይወሰዳል
+    } else {
+        // ካርታ ያልገዛ ሰው ቀጣዩን ዙር ይጠብቃል
+        console.log("ምንም ካርታ አልተገዛም፣ ቀጣዩን ዙር ይጠብቁ።");
+    }
+}
+
+function showStakeScreen() {
+    document.getElementById('card-screen').classList.add('hidden');
+    document.getElementById('stake-screen').classList.remove('hidden');
+}
+
+// ፕሮግራሙን ማስጀመር
+initStakeScreen();
