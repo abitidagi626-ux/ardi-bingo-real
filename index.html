@@ -2,152 +2,57 @@
 <html lang="am">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ardi Bingo</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        
-        /* ሙሉ ዳራውን አረንጓዴ ለማድረግ የተጨመረ */
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #008000; /* Green Background */
-            color: white; 
-            touch-action: manipulation; 
-            min-h-screen;
-        }
-
-        .stake-row { background-color: rgba(255, 255, 255, 0.1); border-radius: 12px; margin-bottom: 8px; }
-        .join-btn { background: linear-gradient(to right, #ff9800, #f57c00); border-radius: 8px; font-weight: 900; padding: 6px 16px; }
-        
-        /* Game Page Styles */
-        #cards-display { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; padding: 10px; }
-        .compact-card { background: #1976d2; border-radius: 6px; padding: 8px 0; font-weight: 900; font-size: 11px; color: white; text-align: center; }
-        .selected-card-green { background: #4caf50 !important; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="app">
+        <header class="main-header">
+            <div class="top-bar">
+                <button class="refresh-btn" onclick="location.reload()">Refresh</button>
+                <div class="balance-box">💰 ETB <span id="balance">0.00</span></div>
+            </div>
+            <div class="sub-header">
+                <button class="deposit-btn">+ Deposit</button>
+                <div class="logo">ARDI BINGO</div>
+            </div>
+        </header>
 
-    <div id="stake-selection-page" class="p-4">
-        <div class="flex justify-between items-center mb-6">
-            <button onclick="location.reload()" class="bg-white text-black px-3 py-1 rounded-lg text-sm font-bold">Refresh</button>
-            <div class="bg-yellow-500 text-black px-4 py-2 rounded-2xl font-black">
-                💰 ETB <span id="main-wallet">0.00</span>
+        <div id="stake-screen" class="screen">
+            <div class="stake-table">
+                <div class="table-header">
+                    <span>Stake</span><span>Active</span><span>Possible Win</span><span>Join</span>
+                </div>
+                <div id="stake-list"></div>
             </div>
         </div>
 
-        <h2 class="text-2xl font-black mb-6 italic">Please Choose Your Stake</h2>
-
-        <div class="grid grid-cols-4 text-[10px] uppercase font-bold opacity-70 mb-2 px-2">
-            <div>Stake</div>
-            <div class="text-center">Active</div>
-            <div class="text-center">Possible Win</div>
-            <div class="text-right">Join</div>
-        </div>
-
-        <div id="stake-list" class="space-y-2">
+        <div id="card-screen" class="screen hidden">
+            <div class="card-header-container">
+                <button class="back-btn" onclick="showStakeScreen()">⬅️ Back</button>
+                <div class="stake-info-text"><span id="selected-stake-val">0</span> Birr Per Card</div>
             </div>
-    </div>
-
-    <div id="game-page" class="hidden min-h-screen flex flex-col">
-        <div class="bg-black/50 p-3 flex justify-between items-center text-[10px] font-bold uppercase">
-            <div class="flex flex-col text-center"><span>Timer</span><span id="timer" class="text-sm text-red-500 font-black">60s</span></div>
-            <div class="flex flex-col text-center"><span>Derrash (85%)</span><span id="derrash-display" class="text-sm text-green-400 font-black">0.00</span></div>
-            <div class="flex flex-col text-center"><span>Wallet</span><span id="wallet-display" class="text-sm text-blue-400 font-black">0.00</span></div>
+            <div id="card-grid" class="card-grid"></div>
         </div>
-        <div id="cards-display"></div>
+
+        <div id="card-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="timer-box" id="modal-timer">00:60</div>
+                <div class="card-display">
+                    <h3 id="modal-card-no">Card No. --</h3>
+                    <div class="bingo-labels">
+                        <span>B</span><span>I</span><span>N</span><span>G</span><span>O</span>
+                    </div>
+                    <div id="preview-grid" class="preview-grid"></div>
+                </div>
+                <div class="modal-btns">
+                    <button class="go-back" onclick="closeModal()">Go Back</button>
+                    <button class="confirm-btn" onclick="confirmPurchase()">Confirm Card</button>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-
-        const urlParams = new URLSearchParams(window.location.search);
-        let wallet = parseFloat(urlParams.get('balance')) || 0.00;
-        let selectedStake = 0;
-        let boughtCardsCount = 0;
-        let countdownValue = 60;
-        const stakes = [10, 20, 30, 50, 80, 100, 150, 200];
-
-        function updateDisplays() {
-            document.getElementById('main-wallet').innerText = wallet.toFixed(2);
-            document.getElementById('wallet-display').innerText = wallet.toFixed(2);
-        }
-
-        function renderStakes() {
-            const container = document.getElementById('stake-list');
-            container.innerHTML = '';
-            stakes.forEach(amt => {
-                // ስሌት፡ Possible Win = stake * number of cards * 0.85
-                // ማሳሰቢያ፡ እዚህ ጋር ለናሙና ተጫዋቹ 1 ካርድ ገዝቷል ተብሎ ታስቧል
-                let possibleWin = (amt * 1 * 0.85).toFixed(2); 
-
-                const row = document.createElement('div');
-                row.className = 'stake-row grid grid-cols-4 items-center p-3';
-                row.innerHTML = `
-                    <div class="font-black">${amt} birr</div>
-                    <div class="text-center text-red-400 font-bold timer-cell">0:60</div>
-                    <div class="text-center font-bold text-gray-200">${possibleWin} Birr</div>
-                    <div class="text-right"><button onclick="startJoining(${amt})" class="join-btn">Join »</button></div>
-                `;
-                container.appendChild(row);
-            });
-        }
-
-        function startJoining(amt) {
-            selectedStake = amt;
-            document.getElementById('stake-selection-page').classList.add('hidden');
-            document.getElementById('game-page').classList.remove('hidden');
-            initCards();
-            startTimer();
-        }
-
-        function initCards() {
-            const container = document.getElementById('cards-display');
-            container.innerHTML = '';
-            for(let i=1; i<=100; i++) {
-                let b = document.createElement('button');
-                b.className = "compact-card";
-                b.innerText = i;
-                b.onclick = () => buyCard(b, i);
-                container.appendChild(b);
-            }
-        }
-
-        function buyCard(btn, num) {
-            if(wallet < selectedStake) { alert("Balance በቂ አይደለም!"); return; }
-            if(btn.classList.contains('selected-card-green')) return;
-
-            wallet -= selectedStake;
-            boughtCardsCount++;
-            btn.classList.add('selected-card-green');
-            btn.innerText = "✓";
-            
-            // የደራሽ (Possible Win) ስሌት፡ stake * number of selected cards * 0.85
-            let currentPossibleWin = (selectedStake * boughtCardsCount * 0.85).toFixed(2);
-            document.getElementById('derrash-display').innerText = currentPossibleWin;
-            
-            updateDisplays();
-        }
-
-        function startTimer() {
-            let t = 60;
-            const timerEl = document.getElementById('timer');
-            const interval = setInterval(() => {
-                t--;
-                timerEl.innerText = t + "s";
-                if(t <= 0) {
-                    clearInterval(interval);
-                    alert("ጊዜው አልቋል!");
-                }
-            }, 1000);
-        }
-
-        window.onload = () => {
-            updateDisplays();
-            renderStakes();
-        };
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
