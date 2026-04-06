@@ -32,7 +32,6 @@ def save_balance(user_id, amount):
     balances = load_balances()
     u_id = str(user_id)
     try:
-        # አሁን ያለውን ባላንስ ላይ መጨመር (ለዲፖዚት) ወይም መቀነስ (ለግዢ)
         balances[u_id] = balances.get(u_id, 0) + float(amount)
         with open(BALANCE_FILE, "w") as f:
             json.dump(balances, f)
@@ -48,11 +47,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=reply_markup
     )
 
-# --- 2. ስልክ ቁጥር ሲላክ ---
+# --- 2. ስልክ ቁጥር ሲላክ (ባላንስን ወደ Web App ለመላክ ተስተካክሏል) ---
 async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.message.from_user
     balance = get_user_balance(user.id)
     
+    # ባላንሱን በ URL parameters በኩል እናልፋለን
     play_url = f"https://abitidagi626-ux.github.io/ardi-bingo-real/index.html?balance={balance}#stake-page"
     dep_url = f"https://abitidagi626-ux.github.io/ardi-bingo-real/index.html?balance={balance}#deposit-methods"
     
@@ -67,49 +67,30 @@ async def handle_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=reply_markup
     )
 
-# --- 3. ከዌብ አፕ የሚመጣ መረጃ መቀበያ (የተስተካከለ) ---
+# --- 3. የዲፖዚት ጥያቄ መቀበያ ---
 async def handle_web_app_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data_raw = update.message.web_app_data.data
     user = update.effective_user
     
     try:
         data = json.loads(data_raw)
-        data_type = data.get("type", "DEPOSIT") # የትኛው ዓይነት እንደሆነ ይለያል
-        
-        # 🟢 A. ካርድ መግዛት ከሆነ (ለአድሚን አይላክም)
-        if data_type == "BUY_CARD":
-            amount = float(data.get("amount", 0))
-            card_num = data.get("cardNumber", "N/A")
-            
-            # ባላንስ መቀነስ (amount በ index.html በኩል ፖዘቲቭ ስለሚላክ እዚህ ጋር በ -1 እናባዛዋለን)
-            save_balance(user.id, -amount)
-            new_balance = get_user_balance(user.id)
-            
-            await update.message.reply_text(
-                f"✅ ካርድ ቁጥር {card_num} በተሳካ ሁኔታ ገዝተዋል።\n"
-                f"💰 የቀሪ ባላንስዎ: {new_balance} ETB\nመልካም ዕድል!"
-            )
-            return # እዚህ ጋር ይቆማል፣ ለአድሚን አይላክም
+        amount = data.get("amount", "0")
+        msg = data.get("message", "No message")
+        method = data.get("method", "Unknown")
+    except:
+        amount = "".join(filter(str.isdigit, data_raw)) or "0"
+        msg = data_raw
+        method = "Unknown"
 
-        # 🔵 B. ዲፖዚት ከሆነ (ለአድሚን ይላካል)
-        else:
-            amount = data.get("amount", "0")
-            msg = data.get("message", "No message")
-            method = data.get("method", "Unknown")
-            
-            keyboard = [[InlineKeyboardButton("✅ Approve", callback_data=f"app_{user.id}_{amount}"),
-                         InlineKeyboardButton("❌ Cancel", callback_data=f"rej_{user.id}")]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
+    keyboard = [[InlineKeyboardButton("✅ Approve", callback_data=f"app_{user.id}_{amount}"),
+                 InlineKeyboardButton("❌ Cancel", callback_data=f"rej_{user.id}")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
 
-            admin_msg = (f"🔔 *አዲስ የዲፖዚት ጥያቄ*\n\n👤 ተጠቃሚ: {user.first_name}\n🏦 ባንክ: {method}\n"
-                         f"💰 መጠን: {amount} ETB\n📝 መረጃ: {msg}\n🆔 User ID: `{user.id}`")
+    admin_msg = (f"🔔 *አዲስ የዲፖዚት ጥያቄ*\n\n👤 ተጠቃሚ: {user.first_name}\n🏦 ባንክ: {method}\n"
+                 f"💰 መጠን: {amount} ETB\n📝 መረጃ: {msg}\n🆔 User ID: `{user.id}`")
 
-            await context.bot.send_message(chat_id=ADMIN_ID, text=admin_msg, reply_markup=reply_markup, parse_mode="Markdown")
-            await update.message.reply_text("✅ የዲፖዚት መረጃዎ ለአድሚን ተልኳል። እባክዎ እስኪረጋገጥ ይጠብቁ።")
-
-    except Exception as e:
-        logging.error(f"Error parsing Web App data: {e}")
-        await update.message.reply_text("⚠️ መረጃውን በማቀነባበር ላይ ስህተት ተፈጥሯል።")
+    await context.bot.send_message(chat_id=ADMIN_ID, text=admin_msg, reply_markup=reply_markup, parse_mode="Markdown")
+    await update.message.reply_text("✅ የዲፖዚት መረጃዎ ለአድሚን ተልኳል። እባክዎ እስኪረጋገጥ ይጠብቁ።")
 
 # --- 4. አድሚኑ ቁልፉን ሲጫን ---
 async def admin_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -133,6 +114,7 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.text == "💰 Check Balance":
         balance = get_user_balance(user_id)
         
+        # ባላንስ ቼክ ሲያደርግም የዌብ አፑን ሊንኮች በባላንስ እናድሳለን
         play_url = f"https://abitidagi626-ux.github.io/ardi-bingo-real/index.html?balance={balance}#stake-page"
         dep_url = f"https://abitidagi626-ux.github.io/ardi-bingo-real/index.html?balance={balance}#deposit-methods"
         
