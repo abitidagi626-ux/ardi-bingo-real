@@ -1,60 +1,40 @@
+:root {
+    --primary-bg: #2d1b4d;
+    --card-bg: #4a3475;
+    --accent-yellow: #efae10;
+    --green-btn: #4caf50;
+    --blue-selected: #2196f3;
+}
+
 body {
-    background-color: #0e1621;
+    background-color: var(--primary-bg);
     color: white;
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-}
-
-.game-container {
-    width: 90%;
-    max-width: 400px;
-    text-align: center;
-}
-
-.bingo-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 5px;
-    background-color: #17212b;
-    padding: 10px;
-    border-radius: 10px;
-    border: 2px solid #2b5278;
-}
-
-.cell {
-    aspect-ratio: 1;
-    background-color: #242f3d;
+    padding: 0;
     display: flex;
     justify-content: center;
-    align-items: center;
-    font-size: 1.2rem;
-    font-weight: bold;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: 0.3s;
 }
 
-.cell.marked {
-    background-color: #efae10; /* የወርቅ ቀለም */
-    color: black;
-}
+#app { width: 100%; max-width: 500px; padding: 10px; }
 
-.cell.free {
-    background-color: #4CAF50;
-    font-size: 0.8rem;
-}
+/* Header Styles */
+.main-header { background: #3b2463; padding: 10px; border-radius: 10px; margin-bottom: 15px; }
+.top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.balance-box { background: #efae10; color: black; padding: 5px 15px; border-radius: 20px; font-weight: bold; }
+.deposit-btn { background: #efae10; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; }
 
-#bingo-btn {
-    margin-top: 20px;
-    padding: 15px 40px;
-    font-size: 1.2rem;
-    background-color: #efae10;
-    border: none;
-    border-radius: 50px;
-    font-weight: bold;
-    cursor: pointer;
-}
+/* Stake Table */
+.stake-table { background: #3b2463; border-radius: 10px; overflow: hidden; }
+.table-header { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; background: #24163f; padding: 10px; font-size: 12px; color: #bbb; }
+.stake-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; padding: 15px 10px; border-bottom: 1px solid #4a3475; align-items: center; text-align: center; }
+.join-btn { background: var(--accent-yellow); color: black; border: none; padding: 5px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+
+/* Card Grid (Image 2) */
+.card-grid { display: grid; grid-template-columns: repeat(11, 1fr); gap: 4px; margin-top: 15px; }
+.card-num { background: #b9b9c8; color: black; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 10px; border-radius: 3px; cursor: pointer; font-weight: bold;}
+.card-num.selected { background: var(--blue-selected); color: white; }
+
+.hidden { display: none; }
+.screen { animation: fadeIn 0.3s; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
