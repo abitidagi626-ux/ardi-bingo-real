@@ -1,82 +1,49 @@
-const stakes = [10, 20, 30, 50, 100, 150];
-let currentStake = 0;
-let timeLeft = 60; 
-let selectedCards = new Set();
-let timerInterval;
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ardi Bingo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <header class="main-header">
+            <div class="top-bar">
+                <span class="icon">❓</span>
+                <div class="toggle-switch"><div class="switch-ball"></div></div>
+                <button class="refresh-btn" onclick="location.reload()">Refresh</button>
+                <div class="balance-box">💰 ETB <span id="balance">0.00</span></div>
+            </div>
+            <div class="sub-header">
+                <button class="menu-btn">☰</button>
+                <button class="deposit-btn">+ Deposit</button>
+                <div class="logo">ARDI BINGO</div>
+            </div>
+        </header>
 
-function initStakeScreen() {
-    const stakeList = document.getElementById('stake-list');
-    stakeList.innerHTML = "";
-    stakes.forEach(s => {
-        const row = document.createElement('div');
-        row.className = 'stake-row';
-        row.innerHTML = `
-            <span><b>${s} birr</b></span>
-            <span class="timer-display" id="timer-${s}">01:00</span>
-            <span class="win-amount" id="win-${s}">0.00 Birr</span>
-            <button class="join-btn" onclick="openCardSelection(${s})">Join »</button>
-        `;
-        stakeList.appendChild(row);
-    });
-    startGlobalTimer();
-}
+        <div id="stake-screen" class="screen">
+            <h2 class="title">Please Choose Your Stake</h2>
+            <div class="stake-table">
+                <div class="table-header">
+                    <span>Stake</span><span>Active</span><span>Possible Win</span><span>Join</span>
+                </div>
+                <div id="stake-list"></div>
+            </div>
+        </div>
 
-function startGlobalTimer() {
-    if (timerInterval) clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-        timeLeft--;
-        if (timeLeft < 0) timeLeft = 60;
-
-        const sec = timeLeft < 10 ? '0' + timeLeft : timeLeft;
-        const timeStr = `00:${sec}`;
-
-        document.querySelectorAll('.timer-display').forEach(el => {
-            el.innerText = timeStr;
-            el.style.color = timeLeft <= 10 ? "red" : "#00ff00";
-        });
-    }, 1000);
-}
-
-function openCardSelection(stake) {
-    currentStake = stake;
-    selectedCards.clear();
-    document.getElementById('stake-screen').classList.add('hidden');
-    document.getElementById('card-screen').classList.remove('hidden');
-    document.getElementById('selected-stake-val').innerText = stake;
-    generateCards();
-}
-
-function generateCards() {
-    const grid = document.getElementById('card-grid');
-    grid.innerHTML = "";
-    for (let i = 1; i <= 143; i++) {
-        const card = document.createElement('div');
-        card.className = 'card-num';
-        card.innerText = i;
-        card.onclick = () => {
-            card.classList.toggle('selected');
-            if (selectedCards.has(i)) selectedCards.delete(i);
-            else selectedCards.add(i);
-            updatePossibleWin();
-        };
-        grid.appendChild(card);
-    }
-}
-
-function updatePossibleWin() {
-    const possibleWin = (currentStake * 0.85 * selectedCards.size).toFixed(2);
-    const winDisplay = document.getElementById(`win-${currentStake}`);
-    if (winDisplay) winDisplay.innerText = `${possibleWin} Birr`;
-}
-
-function showStakeScreen() {
-    document.getElementById('card-screen').classList.add('hidden');
-    document.getElementById('stake-screen').classList.remove('hidden');
-}
-
-function buyCards() {
-    if(selectedCards.size === 0) return alert("እባክዎ መጀመሪያ ካርታ ይምረጡ!");
-    alert(`${selectedCards.size} ካርታዎችን ገዝተዋል። ጨዋታው እስኪጀምር ይጠብቁ!`);
-}
-
-initStakeScreen();
+        <div id="card-screen" class="screen hidden">
+            <div class="card-header">
+                <button class="back-btn" onclick="showStakeScreen()">⬅️</button>
+                <div class="stake-info"><span id="selected-stake-val">0</span> Birr Per Card</div>
+                <button class="random-btn">🔀</button>
+            </div>
+            <div id="card-grid" class="card-grid"></div>
+            <div class="footer-actions">
+                <button class="buy-btn" onclick="buyCards()">BUY SELECTED CARDS</button>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
