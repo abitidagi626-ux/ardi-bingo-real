@@ -1,23 +1,23 @@
-// ለእያንዳንዱ Stake የተገዙ ካርታዎችን እና የድል መጠን ለመያዝ
-const stakeData = {
-    10: { bought: new Set(), possibleWin: 0 },
-    20: { bought: new Set(), possibleWin: 0 },
-    30: { bought: new Set(), possibleWin: 0 },
-    50: { bought: new Set(), possibleWin: 0 },
-    80: { bought: new Set(), possibleWin: 0 },
-    100: { bought: new Set(), possibleWin: 0 },
-    150: { bought: new Set(), possibleWin: 0 },
-    200: { bought: new Set(), possibleWin: 0 }
-};
-
+const stakes = [10, 20, 30, 50, 80, 100, 150, 200];
 let currentStake = null;
-let pendingCardId = null;
 let timeLeft = 60;
+let pendingCardId = null;
+
+const stakeData = {
+    10: { bought: new Set() },
+    20: { bought: new Set() },
+    30: { bought: new Set() },
+    50: { bought: new Set() },
+    80: { bought: new Set() },
+    100: { bought: new Set() },
+    150: { bought: new Set() },
+    200: { bought: new Set() }
+};
 
 function init() {
     const stakeList = document.getElementById('stake-list');
     stakeList.innerHTML = "";
-    Object.keys(stakeData).forEach(s => {
+    stakes.forEach(s => {
         const row = document.createElement('div');
         row.className = 'stake-row';
         row.innerHTML = `
@@ -56,7 +56,6 @@ function generateCardGrid() {
 
     for (let i = 1; i <= 143; i++) {
         const card = document.createElement('div');
-        // እዚህ ጋር ካርታው በዚህ Stake ውስጥ ተገዝቶ ከሆነ ሰማያዊ ይሆናል
         card.className = `card-num ${boughtInCurrentStake.has(i) ? 'bought' : ''}`;
         card.innerText = i;
         card.onclick = () => showPreview(i);
@@ -65,16 +64,11 @@ function generateCardGrid() {
 }
 
 function showPreview(id) {
-    // ቀድሞ የተገዛ ከሆነ Review አያስፈልገውም
     if(stakeData[currentStake].bought.has(id)) return;
-    
     pendingCardId = id;
     document.getElementById('modal-card-no').innerText = `Card No. ${id}`;
-    
     const previewGrid = document.getElementById('preview-grid');
     previewGrid.innerHTML = "";
-    
-    // የቢንጎ ቁጥሮችን በየ Column (B-I-N-G-O) ማመንጨት
     const numbers = generateBingoNumbers();
     numbers.forEach((n, idx) => {
         const cell = document.createElement('div');
@@ -82,7 +76,6 @@ function showPreview(id) {
         cell.innerText = idx === 12 ? 'F' : n;
         previewGrid.appendChild(cell);
     });
-    
     document.getElementById('card-modal').classList.remove('hidden');
 }
 
@@ -100,20 +93,19 @@ function generateBingoNumbers() {
     return card;
 }
 
-// "Confirm Card" ሲጫን የሚሰራው ዋና ስራ
+// እዚህ ጋር የ Possible Win ሂሳብ ተስተካክሏል
 function confirmPurchase() {
-    if (pendingCardId) {
-        // ወደ ተገዙት ዝርዝር ጨምረው
-        stakeData[currentStake].bought.add(pendingCardId);
-        
-        // የድል መጠን (Possible Win) አስላ (ለምሳሌ 85% ተመላሽ)
-        const count = stakeData[currentStake].bought.size;
-        const possibleWin = (currentStake * 0.85 * (count + 5)).toFixed(2); // ናሙና አሰራር
-        document.getElementById(`win-${currentStake}`).innerText = `${possibleWin} Birr`;
-        
-        closeModal();
-        generateCardGrid(); // ግሪዱን አድስ (ሰማያዊ እንዲሆን)
-    }
+    stakeData[currentStake].bought.add(pendingCardId);
+    
+    // ስሌት፡ stake * number of selected cards * 0.85
+    const numberOfCards = stakeData[currentStake].bought.size;
+    const possibleWin = (currentStake * numberOfCards * 0.85).toFixed(2);
+    
+    const winEl = document.getElementById(`win-${currentStake}`);
+    if(winEl) winEl.innerText = `${possibleWin} Birr`;
+    
+    closeModal();
+    generateCardGrid();
 }
 
 function closeModal() {
