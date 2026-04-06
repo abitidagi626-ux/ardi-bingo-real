@@ -3,111 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ardi Bingo - Elite</title>
+    <title>Ardi Bingo</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; touch-action: manipulation; }
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; touch-action: manipulation; overflow-x: hidden; }
+        
+        /* ምስል 2 ላይ ያለው ጥቁር ሰማያዊ መልክ */
+        .call-bg { background-color: #1a237e; } 
+        
         .stake-3d { 
             position: relative; background: linear-gradient(to bottom, #f97316, #ea580c);
-            border-radius: 24px; box-shadow: 0 10px 0 #9a3412, 0 15px 25px rgba(0,0,0,0.25);
-            transition: all 0.1s ease; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border-radius: 20px; box-shadow: 0 8px 0 #9a3412;
+            transition: all 0.1s ease;
         }
-        .stake-3d:active { transform: translateY(6px); box-shadow: 0 4px 0 #9a3412; }
-        #cards-display { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; padding: 12px; background-color: #1e40af; border-radius: 12px; }
-        .compact-card { background: #3b82f6; border: 1px solid #60a5fa; border-radius: 8px; padding: 10px 0; font-weight: 900; font-size: 12px; color: white; text-align: center; }
-        .selected-card-green { background: #22c55e !important; border: none !important; }
-        .bingo-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; background: #cbd5e1; padding: 2px; }
-        .bingo-cell { background: white; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; }
-        .call-bg { background-color: #1e3a8a; } /* ምስል 2 ላይ ያለው ሰማያዊ */
+        .stake-3d:active { transform: translateY(4px); box-shadow: 0 4px 0 #9a3412; }
+
+        #cards-display { 
+            display: grid; grid-template-columns: repeat(10, 1fr); 
+            gap: 4px; padding: 10px; background-color: #0d47a1; border-radius: 12px; 
+        }
+        .compact-card { 
+            background: #1976d2; border-radius: 6px; padding: 8px 0; 
+            font-weight: 900; font-size: 11px; color: white; text-align: center; 
+        }
+        .selected-card-green { background: #4caf50 !important; }
+
+        .bingo-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; background: #e0e0e0; padding: 2px; }
+        .bingo-cell { background: white; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; color: #333; }
     </style>
 </head>
 <body class="min-h-screen">
 
     <div id="home-page" class="flex flex-col items-center justify-center min-h-screen p-6">
-        <img src="ardi.jpg" class="w-24 h-24 rounded-full border-4 border-white shadow-xl mb-6 object-cover">
-        <h1 class="text-3xl font-black text-slate-900 mb-10 italic">ARDI BINGO</h1>
+        <h1 class="text-4xl font-black text-blue-900 mb-10 italic">ARDI BINGO</h1>
         <div class="space-y-4 w-full max-w-xs">
-            <button onclick="showPage('stake-page')" class="w-full bg-green-600 text-white py-4 rounded-[20px] font-black shadow-lg">🕹 PLAY NOW</button>
-            <button onclick="showPage('deposit-methods')" class="w-full bg-blue-700 text-white py-4 rounded-[20px] font-black shadow-lg">💰 DEPOSIT</button>
+            <button onclick="showPage('stake-page')" class="w-full bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg">🕹 PLAY NOW</button>
+            <button onclick="showPage('deposit-methods')" class="w-full bg-blue-700 text-white py-4 rounded-2xl font-black shadow-lg">💰 DEPOSIT</button>
         </div>
     </div>
 
     <div id="stake-page" class="hidden min-h-screen p-6 text-center">
-        <button onclick="showPage('home-page')" class="absolute top-4 left-4 bg-white p-2 rounded-full shadow">←</button>
-        <h1 class="mt-16 text-xl font-black mb-10 italic">CHOOSE STAKE</h1>
-        <div class="grid grid-cols-2 gap-6 max-w-xs mx-auto">
-            <button onclick="selectStake(10)" class="stake-3d aspect-square text-white"><span class="text-3xl font-black">10</span></button>
-            <button onclick="selectStake(20)" class="stake-3d aspect-square text-white"><span class="text-3xl font-black">20</span></button>
-            <button onclick="selectStake(50)" class="stake-3d aspect-square text-white"><span class="text-3xl font-black">50</span></button>
-            <button onclick="selectStake(100)" class="stake-3d aspect-square text-white"><span class="text-3xl font-black">100</span></button>
+        <h1 class="mt-10 text-xl font-black mb-8 italic">CHOOSE STAKE</h1>
+        <div class="grid grid-cols-2 gap-4 max-w-xs mx-auto">
+            <button onclick="selectStake(10)" class="stake-3d aspect-square text-white text-2xl font-black">10</button>
+            <button onclick="selectStake(20)" class="stake-3d aspect-square text-white text-2xl font-black">20</button>
+            <button onclick="selectStake(50)" class="stake-3d aspect-square text-white text-2xl font-black">50</button>
+            <button onclick="selectStake(100)" class="stake-3d aspect-square text-white text-2xl font-black">100</button>
         </div>
     </div>
 
-    <div id="game-page" class="hidden min-h-screen bg-white flex flex-col">
-        <div class="bg-black text-white p-4 flex justify-between items-center text-[10px] font-black uppercase">
-            <div class="flex flex-col"><span>Timer</span><span id="timer" class="text-sm text-red-500">60s</span></div>
-            <div class="flex flex-col items-center"><span>Derrash (85%)</span><span id="derrash-display" class="text-sm text-green-400 font-black">0.00</span></div>
-            <div class="flex flex-col items-end"><span>Wallet</span><span id="wallet-display" class="text-sm text-blue-400">0.00 ETB</span></div>
+    <div id="game-page" class="hidden min-h-screen bg-slate-900 flex flex-col">
+        <div class="bg-black/50 text-white p-3 flex justify-between items-center text-[10px] font-bold uppercase">
+            <div class="flex flex-col text-center"><span>Timer</span><span id="timer" class="text-sm text-red-500 font-black">60s</span></div>
+            <div class="flex flex-col text-center"><span>Derrash</span><span id="derrash-display" class="text-sm text-green-400 font-black">0.00</span></div>
+            <div class="flex flex-col text-center"><span>Wallet</span><span id="wallet-display" class="text-sm text-blue-400 font-black">0.00</span></div>
         </div>
-        <div class="p-2 overflow-y-auto"><div id="cards-display"></div></div>
+        <div class="p-2"><div id="cards-display"></div></div>
     </div>
 
     <div id="call-number-page" class="hidden min-h-screen call-bg text-white p-4 flex flex-col">
-        <div class="flex justify-between items-center bg-black/50 p-3 rounded-xl mb-4 text-[10px] font-black uppercase">
-            <div class="flex flex-col"><span>Numbers</span><span id="call-count" class="text-sm text-red-500">0/75</span></div>
-            <div class="flex flex-col items-center"><span>Derrash</span><span id="call-derrash" class="text-sm text-green-400 font-black">0.00</span></div>
-            <div class="flex flex-col items-end"><span>Wallet</span><span id="call-wallet" class="text-sm text-blue-400">0.00</span></div>
+        <div class="bg-black/30 rounded-xl p-3 flex justify-between items-center text-[10px] font-black uppercase tracking-wider">
+            <div class="flex flex-col text-center"><span>Numbers</span><span id="call-count" class="text-sm text-red-500">0/75</span></div>
+            <div class="flex flex-col text-center"><span>Derrash</span><span id="call-derrash" class="text-sm text-green-400 font-black">0.00</span></div>
+            <div class="flex flex-col text-center"><span>Wallet</span><span id="call-wallet" class="text-sm text-blue-400 font-black">0.00</span></div>
         </div>
         
-        <div class="flex-1 flex flex-col items-center justify-center">
-            <div id="current-number-display" class="text-8xl font-black text-yellow-400 drop-shadow-2xl mb-8">--</div>
+        <div class="flex-1 flex flex-col items-center justify-center space-y-6">
+            <div id="current-number-display" class="text-8xl font-black text-yellow-400 drop-shadow-lg">--</div>
             
-            <p class="text-xs font-bold mb-2 opacity-70">YOUR CARDS</p>
-            <div id="user-bought-cards" class="grid grid-cols-3 gap-2 w-full max-w-sm mb-10 overflow-y-auto max-h-32 p-2">
+            <p class="text-xs font-bold opacity-50 uppercase">Your Cards</p>
+            <div id="user-bought-cards" class="grid grid-cols-3 gap-2 w-full max-w-xs overflow-y-auto max-h-32">
                 </div>
         </div>
 
-        <button onclick="alert('BINGO Request Sent!')" class="w-full bg-red-600 hover:bg-red-700 text-white py-5 rounded-3xl font-black text-2xl shadow-2xl transition-all active:scale-95 mb-4">BINGO</button>
+        <button onclick="handleBingo()" class="w-full bg-red-600 hover:bg-red-700 text-white py-5 rounded-2xl font-black text-2xl shadow-xl transition-transform active:scale-95 mb-4 uppercase">BINGO</button>
+        <p class="text-center text-[10px] opacity-40">@ArdiiiBingoBot</p>
     </div>
 
-    <div id="card-view" class="hidden fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-4">
-        <div class="bg-white rounded-[40px] p-6 w-full max-w-sm text-center">
-            <h2 class="text-xl font-black mb-4 text-slate-800">Card #<span id="sel-card-num"></span></h2>
-            <div class="bingo-grid mb-6 rounded-lg overflow-hidden border-2 border-slate-200">
-                <div class="bg-blue-600 text-white font-black py-1">B</div>
-                <div class="bg-blue-600 text-white font-black py-1">I</div>
-                <div class="bg-blue-600 text-white font-black py-1">N</div>
-                <div class="bg-blue-600 text-white font-black py-1">G</div>
-                <div class="bg-blue-600 text-white font-black py-1">O</div>
+    <div id="card-view" class="hidden fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm text-center">
+            <h2 class="text-lg font-black mb-4 text-gray-800">Card #<span id="sel-card-num"></span></h2>
+            <div class="bingo-grid mb-6 rounded-lg overflow-hidden">
+                <div class="bg-blue-800 text-white font-black py-1">B</div>
+                <div class="bg-blue-800 text-white font-black py-1">I</div>
+                <div class="bg-blue-800 text-white font-black py-1">N</div>
+                <div class="bg-blue-800 text-white font-black py-1">G</div>
+                <div class="bg-blue-800 text-white font-black py-1">O</div>
                 <div id="bingo-numbers" class="contents"></div>
             </div>
             <div class="flex gap-3">
-                <button onclick="buyCard()" class="flex-1 bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg">ACCEPT</button>
-                <button onclick="hideModal('card-view')" class="flex-1 bg-slate-100 text-slate-500 py-4 rounded-2xl font-black">BACK</button>
+                <button onclick="buyCard()" class="flex-1 bg-green-600 text-white py-4 rounded-xl font-black">ACCEPT</button>
+                <button onclick="hideModal('card-view')" class="flex-1 bg-gray-200 text-gray-600 py-4 rounded-xl font-black">BACK</button>
             </div>
         </div>
     </div>
+
+    <div id="deposit-methods" class="hidden min-h-screen p-6">
+        <h2 class="text-xl font-black mb-6">Deposit Methods</h2>
+        <button onclick="showPage('home-page')" class="bg-gray-200 p-2 rounded mb-4">Back</button>
+        </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
         const urlParams = new URLSearchParams(window.location.search);
-        let wallet = parseFloat(urlParams.get('balance')) || 0.0;
+        let wallet = parseFloat(urlParams.get('balance')) || 350.00;
         let stake = 0;
         let selectedCardsCount = 0;
         let timerVal = 60;
         let boughtCardsList = [];
 
         function updateWalletDisplay() {
-            document.querySelectorAll('#wallet-display').forEach(el => el.innerText = wallet.toFixed(2) + " ETB");
+            document.querySelectorAll('#wallet-display, #call-wallet').forEach(el => el.innerText = wallet.toFixed(2));
         }
 
         function showPage(id) {
             document.querySelectorAll('div[id]').forEach(d => {
-                if(!['deposit-modal','card-view','bingo-numbers','deposit-methods'].includes(d.id)) d.classList.add('hidden');
+                if(!['card-view','bingo-numbers','deposit-methods'].includes(d.id)) d.classList.add('hidden');
             });
             document.getElementById(id).classList.remove('hidden');
         }
@@ -140,15 +155,11 @@
             document.getElementById('sel-card-num').innerText = num;
             const grid = document.getElementById('bingo-numbers');
             grid.innerHTML = '';
-            const columns = [[1,15], [16,30], [31,45], [46,60], [61,75]];
+            // ቢንጎ ቁጥሮች ማመንጫ
             let cardData = [];
-            for(let r=0; r<5; r++) {
-                for(let c=0; c<5; c++) {
-                    if(r===2 && c===2) { cardData.push("⭐"); continue; }
-                    let n;
-                    do { n = Math.floor(Math.random() * (columns[c][1] - columns[c][0] + 1)) + columns[c][0]; } while(cardData.includes(n));
-                    cardData.push(n);
-                }
+            for(let i=0; i<25; i++) {
+                if(i===12) { cardData.push("⭐"); continue; }
+                cardData.push(Math.floor(Math.random() * 75) + 1);
             }
             cardData.forEach(v => {
                 let cell = document.createElement('div');
@@ -159,7 +170,7 @@
         }
 
         function buyCard() {
-            if(wallet < stake) { alert("ባላንስዎ በቂ አይደለም!"); return; }
+            if(wallet < stake) { alert("Insufficient Balance!"); return; }
             let num = document.getElementById('sel-card-num').innerText;
             wallet -= stake;
             selectedCardsCount++;
@@ -174,7 +185,6 @@
 
         function startTimer() {
             timerVal = 60;
-            const timerEl = document.getElementById('timer');
             if(window.gameInterval) clearInterval(window.gameInterval);
             window.gameInterval = setInterval(() => {
                 if(timerVal <= 0) {
@@ -182,7 +192,7 @@
                     goToCallPage();
                 } else {
                     timerVal--;
-                    timerEl.innerText = timerVal + "s";
+                    document.getElementById('timer').innerText = timerVal + "s";
                 }
             }, 1000);
         }
@@ -196,29 +206,29 @@
             container.innerHTML = '';
             boughtCardsList.forEach(num => {
                 let div = document.createElement('div');
-                div.className = "bg-yellow-400 text-blue-900 rounded-lg py-2 font-black text-xs text-center shadow-inner";
+                div.className = "bg-white/10 rounded-lg py-2 font-bold text-center border border-white/20";
                 div.innerText = "#" + num;
                 container.appendChild(div);
             });
-
             startCallingNumbers();
         }
 
         function startCallingNumbers() {
             let nums = Array.from({length: 75}, (_, i) => i + 1).sort(() => Math.random() - 0.5);
             let idx = 0;
-            const display = document.getElementById('current-number-display');
-            const countDisplay = document.getElementById('call-count');
-
             const caller = setInterval(() => {
                 if(idx >= nums.length) {
                     clearInterval(caller);
                 } else {
-                    display.innerText = nums[idx];
+                    document.getElementById('current-number-display').innerText = nums[idx];
                     idx++;
-                    countDisplay.innerText = `${idx}/75`;
+                    document.getElementById('call-count').innerText = `${idx}/75`;
                 }
-            }, 3000); // 3 ሰከንድ
+            }, 3000);
+        }
+
+        function handleBingo() {
+            tg.showConfirm("Are you sure you have Bingo?");
         }
 
         window.onload = updateWalletDisplay;
