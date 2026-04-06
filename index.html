@@ -10,25 +10,28 @@
     <div id="app">
         <header class="main-header">
             <div class="top-bar">
-                <span class="icon">❓</span>
                 <button class="refresh-btn" onclick="location.reload()">Refresh</button>
                 <div class="balance-box">💰 ETB <span id="balance">0.00</span></div>
             </div>
             <div class="sub-header">
-                <button class="menu-btn">☰</button>
                 <button class="deposit-btn">+ Deposit</button>
                 <div class="logo">ARDI BINGO</div>
             </div>
         </header>
 
         <div id="stake-screen" class="screen">
-            <div id="stake-list"></div>
+            <div class="stake-table">
+                <div class="table-header">
+                    <span>Stake</span><span>Active</span><span>Possible Win</span><span>Join</span>
+                </div>
+                <div id="stake-list"></div>
+            </div>
         </div>
 
         <div id="card-screen" class="screen hidden">
-            <div class="card-header">
-                <button onclick="showStakeScreen()">⬅️ Back</button>
-                <div id="selected-stake-val">0</div> Birr Per Card
+            <div class="card-header-container">
+                <button class="back-btn" onclick="showStakeScreen()">⬅️ Back</button>
+                <div class="stake-info-text"><span id="selected-stake-val">0</span> Birr Per Card</div>
             </div>
             <div id="card-grid" class="card-grid"></div>
         </div>
@@ -37,8 +40,8 @@
             <div class="modal-content">
                 <div class="timer-box" id="modal-timer">00:60</div>
                 <div class="card-display">
-                    <h3 id="modal-card-no">Card No. 21</h3>
-                    <div class="bingo-preview-header">
+                    <h3 id="modal-card-no">Card No. --</h3>
+                    <div class="bingo-labels">
                         <span>B</span><span>I</span><span>N</span><span>G</span><span>O</span>
                     </div>
                     <div id="preview-grid" class="preview-grid"></div>
