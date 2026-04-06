@@ -11,8 +11,7 @@
         <header class="main-header">
             <div class="top-bar">
                 <span class="icon">❓</span>
-                <div class="toggle-switch"><div class="switch-ball"></div></div>
-                <button class="refresh-btn">Refresh</button>
+                <button class="refresh-btn" onclick="location.reload()">Refresh</button>
                 <div class="balance-box">💰 ETB <span id="balance">0.00</span></div>
             </div>
             <div class="sub-header">
@@ -23,24 +22,31 @@
         </header>
 
         <div id="stake-screen" class="screen">
-            <h2 class="title">Please Choose Your Stake</h2>
-            <div class="stake-table">
-                <div class="table-header">
-                    <span>Stake</span><span>Active</span><span>Possible Win</span><span>Join</span>
-                </div>
-                <div id="stake-list"></div>
-            </div>
+            <div id="stake-list"></div>
         </div>
 
         <div id="card-screen" class="screen hidden">
             <div class="card-header">
-                <button class="back-btn" onclick="showStakeScreen()">⬅️</button>
-                <div class="stake-info"><span id="selected-stake-val">20</span> Birr Per Card</div>
-                <button class="random-btn">🔀</button>
+                <button onclick="showStakeScreen()">⬅️ Back</button>
+                <div id="selected-stake-val">0</div> Birr Per Card
             </div>
             <div id="card-grid" class="card-grid"></div>
-            <div class="footer-actions">
-                <button class="buy-btn">BUY SELECTED CARDS</button>
+        </div>
+
+        <div id="card-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="timer-box" id="modal-timer">00:60</div>
+                <div class="card-display">
+                    <h3 id="modal-card-no">Card No. 21</h3>
+                    <div class="bingo-preview-header">
+                        <span>B</span><span>I</span><span>N</span><span>G</span><span>O</span>
+                    </div>
+                    <div id="preview-grid" class="preview-grid"></div>
+                </div>
+                <div class="modal-btns">
+                    <button class="go-back" onclick="closeModal()">Go Back</button>
+                    <button class="confirm-btn" onclick="confirmPurchase()">Confirm Card</button>
+                </div>
             </div>
         </div>
     </div>
