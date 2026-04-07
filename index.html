@@ -14,32 +14,31 @@
                 <div class="balance-box">💰 ETB <span id="balance">0.00</span></div>
             </div>
             <div class="sub-header" style="display:flex; justify-content:space-between; margin-top:10px;">
-                <button style="background:#efae10; border:none; padding:5px 12px; border-radius:5px; font-weight:bold;">+ Deposit</button>
+                <button style="background:#efae10; border:none; padding:5px 10px; border-radius:5px; font-weight:bold;">+ Deposit</button>
                 <div class="logo">ARDI BINGO</div>
             </div>
         </header>
 
         <div id="stake-screen">
+            <div id="active-alert" class="red-alert" style="display:none;">ACTIVE AMOUNT: 0.00 ETB</div>
             <div class="stake-table">
                 <div id="stake-list"></div>
             </div>
         </div>
 
-        <div id="game-screen" class="hidden">
-            <div class="active-info-box">
-                <div style="font-size: 10px; color: #00c8ff;">ACTIVE</div>
-                <div id="active-amount" style="font-weight: bold;">0.00</div>
-            </div>
+        <div id="card-screen" class="hidden">
+            <button onclick="showStakeScreen()" style="color:white; background:none; border:none; padding:10px; cursor:pointer;">⬅️ Back</button>
+            <div id="card-grid" class="card-grid"></div>
+        </div>
 
+        <div id="game-screen" class="hidden">
             <div class="game-container">
                 <div class="drawn-ball" id="current-ball">-</div>
-                <div class="arena-layout">
-                    <div id="numbers-board" class="board-side"></div>
-                    <div id="cards-stack" class="cards-side"></div>
+                <div class="game-layout">
+                    <div id="numbers-board" class="numbers-board"></div>
+                    <div id="arena-card" class="player-card-arena"></div>
                 </div>
-                <div class="bingo-btn-container">
-                    <button id="bingo-btn" class="bingo-btn" onclick="claimBingo()">BINGO!</button>
-                </div>
+                <button id="bingo-btn" class="bingo-btn" onclick="claimBingo()">BINGO!</button>
             </div>
         </div>
 
@@ -47,10 +46,9 @@
             <div class="modal-content">
                 <div id="modal-timer" style="color:#00ff00; font-size:20px; font-weight:bold; margin-bottom:10px;">00:60</div>
                 <div id="preview-grid" class="preview-grid"></div>
-                <p id="purchase-count" style="color:white; font-size:12px; margin-top:10px;">Cards: 0/4</p>
                 <div style="display:flex; gap:10px; margin-top:15px;">
-                    <button onclick="closeModal()" style="flex:1; padding:10px; border-radius:5px;">Cancel</button>
-                    <button id="confirm-buy-btn" onclick="confirmPurchase()" style="flex:1; padding:10px; background:#efae10; border:none; font-weight:bold; border-radius:5px;">Buy Card</button>
+                    <button onclick="closeModal()" style="flex:1; padding:10px;">Back</button>
+                    <button onclick="confirmPurchase()" style="flex:1; padding:10px; background:#efae10; border:none; font-weight:bold;">Confirm</button>
                 </div>
             </div>
         </div>
