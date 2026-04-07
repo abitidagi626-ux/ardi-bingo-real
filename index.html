@@ -10,7 +10,7 @@
     <div id="app">
         <header class="main-header">
             <div class="top-bar">
-                <button class="refresh-btn" onclick="location.reload()">Refresh</button>
+                <button onclick="location.reload()">Refresh</button>
                 <div class="balance-box">💰 ETB <span id="balance">0.00</span></div>
             </div>
             <div class="sub-header">
@@ -19,26 +19,20 @@
             </div>
         </header>
 
-        <div id="stake-screen" class="screen">
+        <div id="stake-screen">
             <div class="red-alert" id="active-alert">ACTIVE AMOUNT: 0.00 ETB</div>
-            
             <div class="stake-table">
-                <div class="table-header">
-                    <span>Stake</span><span>Active</span><span>Possible Win</span><span>Join</span>
-                </div>
                 <div id="stake-list"></div>
             </div>
         </div>
 
-        <div id="card-screen" class="screen hidden">
-            <div class="card-header-container">
-                <button class="back-btn" onclick="showStakeScreen()">⬅️ Back</button>
-                <div class="stake-info-text"><span id="selected-stake-val">0</span> Birr Per Card</div>
-            </div>
-            <div id="card-grid" class="card-grid"></div>
+        <div id="card-screen" class="hidden">
+            <button onclick="showStakeScreen()" style="color:white; background:none; border:none; padding:10px; cursor:pointer;">⬅️ Back</button>
+            <div style="text-align:center; margin-bottom:10px;"><span id="selected-stake-val">0</span> Birr Per Card</div>
+            <div id="card-grid" class="card-grid" style="display:grid; grid-template-columns:repeat(11,1fr); gap:5px;"></div>
         </div>
 
-        <div id="game-screen" class="screen hidden">
+        <div id="game-screen" class="hidden">
             <div class="game-container">
                 <div class="drawn-ball" id="current-ball">-</div>
                 <div class="game-layout">
@@ -51,17 +45,12 @@
 
         <div id="card-modal" class="modal hidden">
             <div class="modal-content">
-                <div class="timer-box" id="modal-timer">00:60</div>
-                <div class="card-display">
-                    <h3 id="modal-card-no">Card No. --</h3>
-                    <div class="bingo-labels">
-                        <span>B</span><span>I</span><span>N</span><span>G</span><span>O</span>
-                    </div>
-                    <div id="preview-grid" class="preview-grid"></div>
-                </div>
-                <div class="modal-btns">
-                    <button class="go-back" onclick="closeModal()">Go Back</button>
-                    <button class="confirm-btn" onclick="confirmPurchase()">Confirm Card</button>
+                <div id="modal-timer" style="color:#00ff00; font-size:24px; font-weight:bold; margin-bottom:10px;">00:60</div>
+                <div id="modal-card-no" style="margin-bottom:10px;">Card No. --</div>
+                <div id="preview-grid" class="preview-grid"></div>
+                <div style="display:flex; gap:10px; margin-top:15px;">
+                    <button onclick="closeModal()" style="flex:1; padding:10px;">Back</button>
+                    <button onclick="confirmPurchase()" style="flex:1; padding:10px; background:#efae10; border:none; font-weight:bold;">Confirm</button>
                 </div>
             </div>
         </div>
