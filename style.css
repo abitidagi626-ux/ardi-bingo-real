@@ -1,51 +1,40 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo Game</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div id="app">
-        <div id="stake-screen">
-            <div class="main-header">
-                <div class="top-bar"><b>ARDI BINGO</b><div class="balance-box">ETB <span id="balance">0.00</span></div></div>
-                <div style="margin-top:10px;"><button onclick="location.reload()">Refresh</button></div>
-            </div>
-            <div class="stake-table">
-                <div id="stake-list"></div>
-            </div>
-        </div>
+body { 
+    background: #004d40; /* አረንጓዴ የጀርባ ቀለም */
+    color: white; 
+    font-family: sans-serif; 
+    margin: 0; 
+    display: flex; 
+    justify-content: center; 
+    overflow-x: hidden; 
+}
+#app { width: 100%; max-width: 450px; padding: 10px; }
+.main-header { background: #00332c; padding: 15px; border-radius: 12px; margin-bottom: 10px; }
+.top-bar { display: flex; justify-content: space-between; align-items: center; }
+.balance-box { background: #efae10; color: black; padding: 6px 15px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+.sub-header { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+.deposit-btn { background: #efae10; border: none; padding: 5px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+.logo { font-weight: bold; font-size: 1.1rem; letter-spacing: 1px; }
 
-        <div id="card-screen" class="hidden">
-            <button onclick="showStakeScreen()" style="color:white; background:none; border:none; padding:10px;">← Back</button>
-            <div class="stake-info-text" style="text-align:center; margin-bottom:10px;"><span id="selected-stake-val">0</span> Birr Per Card</div>
-            <div id="card-grid" class="card-grid"></div>
-        </div>
+/* Stake Table */
+.stake-table { background: #00332c; border-radius: 10px; margin-top: 10px; }
+.table-header { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; padding: 12px; font-size: 11px; color: #bbb; text-align: center; border-bottom: 1px solid #004d40; }
+.stake-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; padding: 15px 5px; border-bottom: 1px solid #004d40; text-align: center; align-items: center; font-size: 14px; }
+.join-btn { background: #efae10; border: none; padding: 6px; border-radius: 5px; cursor: pointer; font-weight: bold; }
 
-        <div id="game-screen" class="hidden">
-            <div class="game-container">
-                <div class="drawn-ball" id="current-ball">-</div>
-                <div class="game-layout">
-                    <div id="numbers-board" class="numbers-board"></div>
-                    <div id="arena-card" class="player-card-arena"></div>
-                </div>
-            </div>
-        </div>
+/* Card Selection */
+.card-header-container { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+.card-grid { display: grid; grid-template-columns: repeat(11, 1fr); gap: 5px; }
+.card-num { background: #b9b9c8; color: black; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 11px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+.card-num.bought { background: #2196f3 !important; color: white !important; }
 
-        <div id="card-modal" class="modal hidden">
-            <div class="modal-content">
-                <span id="modal-timer" style="color:#4caf50; font-size:24px; font-weight:bold;">00:60</span>
-                <div id="modal-card-no" style="margin:10px 0;">Card No. --</div>
-                <div id="preview-grid" class="preview-grid"></div>
-                <div style="display:flex; gap:10px; margin-top:15px;">
-                    <button onclick="closeModal()" style="flex:1; padding:10px;">Back</button>
-                    <button onclick="confirmPurchase()" style="flex:1; padding:10px; background:#efae10; border:none; font-weight:bold;">Confirm</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script src="app.js"></script>
-</body>
-</html>
+/* Modal */
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+.modal-content { background: #00332c; width: 90%; max-width: 340px; padding: 20px; border-radius: 20px; text-align: center; }
+.card-display { background: white; color: black; padding: 15px; border-radius: 15px; margin: 15px 0; }
+.bingo-labels { display: grid; grid-template-columns: repeat(5, 1fr); font-weight: 900; font-size: 22px; margin-bottom: 8px; }
+.preview-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+.preview-cell { border: 1px solid #ddd; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 15px; }
+.preview-cell.free { background: #2196f3; color: white; }
+.modal-btns { display: flex; gap: 10px; }
+.modal-btns button { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; background: #efae10; }
+.hidden { display: none; }
