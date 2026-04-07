@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,11 +10,10 @@
     <div id="app">
         <div id="stake-screen">
             <div class="main-header">
-                <div class="top-bar"><span class="logo">ARDI BINGO</span><div class="balance-box">ETB <span id="balance">0.00</span></div></div>
-                <div class="sub-header"><button onclick="location.reload()">Refresh</button><button class="deposit-btn">+ Deposit</button></div>
+                <div class="top-bar"><b>ARDI BINGO</b><div class="balance-box">ETB <span id="balance">0.00</span></div></div>
+                <div style="margin-top:10px;"><button onclick="location.reload()">Refresh</button></div>
             </div>
             <div class="stake-table">
-                <div class="table-header"><span>Stake</span><span>Active</span><span>Possible Win</span><span>Join</span></div>
                 <div id="stake-list"></div>
             </div>
         </div>
@@ -31,6 +30,7 @@
                     <div id="numbers-board" class="numbers-board"></div>
                     <div id="arena-card" class="player-card-arena"></div>
                 </div>
+                <div id="bingo-msg" class="hidden">BINGO! 1 LINE COMPLETE</div>
             </div>
         </div>
 
@@ -38,11 +38,9 @@
             <div class="modal-content">
                 <span id="modal-timer" style="color:#4caf50; font-size:24px; font-weight:bold;">00:60</span>
                 <div id="modal-card-no" style="margin:10px 0;">Card No. --</div>
-                <div class="card-display">
-                    <div id="preview-grid" class="preview-grid"></div>
-                </div>
-                <div style="display:flex; gap:10px;">
-                    <button onclick="closeModal()" style="flex:1; padding:10px; border-radius:8px;">Go Back</button>
+                <div id="preview-grid" class="preview-grid"></div>
+                <div style="display:flex; gap:10px; margin-top:15px;">
+                    <button onclick="closeModal()" style="flex:1; padding:10px; border-radius:8px;">Back</button>
                     <button onclick="confirmPurchase()" style="flex:1; padding:10px; border-radius:8px; background:#efae10; border:none; font-weight:bold;">Confirm</button>
                 </div>
             </div>
