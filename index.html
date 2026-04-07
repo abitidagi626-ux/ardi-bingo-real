@@ -20,17 +20,17 @@
 
         <div id="card-screen" class="hidden">
             <button onclick="showStakeScreen()" style="color:white; background:none; border:none; padding:10px;">← Back</button>
+            <div id="selected-stake-val" class="hidden"></div>
             <div id="card-grid" class="card-grid"></div>
         </div>
 
         <div id="game-screen" class="hidden">
             <div class="game-container">
-                <div class="drawn-ball" id="current-ball">-</div>
+                <div class="ball-display" id="current-ball">-</div>
                 <div class="game-layout">
                     <div id="numbers-board" class="numbers-board"></div>
                     <div id="arena-card" class="player-card-arena"></div>
                 </div>
-                <div id="bingo-msg" class="hidden">BINGO! 1 LINE COMPLETE</div>
             </div>
         </div>
 
