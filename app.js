@@ -1,10 +1,6 @@
 const stakes = [10, 20, 30, 50, 80, 100, 150, 200];
-let currentStake = null;
-let timeLeft = 60;
-let pendingCardId = null;
-let boughtCardsNumbers = {}; 
-let drawnNumbers = new Set();
-let playerMarkedNumbers = new Set();
+let currentStake = null, timeLeft = 60, pendingCardId = null;
+let boughtCardsNumbers = {}, drawnNumbers = new Set(), playerMarkedNumbers = new Set();
 
 const stakeData = { 10: { bought: new Set() }, 20: { bought: new Set() }, 30: { bought: new Set() }, 50: { bought: new Set() }, 80: { bought: new Set() }, 100: { bought: new Set() }, 150: { bought: new Set() }, 200: { bought: new Set() } };
 
@@ -14,7 +10,7 @@ function init() {
     stakes.forEach(s => {
         const row = document.createElement('div');
         row.className = 'stake-row';
-        row.innerHTML = `<span><b>${s} birr</b></span><span class="timer-display">00:60</span><span id="win-${s}">0.00</span><button class="join-btn" onclick="openCardSelection(${s})">Join</button>`;
+        row.innerHTML = `<span><b>${s} birr</b></span><span class="timer-display">00:60</span><span id="win-${s}">0.00</span><button class="join-btn" onclick="openCardSelection(${s})">Join »</button>`;
         stakeList.appendChild(row);
     });
     startGlobalTimer();
@@ -33,7 +29,7 @@ function startGlobalTimer() {
 function autoStartGame() {
     let playedStake = stakes.find(s => stakeData[s].bought.size > 0);
     if (playedStake) startBingoArena(playedStake);
-    else { alert("No cards bought!"); location.reload(); }
+    else { alert("Time is up! No cards purchased."); location.reload(); }
 }
 
 function openCardSelection(stake) {
@@ -56,15 +52,15 @@ function generateCardGrid() {
     }
 }
 
-let tempNumbers = [];
+let lastPreview = [];
 function showPreview(id) {
     if(stakeData[currentStake].bought.has(id)) return;
     pendingCardId = id;
     document.getElementById('modal-card-no').innerText = `Card No. ${id}`;
     const previewGrid = document.getElementById('preview-grid');
     previewGrid.innerHTML = "";
-    tempNumbers = generateBingoNumbers();
-    tempNumbers.forEach((n, idx) => {
+    lastPreview = generateBingoNumbers();
+    lastPreview.forEach((n, idx) => {
         const cell = document.createElement('div');
         cell.className = 'preview-cell' + (idx === 12 ? ' free' : '');
         cell.innerText = idx === 12 ? 'F' : n;
@@ -86,9 +82,8 @@ function generateBingoNumbers() {
 
 function confirmPurchase() {
     stakeData[currentStake].bought.add(pendingCardId);
-    boughtCardsNumbers[pendingCardId] = tempNumbers; 
-    const count = stakeData[currentStake].bought.size;
-    const totalWin = (currentStake * count * 0.85).toFixed(2);
+    boughtCardsNumbers[pendingCardId] = lastPreview; 
+    const totalWin = (currentStake * stakeData[currentStake].bought.size * 0.85).toFixed(2);
     document.getElementById(`win-${currentStake}`).innerText = `${totalWin} Birr`;
     document.getElementById('active-alert').innerText = `ACTIVE AMOUNT: ${totalWin} ETB`;
     closeModal();
@@ -110,13 +105,13 @@ function startBingoArena(stake) {
     const firstId = Array.from(stakeData[stake].bought)[0];
     const myNums = boughtCardsNumbers[firstId];
     const arenaCard = document.getElementById('arena-card');
-    playerMarkedNumbers.add("F"); // Free space is always marked
+    playerMarkedNumbers.add("F");
 
     myNums.forEach((n, idx) => {
         const div = document.createElement('div');
         div.className = 'arena-cell' + (idx === 12 ? ' marked' : '');
         div.innerText = idx === 12 ? 'F' : n;
-        // ነጥብ 1: Manual click for players
+        // ነጥብ 1: Manual Click
         div.onclick = () => {
             if (idx === 12) return;
             if (drawnNumbers.has(n)) {
@@ -140,21 +135,18 @@ function startBingoArena(stake) {
     }, 3000);
 }
 
-// ነጥብ 3: Check for 1 line (Horizontal, Vertical, or Diagonal)
-function checkBingo(card) {
-    const patterns = [
-        [0,1,2,3,4], [5,6,7,8,9], [10,11,12,13,14], [15,16,17,18,19], [20,21,22,23,24], // Horiz
-        [0,5,10,15,20], [1,6,11,16,21], [2,7,12,17,22], [3,8,13,18,23], [4,9,14,19,24], // Vert
-        [0,6,12,18,24], [4,8,12,16,20] // Diag
+// ነጥብ 3: Bingo logic (1 Line)
+function checkBingo(cardNums) {
+    const wins = [
+        [0,1,2,3,4], [5,6,7,8,9], [10,11,12,13,14], [15,16,17,18,19], [20,21,22,23,24],
+        [0,5,10,15,20], [1,6,11,16,21], [2,7,12,17,22], [3,8,13,18,23], [4,9,14,19,24],
+        [0,6,12,18,24], [4,8,12,16,20]
     ];
-    const isWin = patterns.some(pattern => pattern.every(i => {
-        let val = (i === 12) ? "F" : card[i];
-        return playerMarkedNumbers.has(val);
-    }));
-    if (isWin) document.getElementById('bingo-btn').style.display = 'block';
+    const hasBingo = wins.some(w => w.every(i => playerMarkedNumbers.has(i === 12 ? "F" : cardNums[i])));
+    if (hasBingo) document.getElementById('bingo-btn').style.display = 'block';
 }
 
-function claimBingo() { alert("BINGO! You Won!"); location.reload(); }
+function claimBingo() { alert("BINGO! Congratulations!"); location.reload(); }
 function closeModal() { document.getElementById('card-modal').classList.add('hidden'); }
 function showStakeScreen() { document.getElementById('card-screen').classList.add('hidden'); document.getElementById('stake-screen').classList.remove('hidden'); }
 
