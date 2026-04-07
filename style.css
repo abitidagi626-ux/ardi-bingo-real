@@ -7,7 +7,7 @@ body { background: #004d40; color: white; font-family: sans-serif; margin: 0; di
 .balance-box { background: #efae10; color: black; padding: 6px 12px; border-radius: 20px; font-weight: bold; }
 
 .active-info-box { 
-    position: absolute; top: 110px; right: 20px; 
+    position: absolute; top: 120px; right: 20px; 
     border: 2px solid #00c8ff; padding: 8px; border-radius: 8px;
     background: rgba(0, 200, 255, 0.1); text-align: center; min-width: 80px; z-index: 10;
 }
