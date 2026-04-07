@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,55 +10,40 @@
     <div id="app">
         <div id="stake-screen">
             <div class="main-header">
-                <div class="top-bar">
-                    <span class="logo">ARDI BINGO</span>
-                    <div class="balance-box">ETB <span id="balance">0.00</span></div>
-                </div>
-                <div class="sub-header">
-                    <button class="refresh-btn" onclick="location.reload()">Refresh</button>
-                    <button class="deposit-btn">+ Deposit</button>
-                </div>
+                <div class="top-bar"><span class="logo">ARDI BINGO</span><div class="balance-box">ETB <span id="balance">0.00</span></div></div>
+                <div class="sub-header"><button onclick="location.reload()">Refresh</button><button class="deposit-btn">+ Deposit</button></div>
             </div>
             <div class="stake-table">
-                <div class="table-header">
-                    <span>Stake</span><span>Active</span><span>Possible Win</span><span>Join</span>
-                </div>
+                <div class="table-header"><span>Stake</span><span>Active</span><span>Possible Win</span><span>Join</span></div>
                 <div id="stake-list"></div>
             </div>
         </div>
 
         <div id="card-screen" class="hidden">
-            <div class="card-header-container">
-                <button onclick="showStakeScreen()" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;">← Back</button>
-                <span id="selected-stake-label"><span id="selected-stake-val">0</span> Birr Per Card</span>
-            </div>
+            <button onclick="showStakeScreen()" style="color:white; background:none; border:none; padding:10px;">← Back</button>
             <div id="card-grid" class="card-grid"></div>
         </div>
 
         <div id="game-screen" class="hidden">
-            <div class="game-header">
-                <div class="stat-item">Win: <span id="game-win">0.00</span></div>
-                <div class="stat-item">Stake: <span id="game-stake">0</span></div>
-                <div class="stat-item">Card: <span id="game-card-no">0</span></div>
-            </div>
-            <div class="game-body">
-                <div class="drawn-number-circle"><span id="current-ball">-</span></div>
+            <div class="game-container">
+                <div class="drawn-ball" id="current-ball">-</div>
                 <div class="game-layout">
-                    <div id="bingo-board" class="bingo-board"></div> <div id="player-card-display" class="player-card-view"></div> </div>
+                    <div id="numbers-board" class="numbers-board"></div>
+                    <div id="arena-card" class="player-card-arena"></div>
+                </div>
             </div>
         </div>
 
         <div id="card-modal" class="modal hidden">
             <div class="modal-content">
-                <span id="modal-timer" class="modal-timer">00:60</span>
-                <div id="modal-card-no" class="modal-card-title">Card No. 1</div>
+                <span id="modal-timer" style="color:#4caf50; font-size:24px; font-weight:bold;">00:60</span>
+                <div id="modal-card-no" style="margin:10px 0;">Card No. --</div>
                 <div class="card-display">
-                    <div class="bingo-labels"><span>B</span><span>I</span><span>N</span><span>G</span><span>O</span></div>
                     <div id="preview-grid" class="preview-grid"></div>
                 </div>
-                <div class="modal-btns">
-                    <button onclick="closeModal()" style="background:#555;">Go Back</button>
-                    <button onclick="confirmPurchase()">Confirm Card</button>
+                <div style="display:flex; gap:10px;">
+                    <button onclick="closeModal()" style="flex:1; padding:10px; border-radius:8px;">Go Back</button>
+                    <button onclick="confirmPurchase()" style="flex:1; padding:10px; border-radius:8px; background:#efae10; border:none; font-weight:bold;">Confirm</button>
                 </div>
             </div>
         </div>
