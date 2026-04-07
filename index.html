@@ -19,7 +19,7 @@
             </div>
         </header>
 
-        <div id="stake-screen" class="screen">
+        <div id="stake-screen">
             <div class="stake-table">
                 <div class="table-header">
                     <span>Stake</span><span>Active</span><span>Possible Win</span><span>Join</span>
@@ -28,27 +28,35 @@
             </div>
         </div>
 
-        <div id="card-screen" class="screen hidden">
+        <div id="card-screen" class="hidden">
             <div class="card-header-container">
-                <button class="back-btn" onclick="showStakeScreen()">⬅️ Back</button>
+                <button onclick="showStakeScreen()" style="color:white; background:none; border:none; cursor:pointer;">⬅️ Back</button>
                 <div class="stake-info-text"><span id="selected-stake-val">0</span> Birr Per Card</div>
             </div>
             <div id="card-grid" class="card-grid"></div>
         </div>
 
+        <div id="game-screen" class="hidden">
+            <div class="game-container">
+                <div class="drawn-ball" id="current-ball">-</div>
+                <div class="game-layout">
+                    <div id="numbers-board" class="numbers-board"></div>
+                    <div id="arena-card" class="player-card-arena"></div>
+                </div>
+                <div id="bingo-msg" class="bingo-alert hidden">BINGO!</div>
+            </div>
+        </div>
+
         <div id="card-modal" class="modal hidden">
             <div class="modal-content">
-                <div class="timer-box" id="modal-timer">00:60</div>
+                <div style="color:#00ff00; font-size:20px; font-weight:bold;" id="modal-timer">00:60</div>
                 <div class="card-display">
-                    <h3 id="modal-card-no">Card No. --</h3>
-                    <div class="bingo-labels">
-                        <span>B</span><span>I</span><span>N</span><span>G</span><span>O</span>
-                    </div>
+                    <h3 id="modal-card-no" style="margin-top:0;">Card No. --</h3>
                     <div id="preview-grid" class="preview-grid"></div>
                 </div>
                 <div class="modal-btns">
-                    <button class="go-back" onclick="closeModal()">Go Back</button>
-                    <button class="confirm-btn" onclick="confirmPurchase()">Confirm Card</button>
+                    <button onclick="closeModal()" style="background:#555; color:white; border:none; padding:10px; border-radius:5px; flex:1;">Go Back</button>
+                    <button onclick="confirmPurchase()" style="background:#efae10; border:none; padding:10px; border-radius:5px; flex:1; font-weight:bold; margin-left:10px;">Confirm</button>
                 </div>
             </div>
         </div>
