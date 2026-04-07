@@ -1,58 +1,53 @@
 * { box-sizing: border-box; }
-body { 
-    background: #004d40; 
-    color: white; 
-    font-family: 'Segoe UI', sans-serif; 
-    margin: 0; 
-    display: flex; 
-    justify-content: center; 
-}
-#app { width: 100%; max-width: 450px; padding: 10px; }
+body { background: #004d40; color: white; font-family: sans-serif; margin: 0; display: flex; justify-content: center; }
+#app { width: 100%; max-width: 450px; padding: 10px; position: relative; min-height: 100vh; }
 .hidden { display: none; }
 
 /* Header */
-.main-header { background: #00332c; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-bottom: 2px solid #efae10; }
-.top-bar { display: flex; justify-content: space-between; align-items: center; }
-.balance-box { background: #efae10; color: black; padding: 6px 15px; border-radius: 20px; font-weight: bold; }
-.logo { font-weight: bold; color: #efae10; font-size: 1.2rem; }
+.main-header { background: #00332c; padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #efae10; }
+.balance-box { background: #efae10; color: black; padding: 6px 12px; border-radius: 20px; font-weight: bold; }
 
-/* Red Alert (ነጥብ 2) */
-.red-alert { 
-    background: #ff0000; color: white; padding: 12px; text-align: center; 
-    font-weight: bold; border-radius: 8px; margin: 10px 0; border: 2px solid white;
+/* Active Amount (Blue Box) */
+.active-info-box { 
+    position: absolute; top: 110px; right: 20px; 
+    border: 2px solid #00c8ff; padding: 8px; border-radius: 8px;
+    background: rgba(0, 200, 255, 0.1); text-align: center; min-width: 80px; z-index: 10;
 }
-
-/* Stake Table */
-.stake-table { background: rgba(0,0,0,0.2); border-radius: 10px; border: 1px solid rgba(239,174,16,0.3); }
-.stake-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; padding: 15px 5px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; align-items: center; }
-.join-btn { background: #efae10; border: none; padding: 6px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-
-/* Card Selection */
-.card-grid { display: grid; grid-template-columns: repeat(11, 1fr); gap: 4px; }
-.card-num { background: #b9b9c8; color: black; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 11px; border-radius: 4px; font-weight: bold; cursor: pointer; }
-.card-num.bought { background: #2196f3 !important; color: white !important; }
 
 /* Game Arena */
-.game-container { background: #00332c; border-radius: 15px; padding: 15px; border: 1px solid #efae10; }
-.drawn-ball { width: 60px; height: 60px; background: white; color: black; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; margin: 0 auto 15px; border: 4px solid #efae10; }
-.game-layout { display: flex; gap: 10px; }
-.numbers-board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; flex: 1; }
-.board-cell { background: rgba(255,255,255,0.1); font-size: 10px; padding: 4px; text-align: center; border-radius: 2px; }
-.board-cell.hit { background: #efae10; color: black; }
+.game-container { background: #002b25; border-radius: 15px; padding: 15px; border: 1px solid #efae10; margin-top: 10px; }
+.drawn-ball { width: 65px; height: 65px; background: white; color: black; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; margin: 0 auto 15px; border: 4px solid #efae10; }
 
-/* Player Card (ነጥብ 1) */
-.player-card-arena { flex: 1.2; background: white; padding: 5px; border-radius: 8px; color: black; display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; }
-.arena-cell { border: 1px solid #ddd; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; cursor: pointer; }
-.arena-cell.marked { background: #efae10 !important; color: black !important; }
+.arena-layout { display: flex; gap: 10px; }
+.board-side { flex: 1; display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; }
+.board-cell { background: rgba(255,255,255,0.1); font-size: 10px; padding: 4px 0; text-align: center; border-radius: 2px; }
+.board-cell.hit { background: #efae10; color: black; font-weight: bold; }
 
-/* Bingo Button (ነጥብ 3) */
-.bingo-btn { 
-    background: #ff0000; color: white; border: 2px solid white; width: 100%; 
-    padding: 15px; margin-top: 15px; border-radius: 10px; font-weight: bold; 
-    font-size: 20px; cursor: pointer; display: none;
+/* Card Stacking (አንዱ ከሌላው በታች) */
+.cards-side { flex: 1.2; position: relative; height: 350px; }
+.player-card { 
+    background: white; padding: 4px; border-radius: 6px; color: black; 
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.5px;
+    position: absolute; width: 100%; transform: scale(0.85);
+    border: 1px solid #999; box-shadow: 0 4px 8px rgba(0,0,0,0.3);
 }
+.player-card:nth-child(1) { top: 0px; z-index: 10; }
+.player-card:nth-child(2) { top: 45px; z-index: 9; }
+.player-card:nth-child(3) { top: 90px; z-index: 8; }
+.player-card:nth-child(4) { top: 135px; z-index: 7; }
+
+.arena-cell { border: 1px solid #ddd; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; cursor: pointer; }
+.arena-cell.marked { background: #efae10 !important; color: black; }
+
+/* Bingo Button Area */
+.bingo-area { width: 100%; display: flex; justify-content: center; margin-top: 40px; }
+.bingo-btn { background: red; color: white; border: 2px solid white; padding: 12px 40px; border-radius: 8px; font-weight: bold; cursor: pointer; display: none; font-size: 18px; }
+
+/* Stake Rows */
+.stake-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #00332c; margin-bottom: 8px; border-radius: 10px; border: 1px solid rgba(239, 174, 16, 0.2); }
+.join-btn { background: #efae10; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+.join-btn.disabled { background: #444; color: #888; cursor: not-allowed; }
 
 /* Modal */
-.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-.modal-content { background: #00332c; width: 90%; max-width: 340px; padding: 20px; border-radius: 20px; text-align: center; }
-.preview-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; background: white; padding: 10px; border-radius: 10px; color: black; }
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 100; }
+.modal-content { background: #00332c; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; border: 1px solid #efae10; }
