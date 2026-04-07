@@ -1,38 +1,54 @@
-body { background: #004d40; color: white; font-family: sans-serif; margin: 0; display: flex; justify-content: center; }
+body { 
+    background: #004d40; /* ጥቁር አረንጓዴ Background */
+    color: white; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    margin: 0; 
+    display: flex; 
+    justify-content: center; 
+}
+
 #app { width: 100%; max-width: 450px; padding: 10px; }
+
+/* Hidden state */
 .hidden { display: none; }
 
-/* Header & Table */
-.main-header { background: #00332c; padding: 15px; border-radius: 12px; border-bottom: 2px solid #efae10; margin-bottom: 10px; }
+/* Main Header */
+.main-header { 
+    background: #00332c; 
+    padding: 15px; 
+    border-radius: 12px; 
+    margin-bottom: 10px; 
+    border-bottom: 2px solid #efae10; 
+}
 .top-bar { display: flex; justify-content: space-between; align-items: center; }
+.logo { font-weight: bold; font-size: 18px; color: #efae10; }
 .balance-box { background: #efae10; color: black; padding: 6px 15px; border-radius: 20px; font-weight: bold; }
+
+.sub-header { display: flex; justify-content: space-between; margin-top: 10px; }
+.refresh-btn { background: #eee; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+.deposit-btn { background: #efae10; border: none; padding: 5px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+
+/* Stake Table */
 .stake-table { background: rgba(0,0,0,0.2); border-radius: 10px; overflow: hidden; }
+.table-header { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; padding: 12px; font-size: 12px; opacity: 0.8; text-align: center; }
 .stake-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; padding: 15px 5px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; align-items: center; }
 .join-btn { background: #efae10; border: none; padding: 8px; border-radius: 5px; font-weight: bold; cursor: pointer; }
 
-/* Card Selection Grid */
+/* Card Selection */
+.card-header-container { display: flex; align-items: center; gap: 20px; padding: 10px; background: #00332c; border-radius: 10px; margin-bottom: 10px; }
 .card-grid { display: grid; grid-template-columns: repeat(11, 1fr); gap: 4px; padding: 10px; }
 .card-num { background: #b9b9c8; color: black; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 11px; border-radius: 4px; font-weight: bold; cursor: pointer; }
 .card-num.bought { background: #2196f3 !important; color: white !important; }
 
-/* Game Arena (Image 2) */
-.game-container { background: #00332c; border-radius: 15px; padding: 15px; border: 1px solid #efae10; text-align: center; }
-.drawn-ball { width: 60px; height: 60px; background: white; color: black; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; margin: 0 auto 15px; border: 4px solid #efae10; }
-.game-layout { display: flex; gap: 10px; }
-.numbers-board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; flex: 1; }
-.board-cell { background: rgba(255,255,255,0.1); font-size: 10px; padding: 4px; text-align: center; border-radius: 2px; border: 0.5px solid rgba(255,255,255,0.2); }
-.board-cell.hit { background: #efae10; color: black; font-weight: bold; }
-.player-card-arena { flex: 1.2; background: white; padding: 5px; border-radius: 8px; color: black; display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; }
-.arena-cell { border: 1px solid #ddd; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; }
-.arena-cell.marked { background: #efae10; color: black; }
-.arena-cell.free { background: #2196f3; color: white; }
-
-/* Bingo Message */
-#bingo-msg { color: #efae10; font-size: 24px; font-weight: bold; margin-top: 10px; animation: blink 0.5s infinite; }
-@keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
-
 /* Modal */
 .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-.modal-content { background: #00332c; width: 90%; max-width: 340px; padding: 20px; border-radius: 20px; text-align: center; }
-.preview-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; background: white; padding: 10px; border-radius: 10px; color: black; }
+.modal-content { background: #00332c; width: 90%; max-width: 340px; padding: 20px; border-radius: 20px; text-align: center; border: 1px solid #efae10; }
+.modal-timer { display: block; color: #4caf50; font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+.modal-card-title { font-size: 18px; margin-bottom: 15px; }
+.card-display { background: white; color: black; padding: 10px; border-radius: 10px; margin-bottom: 20px; }
+.bingo-labels { display: grid; grid-template-columns: repeat(5, 1fr); font-weight: bold; color: #d32f2f; margin-bottom: 5px; }
+.preview-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; }
 .preview-cell { border: 1px solid #eee; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
+.preview-cell.free { background: #2196f3; color: white; }
+.modal-btns { display: flex; justify-content: space-between; gap: 10px; }
+.modal-btns button { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
