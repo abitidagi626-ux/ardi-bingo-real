@@ -4,7 +4,16 @@ let timeLeft = 60;
 let pendingCardId = null;
 let boughtCardsNumbers = {}; 
 
-const stakeData = { 10: { bought: new Set() }, 20: { bought: new Set() }, 30: { bought: new Set() }, 50: { bought: new Set() }, 80: { bought: new Set() }, 100: { bought: new Set() }, 150: { bought: new Set() }, 200: { bought: new Set() } };
+const stakeData = {
+    10: { bought: new Set() },
+    20: { bought: new Set() },
+    30: { bought: new Set() },
+    50: { bought: new Set() },
+    80: { bought: new Set() },
+    100: { bought: new Set() },
+    150: { bought: new Set() },
+    200: { bought: new Set() }
+};
 
 function init() {
     const stakeList = document.getElementById('stake-list');
@@ -24,12 +33,12 @@ function init() {
 }
 
 function startGlobalTimer() {
-    const timerInt = setInterval(() => {
+    const timerInterval = setInterval(() => {
         timeLeft--;
         if (timeLeft <= 0) {
             timeLeft = 0;
-            clearInterval(timerInt);
-            autoStartGame(); 
+            clearInterval(timerInterval);
+            autoStartGame(); // ታይመሩ ሲያልቅ ወደ ጨዋታ ይወስዳል
         }
         const timeStr = `00:${timeLeft < 10 ? '0' + timeLeft : timeLeft}`;
         document.querySelectorAll('.timer-display').forEach(el => el.innerText = timeStr);
@@ -42,7 +51,7 @@ function autoStartGame() {
     if (playedStake) {
         startBingoArena(playedStake);
     } else {
-        alert("Time is up! No cards purchased.");
+        alert("Time is up! No cards bought.");
         location.reload();
     }
 }
@@ -58,9 +67,10 @@ function openCardSelection(stake) {
 function generateCardGrid() {
     const grid = document.getElementById('card-grid');
     grid.innerHTML = "";
+    const boughtInCurrentStake = stakeData[currentStake].bought;
     for (let i = 1; i <= 143; i++) {
         const card = document.createElement('div');
-        card.className = `card-num ${stakeData[currentStake].bought.has(i) ? 'bought' : ''}`;
+        card.className = `card-num ${boughtInCurrentStake.has(i) ? 'bought' : ''}`;
         card.innerText = i;
         card.onclick = () => showPreview(i);
         grid.appendChild(card);
@@ -88,18 +98,23 @@ function generateBingoNumbers() {
     let card = [];
     const ranges = [[1,15], [16,30], [31,45], [46,60], [61,75]];
     let columns = ranges.map(range => {
-        let pool = Array.from({length: 15}, (_, i) => range[0] + i).sort(() => Math.random() - 0.5);
-        return pool.slice(0, 5);
+        let pool = [];
+        for(let i=range[0]; i<=range[1]; i++) pool.push(i);
+        return pool.sort(() => Math.random() - 0.5).slice(0, 5);
     });
-    for(let row=0; row<5; row++) for(let col=0; col<5; col++) card.push(columns[col][row]);
+    for(let row=0; row<5; row++) {
+        for(let col=0; col<5; col++) card.push(columns[col][row]);
+    }
     return card;
 }
 
 function confirmPurchase() {
     stakeData[currentStake].bought.add(pendingCardId);
     boughtCardsNumbers[pendingCardId] = tempNumbers; 
-    const count = stakeData[currentStake].bought.size;
-    document.getElementById(`win-${currentStake}`).innerText = (currentStake * count * 0.85).toFixed(2);
+    const numberOfCards = stakeData[currentStake].bought.size;
+    const possibleWin = (currentStake * numberOfCards * 0.85).toFixed(2);
+    const winEl = document.getElementById(`win-${currentStake}`);
+    if(winEl) winEl.innerText = `${possibleWin} Birr`;
     closeModal();
     generateCardGrid();
 }
@@ -119,19 +134,18 @@ function startBingoArena(stake) {
     const firstCardId = Array.from(stakeData[stake].bought)[0];
     const arenaCard = document.getElementById('arena-card');
     const myNums = boughtCardsNumbers[firstCardId];
-    
     myNums.forEach((n, idx) => {
         const div = document.createElement('div');
         div.className = 'arena-cell' + (idx === 12 ? ' marked' : '');
-        div.id = idx === 12 ? 'my-num-F' : `my-num-${n}`;
+        div.id = `my-num-${n}`;
         div.innerText = idx === 12 ? 'F' : n;
         arenaCard.appendChild(div);
     });
 
     let pool = Array.from({length: 75}, (_, i) => i + 1).sort(() => Math.random() - 0.5);
     let idx = 0;
-    const gameInt = setInterval(() => {
-        if (idx >= 75) { clearInterval(gameInt); return; }
+    const gameInterval = setInterval(() => {
+        if (idx >= 75) { clearInterval(gameInterval); return; }
         let drawn = pool[idx];
         document.getElementById('current-ball').innerText = drawn;
         document.getElementById(`ball-${drawn}`).classList.add('hit');
