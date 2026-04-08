@@ -3,8 +3,7 @@ let currentStake = null;
 let timeLeft = 60;
 let pendingCardId = null;
 let boughtCardsNumbers = {}; 
-let drawnNumbers = new Set();
-let markedByPlayer = new Set();
+let lastWinAmount = "0.00";
 
 const stakeData = {
     10: { bought: new Set() }, 20: { bought: new Set() }, 30: { bought: new Set() },
@@ -18,11 +17,10 @@ function init() {
     stakes.forEach(s => {
         const row = document.createElement('div');
         row.className = 'stake-row';
-        // ነጥብ 3: የPossible Win መጠኑ (Amount) ብቻ Bold ተደርጓል
         row.innerHTML = `
             <span><b>${s} birr</b></span>
             <span class="timer-display">00:60</span>
-            <span id="win-${s}"><b id="win-val-${s}">0.00</b> Birr</span>
+            <span id="win-${s}">0.00 Birr</span>
             <button class="join-btn" onclick="openCardSelection(${s})">Join »</button>
         `;
         stakeList.appendChild(row);
@@ -105,17 +103,11 @@ function generateBingoNumbers() {
 
 function confirmPurchase() {
     stakeData[currentStake].bought.add(pendingCardId);
-    boughtCardsNumbers[pendingCardId] = lastGeneratedNums; 
+    boughtCardsNumbers[pendingCardId] = lastGeneratedNums;
     const numberOfCards = stakeData[currentStake].bought.size;
-    const possibleWin = (currentStake * numberOfCards * 0.85).toFixed(2);
-    
-    // ነጥብ 3: ምስል 1 ላይ Active Amount ባነር እንዲመጣ
-    document.getElementById('active-banner').classList.remove('hidden');
-    document.getElementById('active-val').innerText = possibleWin;
-
-    const winValEl = document.getElementById(`win-val-${currentStake}`);
-    if(winValEl) winValEl.innerText = possibleWin;
-    
+    lastWinAmount = (currentStake * numberOfCards * 0.85).toFixed(2);
+    const winEl = document.getElementById(`win-${currentStake}`);
+    if(winEl) winEl.innerText = `${lastWinAmount} Birr`;
     closeModal();
     generateCardGrid();
 }
@@ -124,6 +116,9 @@ function startBingoArena(stake) {
     document.getElementById('stake-screen').classList.add('hidden');
     document.getElementById('card-screen').classList.add('hidden');
     document.getElementById('game-screen').classList.remove('hidden');
+    
+    // ነጥብ 2: Possible Win በ Arena ላይ ማሳየት
+    document.getElementById('arena-possible-win').innerText = `WIN: ${lastWinAmount} ETB`;
 
     const board = document.getElementById('numbers-board');
     for(let i=1; i<=75; i++) {
@@ -135,20 +130,11 @@ function startBingoArena(stake) {
     const firstId = Array.from(stakeData[stake].bought)[0];
     const myNums = boughtCardsNumbers[firstId];
     const arenaCard = document.getElementById('arena-card');
-    markedByPlayer.add("F"); // Free space marked
-
     myNums.forEach((n, idx) => {
         const div = document.createElement('div');
         div.className = 'arena-cell' + (idx === 12 ? ' marked' : '');
+        div.id = `my-num-${n}`;
         div.innerText = idx === 12 ? 'F' : n;
-        div.onclick = () => {
-            if(idx === 12) return;
-            if(drawnNumbers.has(n)) {
-                div.classList.add('marked');
-                markedByPlayer.add(n);
-                checkWin(myNums);
-            }
-        };
         arenaCard.appendChild(div);
     });
 
@@ -157,24 +143,18 @@ function startBingoArena(stake) {
     const gameInt = setInterval(() => {
         if (idx >= 75) { clearInterval(gameInt); return; }
         let drawn = pool[idx];
-        drawnNumbers.add(drawn);
         document.getElementById('current-ball').innerText = drawn;
         document.getElementById(`ball-${drawn}`).classList.add('hit');
+        const match = document.getElementById(`my-num-${drawn}`);
+        if(match) match.classList.add('marked');
         idx++;
-    }, 3000); 
+    }, 3000);
 }
 
-function checkWin(card) {
-    const wins = [[0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24],[0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24],[0,6,12,18,24],[4,8,12,16,20]];
-    const won = wins.some(w => w.every(i => markedByPlayer.has(i === 12 ? "F" : card[i])));
-    
-    if (won) {
-        // ነጥብ 1: ተጫዋቹ ሲያሸንፍ የቢንጎ በተን (Bingo Button) ይታያል
-        document.getElementById('bingo-btn').classList.remove('hidden');
-    }
+function claimBingo() {
+    alert("Bingo Claimed!");
 }
 
-function claimBingo() { alert("BINGO! Congratulations!"); location.reload(); }
 function closeModal() { document.getElementById('card-modal').classList.add('hidden'); pendingCardId = null; }
 function showStakeScreen() { document.getElementById('card-screen').classList.add('hidden'); document.getElementById('stake-screen').classList.remove('hidden'); }
 
