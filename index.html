@@ -11,7 +11,7 @@
         <header class="main-header">
             <div class="top-bar">
                 <button class="refresh-btn" onclick="location.reload()">Refresh</button>
-                <div class="balance-box">💰 ETB <span id="balance">0.00</span></div>
+                <div class="balance-box">💰 ETB <span id="balance">500.00</span></div>
             </div>
             <div class="sub-header">
                 <button class="deposit-btn">+ Deposit</button>
@@ -20,6 +20,7 @@
         </header>
 
         <div id="stake-screen">
+            <div id="active-banner" class="active-banner hidden">ACTIVE AMOUNT: <span id="active-val">0.00</span> ETB</div>
             <div class="stake-table">
                 <div class="table-header">
                     <span>Stake</span><span>Active</span><span>Possible Win</span><span>Join</span>
@@ -30,7 +31,7 @@
 
         <div id="card-screen" class="hidden">
             <div class="card-header-container">
-                <button onclick="showStakeScreen()" style="color:white; background:none; border:none; cursor:pointer;">⬅️ Back</button>
+                <button onclick="showStakeScreen()" style="color:white; background:none; border:none; cursor:pointer; font-size:20px;">⬅️</button>
                 <div class="stake-info-text"><span id="selected-stake-val">0</span> Birr Per Card</div>
             </div>
             <div id="card-grid" class="card-grid"></div>
@@ -43,6 +44,7 @@
                     <div id="numbers-board" class="numbers-board"></div>
                     <div id="arena-card" class="player-card-arena"></div>
                 </div>
+                <button id="bingo-btn" class="bingo-btn hidden" onclick="claimBingo()">BINGO!</button>
                 <div id="bingo-msg" class="bingo-alert hidden">BINGO!</div>
             </div>
         </div>
@@ -51,12 +53,12 @@
             <div class="modal-content">
                 <div style="color:#00ff00; font-size:20px; font-weight:bold;" id="modal-timer">00:60</div>
                 <div class="card-display">
-                    <h3 id="modal-card-no" style="margin-top:0;">Card No. --</h3>
+                    <h3 id="modal-card-no" style="margin-top:0; color:black;">Card No. --</h3>
                     <div id="preview-grid" class="preview-grid"></div>
                 </div>
-                <div class="modal-btns">
-                    <button onclick="closeModal()" style="background:#555; color:white; border:none; padding:10px; border-radius:5px; flex:1;">Go Back</button>
-                    <button onclick="confirmPurchase()" style="background:#efae10; border:none; padding:10px; border-radius:5px; flex:1; font-weight:bold; margin-left:10px;">Confirm</button>
+                <div style="display:flex; gap:10px;">
+                    <button onclick="closeModal()" style="background:#555; color:white; border:none; padding:12px; border-radius:8px; flex:1; cursor:pointer;">Go Back</button>
+                    <button onclick="confirmPurchase()" style="background:#efae10; border:none; padding:12px; border-radius:8px; flex:1; font-weight:bold; cursor:pointer;">Confirm</button>
                 </div>
             </div>
         </div>
