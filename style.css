@@ -1,43 +1,133 @@
-body { background: #004d40; color: white; font-family: sans-serif; margin: 0; display: flex; justify-content: center; }
+body { 
+    background: #004d40; 
+    color: white; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    margin: 0; 
+    display: flex; 
+    justify-content: center; 
+}
 #app { width: 100%; max-width: 450px; padding: 10px; }
-.main-header { background: #00332c; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-bottom: 2px solid #efae10; }
+
+/* Header Style (Image 1 & 2) */
+.main-header { 
+    background: #00332c; 
+    padding: 12px; 
+    border-radius: 10px; 
+    margin-bottom: 10px; 
+    border-bottom: 3px solid #efae10; 
+}
 .top-bar { display: flex; justify-content: space-between; align-items: center; }
-.balance-box { background: #efae10; color: black; padding: 6px 15px; border-radius: 20px; font-weight: bold; font-size: 14px; }
-.logo { font-weight: bold; font-size: 1.1rem; color: #efae10; }
+.balance-box { 
+    background: #efae10; 
+    color: black; 
+    padding: 5px 12px; 
+    border-radius: 15px; 
+    font-weight: 900; 
+    font-size: 14px; 
+}
+.logo { font-weight: bold; font-size: 1.2rem; color: #efae10; letter-spacing: 1px; }
 
 /* Stake Table */
-.stake-table { background: #00332c; border-radius: 10px; margin-top: 10px; border: 1px solid rgba(239, 174, 16, 0.3); }
-.table-header { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; padding: 12px; font-size: 11px; color: #bbb; text-align: center; border-bottom: 1px solid #004d40; }
-.stake-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; padding: 15px 5px; border-bottom: 1px solid #004d40; text-align: center; align-items: center; font-size: 14px; }
-.join-btn { background: #efae10; border: none; padding: 6px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-
-/* Game Arena Layout */
-.game-container { background: #00332c; border-radius: 15px; padding: 15px; border: 1px solid #efae10; text-align: center; }
-.drawn-ball { width: 60px; height: 60px; background: white; color: black; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; margin: 0 auto 10px; border: 3px solid #efae10; }
-.game-layout { display: flex; gap: 8px; }
-.numbers-board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; flex: 0.8; }
-.board-cell { background: rgba(255,255,255,0.1); font-size: 9px; padding: 4px; text-align: center; }
-.board-cell.hit { background: #efae10; color: black; }
-
-/* Individual Card Container */
-.card-wrapper { background: #004d40; padding: 5px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #555; }
-.card-header-info { display: flex; justify-content: center; font-size: 10px; margin-bottom: 4px; color: #efae10; font-weight: bold; }
-.player-card-arena { background: white; color: black; display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; }
-.arena-cell { border: 1px solid #eee; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; cursor: pointer; }
-.arena-cell.marked { background: #efae10; color: black; }
-
-/* Bingo Button under each card */
-.bingo-btn-small { 
-    background: #ff0000; color: white; border: 2px solid white; 
-    width: 100%; padding: 8px; font-size: 16px; font-weight: bold; 
-    border-radius: 5px; cursor: pointer; margin-top: 5px;
+.stake-table { background: #00332c; border-radius: 10px; overflow: hidden; }
+.stake-row { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr 1fr 1fr; 
+    padding: 15px 5px; 
+    border-bottom: 1px solid #004d40; 
+    text-align: center; 
+    align-items: center;
 }
 
-.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-.modal-content { background: #00332c; width: 90%; max-width: 320px; padding: 20px; border-radius: 20px; border: 1px solid #efae10; text-align: center; }
-.preview-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; background: white; padding: 5px; }
-.preview-cell { border: 1px solid #ddd; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; color: black; font-weight: bold; }
-.preview-cell.free { background: #ffc107; }
+/* Card Selection Grid */
+.card-grid { 
+    display: grid; 
+    grid-template-columns: repeat(11, 1fr); 
+    gap: 5px; 
+    background: #002b25; 
+    padding: 12px; 
+    border-radius: 8px; 
+}
+.card-num { 
+    background: #b9b9c8; 
+    color: black; 
+    aspect-ratio: 1; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 11px; 
+    border-radius: 4px; 
+    font-weight: bold; 
+    cursor: pointer; 
+}
+.card-num.bought { background: #2196f3 !important; color: white !important; }
 
-.bingo-overlay { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 60px; font-weight: bold; color: #efae10; text-shadow: 0 0 20px black; z-index: 2000; display: none; }
+/* Game Arena Card Layout (Image 3 & 4) */
+.arena-card-wrapper { 
+    background: #002b25; 
+    padding: 10px; 
+    border-radius: 12px; 
+    margin-bottom: 20px; 
+    border: 1px solid #444; 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+.card-label-small { 
+    font-size: 12px; 
+    color: #efae10; 
+    text-align: left; 
+    margin-bottom: 6px; 
+    font-weight: bold; 
+    text-transform: uppercase;
+}
+.player-card-arena { 
+    background: #ffffff; 
+    padding: 5px; 
+    display: grid; 
+    grid-template-columns: repeat(5, 1fr); 
+    gap: 2px; 
+    border-radius: 5px; 
+}
+.arena-cell { 
+    border: 1px solid #ccc; 
+    aspect-ratio: 1; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 15px; 
+    font-weight: 800; 
+    color: #333; 
+    cursor: pointer; 
+}
+.arena-cell.marked { background: #efae10 !important; color: black !important; border-color: #d49a0e; }
+
+/* Bingo Button */
+.bingo-btn-card { 
+    background: linear-gradient(to bottom, #ff0000, #cc0000); 
+    color: white; 
+    border: 2px solid white; 
+    width: 100%; 
+    padding: 12px; 
+    font-weight: 900; 
+    border-radius: 8px; 
+    margin-top: 10px; 
+    cursor: pointer; 
+    font-size: 20px; 
+    text-shadow: 1px 1px 2px black;
+}
+
+/* Game Elements */
+.drawn-ball { 
+    width: 70px; height: 70px; 
+    background: white; color: black; 
+    border-radius: 50%; 
+    display: flex; align-items: center; justify-content: center; 
+    font-size: 32px; font-weight: bold; 
+    margin: 15px auto; 
+    border: 5px solid #efae10; 
+}
+.numbers-board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 20px; }
+.board-cell { background: rgba(255,255,255,0.1); font-size: 11px; padding: 6px; border-radius: 3px; }
+.board-cell.hit { background: #efae10; color: black; font-weight: bold; }
+
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+.modal-content { background: #00332c; width: 90%; max-width: 350px; padding: 20px; border-radius: 15px; text-align: center; border: 2px solid #efae10; }
 .hidden { display: none !important; }
