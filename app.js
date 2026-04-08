@@ -2,7 +2,9 @@ const stakes = [10, 20, 30, 50, 80, 100, 150, 200];
 let currentStake = null;
 let timeLeft = 60;
 let pendingCardId = null;
-let boughtCardsNumbers = {}; // የገዛናቸውን ካርዶች ቁጥር ለመያዝ
+let boughtCardsNumbers = {}; 
+let drawnNumbers = new Set();
+let markedNumbers = new Set();
 
 const stakeData = {
     10: { bought: new Set() }, 20: { bought: new Set() }, 30: { bought: new Set() },
@@ -33,7 +35,7 @@ function startGlobalTimer() {
         if (timeLeft <= 0) {
             timeLeft = 0;
             clearInterval(timerInterval);
-            autoStartGame(); // ታይመሩ 0 ሲሆን በራሱ ይጀምራል
+            autoStartGame();
         }
         const timeStr = `00:${timeLeft < 10 ? '0' + timeLeft : timeLeft}`;
         document.querySelectorAll('.timer-display').forEach(el => el.innerText = timeStr);
@@ -42,7 +44,6 @@ function startGlobalTimer() {
 }
 
 function autoStartGame() {
-    // ካርድ የተገዛበትን ስቴክ ፈልጎ ጨዋታውን ይጀምራል
     let activeStake = stakes.find(s => stakeData[s].bought.size > 0);
     if (activeStake) {
         startBingoArena(activeStake);
@@ -103,9 +104,14 @@ function generateBingoNumbers() {
 
 function confirmPurchase() {
     stakeData[currentStake].bought.add(pendingCardId);
-    boughtCardsNumbers[pendingCardId] = lastGeneratedNums; // ካርዱን ከቁጥሮቹ ጋር መመዝገብ
+    boughtCardsNumbers[pendingCardId] = lastGeneratedNums;
     const numberOfCards = stakeData[currentStake].bought.size;
     const possibleWin = (currentStake * numberOfCards * 0.85).toFixed(2);
+    
+    // ነጥብ 3: Active Banner ማስተካከያ
+    document.getElementById('active-banner').classList.remove('hidden');
+    document.getElementById('active-val').innerText = possibleWin;
+
     const winEl = document.getElementById(`win-${currentStake}`);
     if(winEl) winEl.innerText = `${possibleWin} Birr`;
     closeModal();
@@ -117,7 +123,6 @@ function startBingoArena(stake) {
     document.getElementById('card-screen').classList.add('hidden');
     document.getElementById('game-screen').classList.remove('hidden');
 
-    // የ 1-75 ቦርድ ማዘጋጀት
     const board = document.getElementById('numbers-board');
     for(let i=1; i<=75; i++) {
         const div = document.createElement('div');
@@ -125,30 +130,63 @@ function startBingoArena(stake) {
         board.appendChild(div);
     }
 
-    // የተገዛውን የመጀመሪያ ካርድ ማሳየት
     const firstId = Array.from(stakeData[stake].bought)[0];
     const myNums = boughtCardsNumbers[firstId];
     const arenaCard = document.getElementById('arena-card');
+    
+    markedNumbers.add("F"); // Free space መጀመሪያውኑ marked ነው
+
     myNums.forEach((n, idx) => {
         const div = document.createElement('div');
         div.className = 'arena-cell' + (idx === 12 ? ' marked' : '');
-        div.id = `my-num-${n}`;
         div.innerText = idx === 12 ? 'F' : n;
+        
+        // ነጥብ 1: ተጫዋቹ ራሱ እንዲነካው (Manual Click)
+        div.onclick = () => {
+            if(idx === 12) return;
+            if(drawnNumbers.has(n)) {
+                div.classList.add('marked');
+                markedNumbers.add(n);
+                checkBingo(myNums);
+            }
+        };
         arenaCard.appendChild(div);
     });
 
-    // ቁጥሮችን በየተራ ማውጣት
     let pool = Array.from({length: 75}, (_, i) => i + 1).sort(() => Math.random() - 0.5);
     let idx = 0;
     const gameInt = setInterval(() => {
         if (idx >= 75) { clearInterval(gameInt); return; }
         let drawn = pool[idx];
+        drawnNumbers.add(drawn);
         document.getElementById('current-ball').innerText = drawn;
         document.getElementById(`ball-${drawn}`).classList.add('hit');
-        const match = document.getElementById(`my-num-${drawn}`);
-        if(match) match.classList.add('marked');
         idx++;
-    }, 3000); // በየ 3 ሴኮንዱ ቁጥር ይወጣል
+    }, 3000); 
+}
+
+function checkBingo(card) {
+    const wins = [
+        [0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24], // Rows
+        [0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24], // Cols
+        [0,6,12,18,24],[4,8,12,16,20] // Diagonals
+    ];
+    
+    const isWin = wins.some(pattern => 
+        pattern.every(index => {
+            const val = index === 12 ? "F" : card[index];
+            return markedNumbers.has(val);
+        })
+    );
+
+    if(isWin) {
+        document.getElementById('bingo-btn').classList.remove('hidden');
+    }
+}
+
+function claimBingo() {
+    alert("CONGRATULATIONS! YOU WON!");
+    location.reload();
 }
 
 function closeModal() { document.getElementById('card-modal').classList.add('hidden'); pendingCardId = null; }
