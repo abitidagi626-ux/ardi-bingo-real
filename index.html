@@ -29,9 +29,9 @@
         </div>
 
         <div id="card-screen" class="hidden">
-            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
                 <button onclick="showStakeScreen()" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;">⬅️</button>
-                <div style="font-weight:bold;"><span id="selected-stake-val">0</span> Birr Per Card</div>
+                <div style="font-weight:bold;"><span id="selected-stake-val">0</span> Birr | <span id="card-count-info">0</span>/4 Cards</div>
             </div>
             <div id="card-grid" class="card-grid"></div>
         </div>
@@ -42,8 +42,9 @@
                 <div class="drawn-ball" id="current-ball">-</div>
                 <div class="game-layout">
                     <div id="numbers-board" class="numbers-board"></div>
-                    <div id="arena-card" class="player-card-arena"></div>
+                    <div id="arena-cards-container"></div>
                 </div>
+                <button class="bingo-btn-arena" onclick="manualBingoCheck()">BINGO!</button>
             </div>
         </div>
 
@@ -54,7 +55,7 @@
                 <div id="preview-grid" class="preview-grid"></div>
                 <div style="display:flex; gap:10px; margin-top:20px;">
                     <button onclick="closeModal()" style="flex:1; padding:10px; border-radius:8px; border:none; background:#555; color:white;">Go Back</button>
-                    <button onclick="confirmPurchase()" style="flex:1; padding:10px; border-radius:8px; border:none; background:#efae10; font-weight:bold;">Confirm</button>
+                    <button id="confirm-buy-btn" onclick="confirmPurchase()" style="flex:1; padding:10px; border-radius:8px; border:none; background:#efae10; font-weight:bold;">Confirm</button>
                 </div>
             </div>
         </div>
