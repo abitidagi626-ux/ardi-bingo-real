@@ -1,63 +1,53 @@
-* { box-sizing: border-box; }
-body { background: #004d40; color: white; font-family: sans-serif; margin: 0; display: flex; justify-content: center; }
-#app { width: 100%; max-width: 450px; padding: 10px; position: relative; min-height: 100vh; }
-.hidden { display: none !important; }
+body { 
+    background: #004d40; 
+    color: white; 
+    font-family: sans-serif; 
+    margin: 0; 
+    display: flex; 
+    justify-content: center; 
+    overflow-x: hidden; 
+}
+#app { width: 100%; max-width: 450px; padding: 10px; }
+.main-header { background: #00332c; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-bottom: 2px solid #efae10; }
+.top-bar { display: flex; justify-content: space-between; align-items: center; }
+.balance-box { background: #efae10; color: black; padding: 6px 15px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+.sub-header { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+.deposit-btn { background: #efae10; border: none; padding: 5px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+.logo { font-weight: bold; font-size: 1.1rem; letter-spacing: 1px; color: #efae10; }
 
-/* Header */
-.main-header { background: #00332c; padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #efae10; }
-.balance-box { background: #efae10; color: black; padding: 6px 12px; border-radius: 20px; font-weight: bold; }
+/* Stake Table */
+.stake-table { background: #00332c; border-radius: 10px; margin-top: 10px; border: 1px solid rgba(239, 174, 16, 0.3); }
+.table-header { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; padding: 12px; font-size: 11px; color: #bbb; text-align: center; border-bottom: 1px solid #004d40; }
+.stake-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; padding: 15px 5px; border-bottom: 1px solid #004d40; text-align: center; align-items: center; font-size: 14px; }
+.join-btn { background: #efae10; border: none; padding: 6px; border-radius: 5px; cursor: pointer; font-weight: bold; }
 
-/* Stake Rows */
-.stake-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #00332c; margin-bottom: 8px; border-radius: 10px; }
-.join-btn { background: #efae10; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+/* Card Selection */
+.card-header-container { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+.card-grid { display: grid; grid-template-columns: repeat(11, 1fr); gap: 5px; }
+.card-num { background: #b9b9c8; color: black; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 11px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+.card-num.bought { background: #2196f3 !important; color: white !important; }
 
 /* Game Arena */
-.game-container { background: #002b25; border-radius: 15px; padding: 10px; border: 1px solid #efae10; margin-top: 10px; position: relative; }
-.drawn-ball { width: 60px; height: 60px; background: white; color: black; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; margin: 0 auto 10px; border: 3px solid #efae10; }
-
-.arena-layout { display: flex; gap: 8px; align-items: flex-start; }
-.board-side { flex: 1; display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; }
-.board-cell { background: rgba(255,255,255,0.1); font-size: 9px; padding: 3px; text-align: center; border-radius: 2px; }
+.game-container { background: #00332c; border-radius: 15px; padding: 15px; border: 1px solid #efae10; margin-top: 10px; text-align: center; }
+.drawn-ball { width: 65px; height: 65px; background: white; color: black; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; margin: 0 auto 15px; border: 4px solid #efae10; box-shadow: 0 0 15px rgba(239, 174, 16, 0.5); }
+.game-layout { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 15px; }
+.numbers-board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; flex: 1; }
+.board-cell { background: rgba(255,255,255,0.1); font-size: 10px; padding: 5px; text-align: center; border-radius: 2px; }
 .board-cell.hit { background: #efae10; color: black; font-weight: bold; }
+.player-card-arena { flex: 1.2; background: white; padding: 5px; border-radius: 8px; color: black; display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; }
+.arena-cell { border: 1px solid #ddd; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; cursor: pointer; }
+.arena-cell.marked { background: #efae10; color: black; }
 
-.cards-side { flex: 1.2; display: flex; flex-direction: column; gap: 8px; align-items: center; }
-.player-card { 
-    background: white; padding: 4px; border-radius: 6px; color: black; 
-    display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.5px;
-    width: 100%; transform: scale(0.95);
-}
-.arena-cell { border: 1px solid #ccc; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; cursor: pointer; }
-.arena-cell.marked { background: #efae10 !important; }
-
-/* ነጥብ 3: Possible Win መጠን በጎላ (Bold) ሁኔታ ማሳያ */
-.possible-win-card-display {
-    background: rgba(239, 174, 16, 0.1);
-    color: #efae10;
-    font-weight: 900; /* በጎላ (Bold) */
-    font-size: 16px;
-    padding: 5px 15px;
-    border-radius: 20px;
-    border: 1px solid #efae10;
-    margin-bottom: 5px;
-    text-align: center;
-}
-
-/* ነጥብ 1: Bingo Button (ቀይ መስመር ባለበት ቦታ) */
-.bingo-btn { 
-    background: red; 
-    color: white; 
-    border: 2px solid white; 
-    padding: 10px 30px; 
-    border-radius: 8px; 
-    font-weight: bold; 
-    cursor: pointer; 
-    margin-top: 15px;
-    width: 100%;
-    font-size: 18px;
-    display: none; /* መጀመሪያ አይታይም */
-}
+/* Bingo Button & Msg (Arena) */
+.bingo-btn { background: #ff0000; color: white; border: 3px solid white; padding: 12px 30px; font-size: 20px; font-weight: bold; border-radius: 10px; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+.bingo-alert { color: #efae10; font-size: 24px; font-weight: bold; text-align: center; margin-top: 10px; animation: flash 0.5s infinite; }
 
 /* Modal */
-.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 100; }
-.modal-content { background: #00332c; padding: 20px; border-radius: 20px; width: 85%; text-align: center; border: 1px solid #efae10; }
-.preview-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; background: white; padding: 10px; border-radius: 10px; color: black; }
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+.modal-content { background: #00332c; width: 90%; max-width: 340px; padding: 20px; border-radius: 20px; text-align: center; border: 1px solid #efae10; }
+.card-display { background: white; color: black; padding: 15px; border-radius: 15px; margin: 15px 0; }
+.preview-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+.preview-cell { border: 1px solid #ddd; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 15px; }
+.preview-cell.free { background: #2196f3; color: white; }
+.hidden { display: none !important; }
+@keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
