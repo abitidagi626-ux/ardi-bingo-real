@@ -16,13 +16,13 @@ const stakeData = {
 
 function init() {
     const list = document.getElementById('stake-list');
-    list.innerHTML = `<div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; padding:12px 5px; font-size:12px; color:#bbb; text-align:center; font-weight:bold; border-bottom:1px solid #004d40;">
+    list.innerHTML = `<div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; padding:12px 5px; font-size:12px; color:#aaa; text-align:center; font-weight:bold; border-bottom:1px solid #004d40;">
         <span>Stake</span><span>Active</span><span>Win</span><span>Join</span></div>`;
     stakes.forEach(s => {
         const row = document.createElement('div');
         row.className = 'stake-row';
         row.innerHTML = `<span><b>${s}</b></span><span class="timer-display">00:60</span><span id="win-${s}">0.00</span>
-            <button class="join-btn" id="btn-join-${s}" onclick="openCardSelection(${s})" style="background:#efae10; border:none; border-radius:5px; font-weight:bold; padding:6px; cursor:pointer; font-size:12px;">JOIN »</button>`;
+            <button class="join-btn" id="btn-join-${s}" onclick="openCardSelection(${s})" style="background:#efae10; border:none; border-radius:5px; font-weight:bold; padding:6px; cursor:pointer;">Join »</button>`;
         list.appendChild(row);
     });
     startGlobalTimer();
@@ -64,7 +64,7 @@ function generateCardGrid() {
         const card = document.createElement('div');
         card.className = `card-num ${stakeData[currentStake].bought.has(i) ? 'bought' : ''}`;
         card.innerText = i;
-        card.onclick = () => { if(stakeData[currentStake].bought.size < 4) showPreview(i); else alert("Maximum 4 cards per round."); };
+        card.onclick = () => { if(stakeData[currentStake].bought.size < 4) showPreview(i); else alert("Max 4 cards."); };
         grid.appendChild(card);
     }
 }
@@ -177,7 +177,7 @@ function manualBingoCheck(cardId) {
         document.getElementById('bingo-overlay').style.display = 'block';
         setTimeout(() => location.reload(), 3000);
     } else {
-        alert("Not a Bingo yet!");
+        alert("Not Bingo yet!");
     }
 }
 
