@@ -5,7 +5,7 @@ let timeLeft = 60;
 let pendingCardId = null;
 let boughtCardsNumbers = {}; 
 let drawnNumbers = new Set();
-let playerMarkedNumbers = {}; // ተጫዋቹ የነካቸውን ቁጥሮች ለመያዝ
+let playerMarkedNumbers = {}; 
 let gameInterval;
 
 const stakeData = {
@@ -16,13 +16,13 @@ const stakeData = {
 
 function init() {
     const list = document.getElementById('stake-list');
-    list.innerHTML = `<div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; padding:10px; font-size:11px; color:#aaa; text-align:center;">
-        <span>Stake</span><span>Active</span><span>Possible Win</span><span>Join</span></div>`;
+    list.innerHTML = `<div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; padding:12px 5px; font-size:12px; color:#bbb; text-align:center; font-weight:bold; border-bottom:1px solid #004d40;">
+        <span>Stake</span><span>Active</span><span>Win</span><span>Join</span></div>`;
     stakes.forEach(s => {
         const row = document.createElement('div');
-        row.style = "display:grid; grid-template-columns:1fr 1fr 1fr 1fr; padding:15px 5px; border-bottom:1px solid #004d40; text-align:center; align-items:center;";
+        row.className = 'stake-row';
         row.innerHTML = `<span><b>${s}</b></span><span class="timer-display">00:60</span><span id="win-${s}">0.00</span>
-            <button class="join-btn" id="btn-join-${s}" onclick="openCardSelection(${s})" style="background:#efae10; border:none; border-radius:5px; font-weight:bold; cursor:pointer;">Join</button>`;
+            <button class="join-btn" id="btn-join-${s}" onclick="openCardSelection(${s})" style="background:#efae10; border:none; border-radius:5px; font-weight:bold; padding:6px; cursor:pointer; font-size:12px;">JOIN »</button>`;
         list.appendChild(row);
     });
     startGlobalTimer();
@@ -32,7 +32,7 @@ function startGlobalTimer() {
     const timer = setInterval(() => {
         if (timeLeft > 0) {
             timeLeft--;
-            const timeStr = `00:${timeLeft < 10 ? '0' + timeLeft : timeLeft}`;
+            const timeStr = `00:${timeLeft < 10 ? '0'+timeLeft : timeLeft}`;
             document.querySelectorAll('.timer-display').forEach(el => el.innerText = timeStr);
             if(document.getElementById('modal-timer')) document.getElementById('modal-timer').innerText = timeStr;
         } else {
@@ -44,7 +44,7 @@ function startGlobalTimer() {
 }
 
 function openCardSelection(stake) {
-    if (lockStake && lockStake !== stake) return alert("Locked to " + lockStake + " stake.");
+    if (lockStake && lockStake !== stake) return alert("Stake locked to " + lockStake);
     currentStake = stake;
     document.getElementById('stake-screen').classList.add('hidden');
     document.getElementById('card-screen').classList.remove('hidden');
@@ -64,7 +64,7 @@ function generateCardGrid() {
         const card = document.createElement('div');
         card.className = `card-num ${stakeData[currentStake].bought.has(i) ? 'bought' : ''}`;
         card.innerText = i;
-        card.onclick = () => { if(stakeData[currentStake].bought.size < 4) showPreview(i); else alert("Max 4 Cards"); };
+        card.onclick = () => { if(stakeData[currentStake].bought.size < 4) showPreview(i); else alert("Maximum 4 cards per round."); };
         grid.appendChild(card);
     }
 }
@@ -74,28 +74,29 @@ function showPreview(id) {
     document.getElementById('modal-card-no').innerText = `Card No. ${id}`;
     const previewGrid = document.getElementById('preview-grid');
     previewGrid.innerHTML = "";
-    lastGeneratedNums = generateBingoNumbers();
-    lastGeneratedNums.forEach((n, idx) => {
+    let tempNums = generateBingoNumbers();
+    tempNums.forEach((n, idx) => {
         const cell = document.createElement('div');
-        cell.className = 'preview-cell' + (idx === 12 ? ' free' : '');
+        cell.className = 'arena-cell' + (idx === 12 ? ' marked' : '');
         cell.innerText = idx === 12 ? 'F' : n;
         previewGrid.appendChild(cell);
     });
+    boughtCardsNumbers["temp"] = tempNums; 
     document.getElementById('card-modal').classList.remove('hidden');
 }
 
 function generateBingoNumbers() {
     let card = [];
     const ranges = [[1,15], [16,30], [31,45], [46,60], [61,75]];
-    let columns = ranges.map(range => Array.from({length: 15}, (_, i) => range[0] + i).sort(() => Math.random() - 0.5).slice(0, 5));
+    let columns = ranges.map(range => Array.from({length:15}, (_,i)=>range[0]+i).sort(()=>Math.random()-0.5).slice(0,5));
     for(let r=0; r<5; r++) for(let c=0; c<5; c++) card.push(columns[c][r]);
     return card;
 }
 
 function confirmPurchase() {
     stakeData[currentStake].bought.add(pendingCardId);
-    boughtCardsNumbers[pendingCardId] = lastGeneratedNums;
-    playerMarkedNumbers[pendingCardId] = new Set([12]); // FREE space is auto-marked
+    boughtCardsNumbers[pendingCardId] = boughtCardsNumbers["temp"];
+    playerMarkedNumbers[pendingCardId] = new Set([12]);
     lockStake = currentStake;
     const win = (currentStake * stakeData[currentStake].bought.size * 0.8).toFixed(2);
     document.getElementById(`win-${currentStake}`).innerText = win;
@@ -118,7 +119,7 @@ function startBingoArena(stake) {
     stakeData[stake].bought.forEach(id => {
         const wrapper = document.createElement('div');
         wrapper.className = 'arena-card-wrapper';
-        wrapper.innerHTML = `<div class="card-label-small">Card #${id}</div>`;
+        wrapper.innerHTML = `<div class="card-label-small">CARD #${id}</div>`;
         
         const cardGrid = document.createElement('div');
         cardGrid.className = 'player-card-arena';
@@ -139,7 +140,7 @@ function startBingoArena(stake) {
         container.appendChild(wrapper);
     });
 
-    let pool = Array.from({length: 75}, (_, i) => i + 1).sort(() => Math.random() - 0.5);
+    let pool = Array.from({length:75}, (_,i)=>i+1).sort(()=>Math.random()-0.5);
     let idx = 0;
     gameInterval = setInterval(() => {
         if(idx >= 75) return clearInterval(gameInterval);
@@ -153,7 +154,7 @@ function startBingoArena(stake) {
 
 function toggleMark(cardId, index, number, element) {
     if (index === 12) return; 
-    if (!drawnNumbers.has(number)) return; // የወጣ ቁጥር ካልሆነ ክሊክ አይሰራም
+    if (!drawnNumbers.has(number)) return; 
 
     if (playerMarkedNumbers[cardId].has(index)) {
         playerMarkedNumbers[cardId].delete(index);
@@ -171,13 +172,12 @@ function manualBingoCheck(cardId) {
         [0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24],
         [0,6,12,18,24],[4,8,12,16,20]
     ];
-    const isWin = lines.some(line => line.every(idx => marked.has(idx)));
-    if (isWin) {
+    if (lines.some(line => line.every(idx => marked.has(idx)))) {
         clearInterval(gameInterval);
         document.getElementById('bingo-overlay').style.display = 'block';
         setTimeout(() => location.reload(), 3000);
     } else {
-        alert("Not Bingo yet! Check your marked numbers.");
+        alert("Not a Bingo yet!");
     }
 }
 
