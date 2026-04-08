@@ -3,7 +3,7 @@ let currentStake = null;
 let timeLeft = 60;
 let pendingCardId = null;
 let boughtCardsNumbers = {}; 
-let lastWinAmount = "0.00";
+let lastGeneratedNums = [];
 
 const stakeData = {
     10: { bought: new Set() }, 20: { bought: new Set() }, 30: { bought: new Set() },
@@ -29,27 +29,18 @@ function init() {
 }
 
 function startGlobalTimer() {
-    const timerInterval = setInterval(() => {
-        timeLeft--;
-        if (timeLeft <= 0) {
-            timeLeft = 0;
-            clearInterval(timerInterval);
-            autoStartGame();
-        }
+    setInterval(() => {
+        if (timeLeft > 0) timeLeft--;
         const timeStr = `00:${timeLeft < 10 ? '0' + timeLeft : timeLeft}`;
         document.querySelectorAll('.timer-display').forEach(el => el.innerText = timeStr);
         if(document.getElementById('modal-timer')) document.getElementById('modal-timer').innerText = timeStr;
+        if(timeLeft === 0) autoStartGame();
     }, 1000);
 }
 
 function autoStartGame() {
     let activeStake = stakes.find(s => stakeData[s].bought.size > 0);
-    if (activeStake) {
-        startBingoArena(activeStake);
-    } else {
-        alert("Time up! No cards were purchased.");
-        location.reload();
-    }
+    if (activeStake) startBingoArena(activeStake);
 }
 
 function openCardSelection(stake) {
@@ -64,6 +55,7 @@ function generateCardGrid() {
     const grid = document.getElementById('card-grid');
     grid.innerHTML = "";
     const boughtInCurrentStake = stakeData[currentStake].bought;
+    // 143 ትንንሽ ካርዶችን መፍጠር (Image 2 style)
     for (let i = 1; i <= 143; i++) {
         const card = document.createElement('div');
         card.className = `card-num ${boughtInCurrentStake.has(i) ? 'bought' : ''}`;
@@ -73,18 +65,19 @@ function generateCardGrid() {
     }
 }
 
-let lastGeneratedNums = [];
 function showPreview(id) {
     if(stakeData[currentStake].bought.has(id)) return;
     pendingCardId = id;
     document.getElementById('modal-card-no').innerText = `Card No. ${id}`;
     const previewGrid = document.getElementById('preview-grid');
     previewGrid.innerHTML = "";
+    
+    // ለፕሪቪው 5x5 ቁጥሮችን ማመንጨት (Image 3 style)
     lastGeneratedNums = generateBingoNumbers();
     lastGeneratedNums.forEach((n, idx) => {
         const cell = document.createElement('div');
         cell.className = 'preview-cell' + (idx === 12 ? ' free' : '');
-        cell.innerText = idx === 12 ? 'F' : n;
+        cell.innerText = idx === 12 ? 'FREE' : n;
         previewGrid.appendChild(cell);
     });
     document.getElementById('card-modal').classList.remove('hidden');
@@ -104,22 +97,20 @@ function generateBingoNumbers() {
 function confirmPurchase() {
     stakeData[currentStake].bought.add(pendingCardId);
     boughtCardsNumbers[pendingCardId] = lastGeneratedNums;
-    const numberOfCards = stakeData[currentStake].bought.size;
-    lastWinAmount = (currentStake * numberOfCards * 0.85).toFixed(2);
-    const winEl = document.getElementById(`win-${currentStake}`);
-    if(winEl) winEl.innerText = `${lastWinAmount} Birr`;
+    const numCards = stakeData[currentStake].bought.size;
+    const possibleWin = (currentStake * numCards * 0.85).toFixed(2);
+    
+    document.getElementById(`win-${currentStake}`).innerText = `${possibleWin} Birr`;
+    document.getElementById('arena-possible-win').innerText = `${possibleWin} Birr`;
+    
     closeModal();
     generateCardGrid();
 }
 
 function startBingoArena(stake) {
-    document.getElementById('stake-screen').classList.add('hidden');
     document.getElementById('card-screen').classList.add('hidden');
     document.getElementById('game-screen').classList.remove('hidden');
     
-    // ነጥብ 2: Possible Win በ Arena ላይ ማሳየት
-    document.getElementById('arena-possible-win').innerText = `WIN: ${lastWinAmount} ETB`;
-
     const board = document.getElementById('numbers-board');
     for(let i=1; i<=75; i++) {
         const div = document.createElement('div');
@@ -144,18 +135,13 @@ function startBingoArena(stake) {
         if (idx >= 75) { clearInterval(gameInt); return; }
         let drawn = pool[idx];
         document.getElementById('current-ball').innerText = drawn;
-        document.getElementById(`ball-${drawn}`).classList.add('hit');
-        const match = document.getElementById(`my-num-${drawn}`);
-        if(match) match.classList.add('marked');
+        if(document.getElementById(`ball-${drawn}`)) document.getElementById(`ball-${drawn}`).classList.add('hit');
+        if(document.getElementById(`my-num-${drawn}`)) document.getElementById(`my-num-${drawn}`).classList.add('marked');
         idx++;
     }, 3000);
 }
 
-function claimBingo() {
-    alert("Bingo Claimed!");
-}
-
-function closeModal() { document.getElementById('card-modal').classList.add('hidden'); pendingCardId = null; }
+function closeModal() { document.getElementById('card-modal').classList.add('hidden'); }
 function showStakeScreen() { document.getElementById('card-screen').classList.add('hidden'); document.getElementById('stake-screen').classList.remove('hidden'); }
 
 init();
