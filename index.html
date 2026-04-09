@@ -6,9 +6,10 @@
     <title>Ardi Bingo</title> 
     <link rel="stylesheet" href="style.css">
     <style>
-        /* ከላይ ያለውን ባዶ ቦታ ለማጥፋት */
-        body { margin: 0; padding: 0; }
-        #app { padding-top: 5px; }
+        /* ከላይ ያለውን ማንኛውንም ባዶ ቦታ (Gap) ለማጥፋት */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: #00221c; overflow-x: hidden; }
+        #app { padding-top: 0px; margin-top: 0px; }
 
         .winner-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 3000; text-align: center; }
         .winner-card-box { background: white; padding: 10px; border-radius: 10px; margin-top: 15px; box-shadow: 0 0 20px #efae10; }
@@ -46,7 +47,7 @@
 </head>
 <body>
     <div id="app">
-        <header class="main-header" style="background: #00332c; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-bottom: 3px solid #efae10;">
+        <header class="main-header" style="background: #00332c; padding: 15px; border-radius: 0 0 12px 12px; margin-bottom: 10px; border-bottom: 3px solid #efae10;">
             <div class="top-bar">
                 <button onclick="location.reload()" class="refresh-btn">Refresh</button>
                 <div class="balance-status-box">💰 ETB <span id="balance">0.00</span></div>
@@ -62,9 +63,9 @@
         </div>
 
         <div id="card-screen" class="hidden">
-            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; padding: 0 10px;">
                 <button onclick="showStakeScreen()" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;">⬅</button>
-                <div style="font-size:14px;"><span id="selected-stake-val">0</span> Birr | <span id="card-count-info">0</span>/4 Cards</div>
+                <div style="font-size:14px; color: white;"><span id="selected-stake-val">0</span> Birr | <span id="card-count-info">0</span>/4 Cards</div>
             </div>
             <div id="card-grid" class="card-grid"></div>
         </div>
