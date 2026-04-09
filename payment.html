@@ -168,7 +168,7 @@
 
                 <div class="instruction">
                     <p><strong>መመሪያ፦</strong></p>
-                    <p>1. ከላይ ያለውን ቁጥር ኮፒ አድርገው በባንክ ወይም በቴሌብር  አፕዎ ብር ይላኩ።</p>
+                    <p>1. ከላይ ያለውን ቁጥር ኮፒ አድርገው በባንክ ወይም በቴሌብር አፕዎ ብር ይላኩ።</p>
                     <p>2. ብር ከላኩ በኋላ የላኩትን መጠን እና የደረሰዎትን መልእክት (SMS) ከታች ባሉት ሳጥኖች ውስጥ ያስገቡ።</p>
                 </div>
 
@@ -186,6 +186,25 @@
 
     <script>
         let currentPage = 'selection';
+
+        // ሎጂክ - የዲፖዚት ጥያቄን ለመመዝገብ (ለጊዜው በ LocalStorage)
+        function requestDeposit(userId, amount, transactionId) {
+            const depositRequest = {
+                userId: userId,
+                amount: amount,
+                transactionId: transactionId,
+                bank: document.getElementById('selected-bank-name').innerText,
+                status: 'pending',
+                timestamp: new Date().toISOString()
+            };
+
+            // ጥያቄዎችን ለማከማቸት (ለAdmin እንዲታይ)
+            let pendingRequests = JSON.parse(localStorage.getItem('admin_deposit_requests')) || [];
+            pendingRequests.push(depositRequest);
+            localStorage.setItem('admin_deposit_requests', JSON.stringify(pendingRequests));
+            
+            console.log("Deposit request logged:", depositRequest);
+        }
 
         function showDetail(bank, number, logo) {
             document.getElementById('selection-page').classList.add('hidden');
@@ -216,21 +235,22 @@
             alert("ቁጥሩ ኮፒ ተደርጓል፦ " + num);
         }
 
+        // አዲሱ የተሻሻለ submitRequest
         function submitRequest() {
-            const amount = document.getElementById('sent-amount').value;
-            const message = document.getElementById('transaction-msg').value;
+            const amountInput = document.getElementById('sent-amount').value;
+            const amount = parseFloat(amountInput);
+            const transactionId = document.getElementById('transaction-msg').value;
+            const userId = "user_1"; // ይህን በሁዋላ ከLogin ሲስተም ጋር እናገናኘዋለን
 
-            if(!amount || amount < 10) {
-                alert("እባክዎ ትክክለኛ የብር መጠን ያስገቡ!");
-                return;
+            if (amount >= 10 && transactionId.trim().length > 3) {
+                // ለAdmin ጥያቄ መላክ
+                requestDeposit(userId, amount, transactionId);
+                
+                alert("እናመሰግናለን! ጥያቄዎ ለAdmin ተልኳል። Admin ሲያረጋግጥ በሂሳብዎ ላይ ይጨመራል።");
+                window.location.href = 'index.html';
+            } else {
+                alert("እባክዎ ትክክለኛ የብር መጠን (ቢያንስ 10 ብር) እና የትራንዛክሽን መረጃ ያስገቡ!");
             }
-            if(!message || message.trim().length < 5) {
-                alert("እባክዎ የትራንዛክሽን መረጃውን ያስገቡ!");
-                return;
-            }
-
-            alert("እናመሰግናለን! ጥያቄዎ ለAdmin ተልኳል።");
-            window.location.href = 'index.html';
         }
     </script>
 </body>
