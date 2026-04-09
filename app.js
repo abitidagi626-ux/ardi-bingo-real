@@ -9,7 +9,7 @@ function init() {
     list.innerHTML = `<div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; padding:10px 5px; font-size:11px; color:#aaa; text-align:center; border-bottom:1px solid #004d40;"><span>Stake</span><span>Active</span><span>Win</span><span>Join</span></div>`;
     stakes.forEach(s => {
         const row = document.createElement('div'); row.className = 'stake-row';
-        row.innerHTML = `<span><b>${s}</b></span><span class="timer-display">00:60</span><span id="win-${s}">0.00</span><button onclick="openCardSelection(${s})" style="background:#efae10; border:none; border-radius:4px; padding:4px; cursor:pointer; font-weight:bold;">Join »</button>`;
+        row.innerHTML = `<span><b>${s}</b></span><span class="timer-display">00:60</span><span id="win-${s}">0.00</span><button onclick="openCardSelection(${s})" style="background:#efae10; border:none; border-radius:4px; padding:4px; cursor:pointer; font-weight:bold; font-size:11px;">Join »</button>`;
         list.appendChild(row);
     });
     startGlobalTimer();
@@ -26,7 +26,7 @@ function startGlobalTimer() {
 }
 
 function openCardSelection(stake) {
-    if (lockStake && lockStake !== stake) return alert("Locked to " + lockStake);
+    if (lockStake && lockStake !== stake) return alert("Stake locked to " + lockStake);
     currentStake = stake;
     document.getElementById('stake-screen').classList.add('hidden');
     document.getElementById('card-screen').classList.remove('hidden');
@@ -91,7 +91,8 @@ function startBingoArena(stake) {
         const cardGrid = document.createElement('div'); cardGrid.className = 'player-card-arena';
         boughtCardsNumbers[id].forEach((n, idx) => {
             const cell = document.createElement('div'); cell.className = 'arena-cell' + (idx === 12 ? ' marked' : '');
-            cell.innerText = idx === 12 ? 'F' : n; cell.onclick = () => { if(drawnNumbers.has(n)) { playerMarkedNumbers[id].add(idx); cell.classList.add('marked'); } };
+            cell.innerText = idx === 12 ? 'F' : n; 
+            cell.onclick = () => { if(drawnNumbers.has(n)) { playerMarkedNumbers[id].add(idx); cell.classList.add('marked'); } };
             cardGrid.appendChild(cell);
         });
         wrapper.appendChild(cardGrid);
@@ -112,11 +113,56 @@ function startBingoArena(stake) {
 
 function manualBingoCheck(id) {
     const marked = playerMarkedNumbers[id];
-    const lines = [[0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24],[0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24],[0,6,12,18,24],[4,8,12,16,20]];
-    if (lines.some(l => l.every(idx => marked.has(idx)))) {
-        clearInterval(gameInterval); document.getElementById('bingo-overlay').style.display = 'block';
-        setTimeout(() => location.reload(), 3000);
+    // Win Patterns: Horizontal, Vertical, Diagonal, and Four Corners
+    const patterns = [
+        [0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24], // Rows
+        [0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24], // Cols
+        [0,6,12,18,24],[4,8,12,16,20], // Diagonals
+        [0,4,20,24] // Four Corners
+    ];
+    
+    let winningPattern = patterns.find(p => p.every(idx => marked.has(idx)));
+
+    if (winningPattern) {
+        clearInterval(gameInterval);
+        showBingoWinner(id, winningPattern);
     } else { alert("Not Bingo yet!"); }
+}
+
+function showBingoWinner(cardId, pattern) {
+    const overlay = document.getElementById('winner-display-overlay');
+    const text = document.getElementById('winner-text');
+    const preview = document.getElementById('winning-card-preview');
+    
+    text.innerText = `Card Number #${cardId} is the Winner!`;
+    overlay.classList.remove('hidden');
+    
+    // አሸናፊውን ካርድ እና አሸናፊ ያደረጉትን ቁጥሮች (Tick) ነጥሎ ማሳየት
+    const cardGrid = document.createElement('div');
+    cardGrid.className = 'player-card-arena';
+    cardGrid.style.display = 'grid';
+    cardGrid.style.gridTemplateColumns = 'repeat(5, 1fr)';
+    cardGrid.style.gap = '2px';
+    
+    boughtCardsNumbers[cardId].forEach((n, idx) => {
+        const cell = document.createElement('div');
+        cell.className = 'arena-cell';
+        cell.style.width = '40px'; cell.style.height = '40px';
+        cell.style.border = '1px solid #ccc';
+        cell.style.display = 'flex'; cell.style.alignItems = 'center'; cell.style.justifyContent = 'center';
+        cell.style.fontWeight = 'bold'; cell.style.color = 'black';
+        
+        cell.innerText = idx === 12 ? 'F' : n;
+        
+        // አሸናፊ ያደረጉት ቁጥሮች ላይ አረንጓዴ ቀለም (Tick)
+        if (pattern.includes(idx)) {
+            cell.classList.add('winner-cell');
+        }
+        cardGrid.appendChild(cell);
+    });
+    
+    preview.innerHTML = "";
+    preview.appendChild(cardGrid);
 }
 
 function closeModal() { document.getElementById('card-modal').classList.add('hidden'); }
