@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Deposit - Ardi Bingo</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background-color: #00221c; color: white; overflow-x: hidden; }
 
         /* Header */
@@ -26,25 +26,32 @@
 
         h2 { color: #efae10; margin-bottom: 20px; font-size: 1.1rem; text-align: center; }
 
-        /* Bank Selection Style (Image 2 & 3 መሰረት) */
+        /* Bank Selection Style (ምስል 1 እና 2ን መሠረት ያደረገ) */
         .bank-option {
             background: #004d40;
-            padding: 15px;
+            padding: 12px 15px;
             border-radius: 12px;
             margin-bottom: 12px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             cursor: pointer;
-            border: 1px solid rgba(239, 174, 16, 0.2);
-            transition: 0.3s;
+            border: 1px solid rgba(239, 174, 16, 0.1);
         }
-        .bank-option:active { transform: scale(0.98); background: #005a4b; }
         .bank-info { display: flex; align-items: center; gap: 15px; }
-        .bank-logo { width: 40px; height: 40px; background: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; font-size: 10px; text-align: center; }
-        .arrow { color: #efae10; font-weight: bold; }
+        
+        /* ሎጎዎቹን እዚህ ጋር ያስገቡ */
+        .bank-logo { 
+            width: 45px; 
+            height: 45px; 
+            border-radius: 8px; 
+            object-fit: contain; 
+            background: white; /* ምስሉ ግልጽ ካልሆነ እንዲታይ */
+        }
+        
+        .arrow { color: #efae10; font-size: 18px; font-weight: bold; }
 
-        /* Detail View Style (Image 4 መሰረት) */
+        /* Detail Card (ምስል 4ን መሠረት ያደረገ) */
         .detail-card {
             background: #00332c;
             border-radius: 15px;
@@ -60,22 +67,23 @@
             border: 1px dashed #efae10;
         }
         .account-label { font-size: 12px; color: #aaa; margin-bottom: 5px; }
-        .account-number { font-size: 1.4rem; font-weight: bold; color: #efae10; letter-spacing: 1px; }
+        .account-number { font-size: 1.5rem; font-weight: bold; color: #efae10; letter-spacing: 1px; }
         
-        .copy-btn {
+        .action-btn {
             background: #efae10;
             color: black;
             border: none;
-            padding: 10px 20px;
+            padding: 12px;
             border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
             width: 100%;
             margin-top: 10px;
         }
-
-        .instruction { font-size: 0.9rem; color: #ddd; line-height: 1.5; margin-top: 15px; text-align: left; }
         
+        .submit-btn { background: #28a745; color: white; margin-top: 15px; }
+
+        .instruction { font-size: 0.85rem; color: #ccc; line-height: 1.6; margin-top: 15px; text-align: left; }
         .amount-input {
             width: 100%;
             padding: 12px;
@@ -86,6 +94,7 @@
             color: white;
             text-align: center;
             font-size: 18px;
+            outline: none;
         }
     </style>
 </head>
@@ -98,27 +107,25 @@
 
     <div class="container">
         <div id="selection-page">
-            <h2>ክፍያ የሚፈጽሙበትን ባንክ ይምረጡ</h2>
+            <h2>የክፍያ አማራጭ ይምረጡ</h2>
             
-            <div class="bank-option" onclick="showDetail('Telebirr', '0979429028')">
+            <div class="bank-option" onclick="showDetail('Telebirr', '0979429028', 'image_73c07b.png')">
                 <div class="bank-info">
-                    <div class="bank-logo" style="background: #2196F3; color: white;">tele<br>birr</div>
-                    <span>Telebirr / ቴሌ ብር</span>
+                    <img src="image_73c07b.png" alt="telebirr" class="bank-logo"> <span>Telebirr / ቴሌ ብር</span>
                 </div>
                 <span class="arrow">❯</span>
             </div>
 
-            <div class="bank-option" onclick="showDetail('CBE Birr', '0979429028')">
+            <div class="bank-option" onclick="showDetail('CBE Birr', '0979429028', 'image_73c133.png')">
                 <div class="bank-info">
-                    <div class="bank-logo" style="background: #4b2c85; color: white;">CBE<br>Birr</div>
-                    <span>CBE Birr / ሲቢኢ ብር</span>
+                    <img src="image_73c133.png" alt="cbebirr" class="bank-logo"> <span>CBE Birr / ሲቢኢ ብር</span>
                 </div>
                 <span class="arrow">❯</span>
             </div>
 
-            <div class="bank-option" onclick="showDetail('CBE Bank', '1000277987067')">
+            <div class="bank-option" onclick="showDetail('CBE Bank', '1000277987067', 'image_73c133.png')">
                 <div class="bank-info">
-                    <div class="bank-logo" style="background: #4b2c85; color: white;">CBE</div>
+                    <img src="image_73c133.png" alt="cbe" class="bank-logo">
                     <span>CBE Bank / ንግድ ባንክ</span>
                 </div>
                 <span class="arrow">❯</span>
@@ -127,23 +134,23 @@
 
         <div id="detail-page" class="hidden">
             <div class="detail-card">
-                <h3 id="selected-bank-name" style="color: #efae10;">Telebirr</h3>
+                <img id="detail-logo" src="" alt="logo" class="bank-logo" style="margin-bottom: 10px;">
+                <h3 id="selected-bank-name" style="color: #efae10;">Bank Name</h3>
                 
                 <div class="account-box">
                     <p class="account-label" id="account-type-label">የስልክ ቁጥር</p>
-                    <p class="account-number" id="target-number">0979429028</p>
-                    <button class="copy-btn" onclick="copyNumber()">Copy / ቁጥሩን ኮፒ አድርግ</button>
+                    <p class="account-number" id="target-number">ቁጥር</p>
+                    <button class="action-btn" onclick="copyNumber()">Copy / ኮፒ አድርግ</button>
                 </div>
 
                 <div class="instruction">
-                    <p><strong>እንዴት ብር ማስገባት ይቻላል?</strong></p>
-                    <p>1. ከላይ ያለውን ቁጥር ኮፒ ያድርጉ።</p>
-                    <p>2. ወደ ባንክ አፕሊኬሽንዎ በመሄድ የፈለጉትን የብር መጠን ይላኩ።</p>
-                    <p>3. ብር ከላኩ በኋላ ያስገቡትን የብር መጠን እዚህ ይጥቀሱ።</p>
+                    <p><strong>መመሪያ፦</strong></p>
+                    <p>1. ከላይ ያለውን ቁጥር ኮፒ አድርገው በባንክ አፕዎ ብር ይላኩ።</p>
+                    <p>2. ብር ከላኩ በኋላ የላኩትን መጠን ከታች ባለው ሳጥን ውስጥ ይጻፉ።</p>
                 </div>
 
-                <input type="number" id="sent-amount" class="amount-input" placeholder="ያስገቡት የብር መጠን">
-                <button class="copy-btn" style="background: #28a745; color: white; margin-top: 20px;" onclick="submitRequest()">ያለቀውን ፎርም ላክ</button>
+                <input type="number" id="sent-amount" class="amount-input" placeholder="የላኩት የብር መጠን">
+                <button class="action-btn submit-btn" onclick="submitRequest()">አረጋግጥ / Confirm</button>
             </div>
         </div>
     </div>
@@ -151,18 +158,18 @@
     <script>
         let currentPage = 'selection';
 
-        function showDetail(bank, number) {
+        function showDetail(bank, number, logo) {
             document.getElementById('selection-page').classList.add('hidden');
             document.getElementById('detail-page').classList.remove('hidden');
             document.getElementById('header-title').innerText = bank;
             document.getElementById('selected-bank-name').innerText = bank;
             document.getElementById('target-number').innerText = number;
+            document.getElementById('detail-logo').src = logo;
             
-            // ለንግድ ባንክ ከሆነ "የአካውንት ቁጥር" እንዲል
             if(bank === 'CBE Bank') {
-                document.getElementById('account-type-label').innerText = 'የአካውንት ቁጥር';
+                document.getElementById('account-type-label').innerText = 'የአካውንት ቁጥር (Account Number)';
             } else {
-                document.getElementById('account-type-label').innerText = 'የስልክ ቁጥር';
+                document.getElementById('account-type-label').innerText = 'የስልክ ቁጥር (Phone Number)';
             }
             
             currentPage = 'detail';
@@ -182,7 +189,7 @@
         function copyNumber() {
             const num = document.getElementById('target-number').innerText;
             navigator.clipboard.writeText(num);
-            alert("ቁጥሩ ኮፒ ተደርጓል: " + num);
+            alert("ቁጥሩ ኮፒ ተደርጓል፦ " + num);
         }
 
         function submitRequest() {
@@ -191,7 +198,7 @@
                 alert("እባክዎ ትክክለኛ የብር መጠን ያስገቡ!");
                 return;
             }
-            alert(amount + " ብር የማስገባት ጥያቄዎ ለሲስተም አስተዳዳሪ ተልኳል። በቅርቡ ባላንስዎ ላይ ይጨመራል።");
+            alert(amount + " ብር የማስገባት ጥያቄዎ ተልኳል! በቅርቡ ባላንስዎ ላይ ይጨመራል።");
             window.location.href = 'index.html';
         }
     </script>
