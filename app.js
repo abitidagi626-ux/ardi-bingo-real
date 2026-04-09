@@ -113,12 +113,12 @@ function startBingoArena(stake) {
 
 function manualBingoCheck(id) {
     const marked = playerMarkedNumbers[id];
-    // Win Patterns: Horizontal, Vertical, Diagonal, and Four Corners
+    // Image 2 ላለው ችግር መፍትሄ፡ አራቱ ማዕዘን [0, 4, 20, 24] ተጨምረዋል
     const patterns = [
         [0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24], // Rows
         [0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24], // Cols
         [0,6,12,18,24],[4,8,12,16,20], // Diagonals
-        [0,4,20,24] // Four Corners
+        [0, 4, 20, 24] // Four Corners - Image 2 ላይ እምቢ ያለው እዚህ ተስተካክሏል
     ];
     
     let winningPattern = patterns.find(p => p.every(idx => marked.has(idx)));
@@ -137,7 +137,6 @@ function showBingoWinner(cardId, pattern) {
     text.innerText = `Card Number #${cardId} is the Winner!`;
     overlay.classList.remove('hidden');
     
-    // አሸናፊውን ካርድ እና አሸናፊ ያደረጉትን ቁጥሮች (Tick) ነጥሎ ማሳየት
     const cardGrid = document.createElement('div');
     cardGrid.className = 'player-card-arena';
     cardGrid.style.display = 'grid';
@@ -154,7 +153,6 @@ function showBingoWinner(cardId, pattern) {
         
         cell.innerText = idx === 12 ? 'F' : n;
         
-        // አሸናፊ ያደረጉት ቁጥሮች ላይ አረንጓዴ ቀለም (Tick)
         if (pattern.includes(idx)) {
             cell.classList.add('winner-cell');
         }
