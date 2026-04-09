@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Deposit - Ardi Bingo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background-color: #00221c; color: white; padding-top: env(safe-area-inset-top); }
+        
+        .header {
+            background: #00332c;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid #efae10;
+        }
+        .back-btn { background: none; border: none; color: #efae10; font-size: 24px; cursor: pointer; margin-right: 15px; }
+        
+        .container { padding: 20px; max-width: 500px; margin: auto; }
+        
+        h2 { color: #efae10; margin-bottom: 20px; font-size: 1.2rem; }
+
+        /* Payment Methods */
+        .methods { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
+        .method-item {
+            background: #004d40;
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .method-item.active { border-color: #efae10; background: #005a4b; }
+        .dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #efae10; position: relative; }
+        .method-item.active .dot::after {
+            content: ""; width: 10px; height: 10px; background: #efae10;
+            border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        }
+
+        /* Amount Input */
+        .amount-section { margin-bottom: 25px; }
+        .amount-input-wrapper { position: relative; }
+        .amount-input {
+            width: 100%;
+            padding: 15px;
+            background: #00221c;
+            border: 1px solid #444;
+            border-radius: 10px;
+            color: white;
+            font-size: 18px;
+            padding-left: 50px;
+            outline: none;
+        }
+        .currency-label { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #efae10; font-weight: bold; }
+
+        /* Fast Selection Buttons */
+        .fast-amounts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }
+        .fast-btn {
+            background: #00332c; border: 1px solid #444; color: white;
+            padding: 8px; border-radius: 8px; cursor: pointer; font-size: 14px;
+        }
+        .fast-btn:hover { border-color: #efae10; }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: #efae10;
+            color: black;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button class="back-btn" onclick="history.back()">⬅</button>
+        <h3>Deposit / ብር ያስገቡ</h3>
+    </div>
+
+    <div class="container">
+        <h2>የክፍያ አማራጭ ይምረጡ</h2>
+        <div class="methods">
+            <div class="method-item active" onclick="selectMethod(this, 'Telebirr')">
+                <span class="dot"></span>
+                <span>Telebirr / ቴሌ ብር</span>
+            </div>
+            <div class="method-item" onclick="selectMethod(this, 'CBE')">
+                <span class="dot"></span>
+                <span>CBE Birr / ሲቢኢ ብር</span>
+            </div>
+        </div>
+
+        <div class="amount-section">
+            <h2>የብር መጠን</h2>
+            <div class="amount-input-wrapper">
+                <span class="currency-label">ETB</span>
+                <input type="number" id="amount" class="amount-input" placeholder="0.00" min="10">
+            </div>
+            <div class="fast-amounts">
+                <button class="fast-btn" onclick="setAmount(50)">50</button>
+                <button class="fast-btn" onclick="setAmount(100)">100</button>
+                <button class="fast-btn" onclick="setAmount(500)">500</button>
+                <button class="fast-btn" onclick="setAmount(1000)">1000</button>
+            </div>
+        </div>
+
+        <button class="submit-btn" onclick="confirmDeposit()">ብር አስገባ</button>
+    </div>
+
+    <script>
+        let selectedMethod = 'Telebirr';
+
+        function selectMethod(el, method) {
+            document.querySelectorAll('.method-item').forEach(m => m.classList.remove('active'));
+            el.classList.add('active');
+            selectedMethod = method;
+        }
+
+        function setAmount(val) {
+            document.getElementById('amount').value = val;
+        }
+
+        function confirmDeposit() {
+            const amount = document.getElementById('amount').value;
+            if(!amount || amount < 10) {
+                alert("እባክዎ ትክክለኛ የብር መጠን ያስገቡ (ትንሹ 10 ብር)!");
+                return;
+            }
+            
+            // እዚህ ጋር ወደ ክፍያ መነሻ መላክ ይቻላል
+            alert(`${amount} ብር በ ${selectedMethod} በኩል ለማስገባት ጥያቄዎ ቀርቧል።`);
+            
+            // ወደ ዋናው ገጽ ለመመለስ
+            window.location.href = 'index.html'; 
+        }
+    </script>
+</body>
+</html>
