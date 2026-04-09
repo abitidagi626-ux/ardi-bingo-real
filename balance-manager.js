@@ -1,117 +1,204 @@
-// የቴሌግራም WebApp ማቀናበሪያ
-const tg = window.Telegram.WebApp;
-tg.expand(); // WebApp ስክሪኑን ሙሉ እንዲሞላ
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Deposit - Ardi Bingo</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #00221c; color: white; overflow-x: hidden; }
 
-// --- 1. የዲፖዚት ፎርም መረጃን ለAdmin ማጽደቂያ መላክ (ከክፍያ ገጽ የሚመጣ) ---
+        .header {
+            background: #00332c;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid #efae10;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .back-btn { background: none; border: none; color: #efae10; font-size: 24px; cursor: pointer; margin-right: 15px; }
+        .container { padding: 20px; max-width: 500px; margin: auto; }
+        .hidden { display: none !important; }
 
-function submitRequest() {
-    // በ payment.html ላይ ያሉትን የ Input ID-ዎች በመጠቀም መረጃ መሰብሰብ
-    // ማሳሰቢያ፡ በ HTML ገጽህ ላይ ያሉት ID-ዎች 'amount' እና 'transaction' መሆናቸውን አረጋግጥ
-    const amountInput = document.getElementById('amount') || document.getElementById('sent-amount');
-    const transactionInput = document.getElementById('transaction') || document.getElementById('transaction-msg');
-    const bankDisplay = document.getElementById('bank-name') || document.getElementById('selected-bank-name');
+        h2 { color: #efae10; margin-bottom: 20px; font-size: 1.1rem; text-align: center; }
 
-    const amount = amountInput ? amountInput.value : null;
-    const transaction = transactionInput ? transactionInput.value : null;
-    const bank = bankDisplay ? bankDisplay.innerText : "Unknown Bank";
-    const user = tg.initDataUnsafe.user;
+        .bank-option {
+            background: #004d40;
+            padding: 12px 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            border: 1px solid rgba(239, 174, 16, 0.1);
+        }
+        .bank-info { display: flex; align-items: center; gap: 15px; }
+        .bank-logo { width: 45px; height: 45px; border-radius: 8px; object-fit: contain; background: white; }
+        .arrow { color: #efae10; font-size: 18px; font-weight: bold; }
 
-    // መረጃ መሞላቱን ማረጋገጫ
-    if (!amount || !transaction) {
-        tg.showAlert("እባክዎ መረጃውን በትክክል ይሙሉ።");
-        return;
-    }
+        .detail-card {
+            background: #00332c;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #efae10;
+        }
+        .account-box {
+            background: #00221c;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px dashed #efae10;
+        }
+        .account-number { font-size: 1.5rem; font-weight: bold; color: #ffffff; margin-bottom: 10px; }
+        
+        .action-btn {
+            background: #efae10;
+            color: black;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .submit-btn { background: #28a745; color: white; margin-top: 15px; font-size: 16px; }
 
-    // ለአድሚን የሚላክ መረጃ
-    const paymentData = {
-        type: 'deposit_request',
-        user_id: user ? user.id : 'Unknown',
-        user_name: user ? `${user.first_name} ${user.last_name || ''}` : 'Guest',
-        amount: amount,
-        bank: bank,
-        transaction: transaction,
-        timestamp: new Date().getTime()
-    };
+        .amount-input, .message-input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background: #001a15;
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+            outline: none;
+        }
+        .message-input { text-align: left; height: 80px; resize: none; }
+        .instruction { font-size: 0.85rem; color: #ccc; margin-top: 15px; text-align: left; line-height: 1.5; }
+    </style>
+</head>
+<body>
 
-    // መረጃውን ወደ ሰርቨር (Telegram Bot) መላክ
-    tg.sendData(JSON.stringify(paymentData));
+    <div class="header">
+        <button class="back-btn" onclick="goBack()">⬅</button>
+        <h3 id="header-title">Deposit / ብር ያስገቡ</h3>
+    </div>
 
-    // ማረጋገጫ መልዕክት ማሳየት
-    tg.showAlert("እናመሰግናለን! ጥያቄዎ ለAdmin ተልኳል።", () => {
-        tg.close(); // WebApp መዝጊያ
-    });
-}
+    <div class="container">
+        <div id="selection-page">
+            <h2>የክፍያ አማራጭ ይምረጡ</h2>
+            <div class="bank-option" onclick="showDetail('Telebirr', '0979429028', 'telebirr.png')">
+                <div class="bank-info"><img src="telebirr.png" class="bank-logo"><span>Telebirr / ቴሌ ብር</span></div>
+                <span class="arrow">❯</span>
+            </div>
+            <div class="bank-option" onclick="showDetail('CBE Birr', '0979429028', 'cbebirr.png')">
+                <div class="bank-info"><img src="cbebirr.png" class="bank-logo"><span>CBE Birr / ሲቢኢ ብር</span></div>
+                <span class="arrow">❯</span>
+            </div>
+            <div class="bank-option" onclick="showDetail('CBE Bank', '1000277987067', 'cbe.png')">
+                <div class="bank-info"><img src="cbe.png" class="bank-logo"><span>CBE Bank / ንግድ ባንክ</span></div>
+                <span class="arrow">❯</span>
+            </div>
+        </div>
 
-// --- 2. የባላንስ አስተዳደር ሎጂክ (Logic) ---
+        <div id="detail-page" class="hidden">
+            <div class="detail-card">
+                <img id="detail-logo" src="" class="bank-logo">
+                <h3 id="selected-bank-name" style="color: #efae10; margin-top: 5px;">Bank Name</h3>
+                
+                <div class="account-box">
+                    <p style="color: #efae10; font-size: 12px;">Account Name: Yordanos</p>
+                    <p class="account-number" id="target-number">---</p>
+                    <button class="action-btn" onclick="copyNumber()">Copy / ኮፒ አድርግ</button>
+                </div>
 
-// በAdmin ሲጸድቅ Balance ላይ መደመር (Deposit Approve)
-function approveDeposit(userId, amount) {
-    let currentBalance = getUserBalance(userId);
-    let newBalance = currentBalance + parseFloat(amount);
-    updateUserBalance(userId, newBalance);
-    console.log(`Deposit Approved! New Balance: ${newBalance} ETB`);
-}
+                <div class="instruction">
+                    <p>1. ከላይ ያለውን ቁጥር ኮፒ አድርገው ብር ይላኩ።</p>
+                    <p>2. የላኩትን መጠን እና የደረሰዎትን SMS ከታች ባሉት ሳጥኖች ይሙሉ በጥንቃቄ ይሙሉ::</p>
+                </div>
 
-// ጨዋታ ሲቀላቀሉ ከBalance ላይ መቀነስ (Stake Deduction)
-function deductStake(userId, stakeAmount) {
-    let currentBalance = getUserBalance(userId);
-    if (currentBalance >= stakeAmount) {
-        let newBalance = currentBalance - stakeAmount;
-        updateUserBalance(userId, newBalance);
-        console.log(`Stake deducted: ${stakeAmount}. New Balance: ${newBalance}`);
-        return true; // ክፍያው ተሳክቷል
-    } else {
-        tg.showAlert("በቂ ሂሳብ የሎትም! እባክዎ መጀመሪያ ተቀማጭ ያድርጉ።");
-        return false; // ክፍያው አልተሳካም
-    }
-}
+                <input type="number" id="sent-amount" class="amount-input" placeholder="የላኩት የብር መጠን" required>
+                <textarea id="transaction-msg" class="message-input" placeholder="የደረሰዎትን የትራንዛክሽን ቁጥር ወይም SMS እዚህ ይለጥፉ..." required></textarea>
 
-// ሲያሸንፉ Balance ላይ መደመር (Winning Credit)
-function addWinnings(userId, winAmount) {
-    let currentBalance = getUserBalance(userId);
-    let newBalance = currentBalance + parseFloat(winAmount);
-    updateUserBalance(userId, newBalance);
-    console.log(`Winner! ${winAmount} ETB added. Total: ${newBalance}`);
-}
+                <button id="confirm-btn" class="action-btn submit-btn" onclick="submitRequest()">አረጋግጥ / Confirm</button>
+            </div>
+        </div>
+    </div>
 
-// ገንዘብ ለማውጣት ሲጠይቁ መቀነስ (Withdrawal Request)
-function requestWithdrawal(userId, amount) {
-    let currentBalance = getUserBalance(userId);
-    if (currentBalance >= amount) {
-        let newBalance = currentBalance - amount;
-        updateUserBalance(userId, newBalance);
-        // ለAdmin የክፍያ ጥያቄ እዚህ ጋር ይላካል
-        console.log(`Withdrawal request for ${amount} ETB processed.`);
-        return true;
-    } else {
-        tg.showAlert("ሊያወጡ የፈለጉት የብር መጠን ከሂሳብዎ ይበልጣል!");
-        return false;
-    }
-}
+    <script src="balance-manager.js"></script>
 
-// --- 3. መረጃን ከዳታቤዝ ለማንበብ እና ለማስተካከል (Helper functions) ---
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
 
-function getUserBalance(userId) {
-    // ለጊዜው ከLocalStorage መረጃውን ያነባል
-    return parseFloat(localStorage.getItem(`balance_${userId}`)) || 0.00;
-}
+        let currentPage = 'selection';
 
-function updateUserBalance(userId, newAmount) {
-    // መረጃውን በLocalStorage ውስጥ ያስቀምጣል
-    localStorage.setItem(`balance_${userId}`, newAmount.toFixed(2));
-    
-    // በገጹ ላይ 'balance-display' የሚል ID ያለው ቦታ ካለ ወዲያውኑ እንዲቀየር ያደርጋል
-    const display = document.getElementById('balance-display');
-    if(display) {
-        display.innerText = `ETB ${newAmount.toFixed(2)}`;
-    }
-}
+        function showDetail(bank, number, logo) {
+            document.getElementById('selection-page').classList.add('hidden');
+            document.getElementById('detail-page').classList.remove('hidden');
+            document.getElementById('header-title').innerText = bank;
+            document.getElementById('selected-bank-name').innerText = bank;
+            document.getElementById('target-number').innerText = number;
+            document.getElementById('detail-logo').src = logo;
+            currentPage = 'detail';
+        }
 
-// ገጹ ሲከፈት የቆየውን ባላንስ ለማሳየት (ካስፈለገ)
-window.onload = function() {
-    const user = tg.initDataUnsafe.user;
-    if (user) {
-        const bal = getUserBalance(user.id);
-        updateUserBalance(user.id, bal);
-    }
-};
+        function goBack() {
+            if(currentPage === 'detail') {
+                document.getElementById('detail-page').classList.add('hidden');
+                document.getElementById('selection-page').classList.remove('hidden');
+                document.getElementById('header-title').innerText = 'Deposit / ብር ያስገቡ';
+                currentPage = 'selection';
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        function copyNumber() {
+            const num = document.getElementById('target-number').innerText;
+            navigator.clipboard.writeText(num).then(() => {
+                tg.showAlert("ቁጥሩ ኮፒ ተደርጓል፦ " + num);
+            });
+        }
+
+        // submitRequest() በ balance-manager.js ውስጥ ካልተገኘ እንደ አማራጭ እዚህም አለ
+        if (typeof submitRequest !== 'function') {
+            window.submitRequest = function() {
+                const amount = document.getElementById('sent-amount').value;
+                const message = document.getElementById('transaction-msg').value;
+                const bank = document.getElementById('selected-bank-name').innerText;
+                const user = tg.initDataUnsafe.user;
+
+                if(!amount || amount < 10) {
+                    tg.showAlert("እባክዎ ትክክለኛ የብር መጠን ያስገቡ!");
+                    return;
+                }
+                if(!message || message.trim().length < 5) {
+                    tg.showAlert("እባክዎ የትራንዛክሽን መረጃውን (SMS) ያስገቡ!");
+                    return;
+                }
+
+                const data = {
+                    type: 'deposit_request',
+                    user_id: user ? user.id : 'Unknown',
+                    user_name: user ? (user.first_name + " " + (user.last_name || "")) : 'Guest',
+                    amount: amount,
+                    bank: bank,
+                    transaction: message
+                };
+
+                tg.sendData(JSON.stringify(data));
+                tg.showAlert("ጥያቄዎ ለAdmin ተልኳል! ሲረጋገጥ ባላንስዎ ላይ ይጨመራል።");
+                setTimeout(() => { tg.close(); }, 1500);
+            };
+        }
+    </script>
+</body>
+</html>
