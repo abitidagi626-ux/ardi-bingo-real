@@ -4,17 +4,12 @@ let boughtCardsNumbers = {}, drawnNumbers = new Set(), playerMarkedNumbers = {},
 
 const stakeData = { 10: { bought: new Set() }, 20: { bought: new Set() }, 30: { bought: new Set() }, 50: { bought: new Set() }, 80: { bought: new Set() }, 100: { bought: new Set() }, 150: { bought: new Set() }, 200: { bought: new Set() } };
 
-// የካርድ ቁጥሮችን Fixed ለማድረግ የሚያገለግል Helper (Seeded Random)
 function getFixedNumbers(cardId) {
     let card = [];
     const ranges = [[1,15], [16,30], [31,45], [46,60], [61,75]];
-    
-    // የካርድ ቁጥሩን (cardId) እንደ Seed በመጠቀም ሁሌም አንድ አይነት ቁጥር እንዲወጣ እናደርጋለን
     ranges.forEach((range, colIdx) => {
         let colNumbers = [];
         for (let i = range[0]; i <= range[1]; i++) colNumbers.push(i);
-        
-        // Seeded shuffle: cardId በመጠቀም ሹፍል ማድረግ
         let seed = cardId + colIdx;
         for (let i = colNumbers.length - 1; i > 0; i--) {
             seed = (seed * 9301 + 49297) % 233280;
@@ -24,7 +19,6 @@ function getFixedNumbers(cardId) {
         }
         card.push(colNumbers.slice(0, 5));
     });
-
     let finalCard = [];
     for(let r=0; r<5; r++) for(let c=0; c<5; c++) finalCard.push(card[c][r]);
     return finalCard;
@@ -76,10 +70,7 @@ function showPreview(id) {
     document.getElementById('modal-card-no').innerText = `Card No. ${id}`;
     const previewGrid = document.getElementById('preview-grid'); 
     previewGrid.innerHTML = "";
-    
-    // እዚህ ጋር በካርድ ቁጥሩ የታሰረ (Fixed) ቁጥር እናመጣለን
     let fixedNumbers = getFixedNumbers(id);
-    
     fixedNumbers.forEach((n, idx) => {
         const cell = document.createElement('div'); 
         cell.className = 'arena-cell' + (idx === 12 ? ' marked' : '');
@@ -89,13 +80,11 @@ function showPreview(id) {
         cell.innerText = idx === 12 ? 'F' : n; 
         previewGrid.appendChild(cell);
     });
-    
     document.getElementById('card-modal').classList.remove('hidden');
 }
 
 function confirmPurchase() {
     stakeData[currentStake].bought.add(pendingCardId);
-    // ጨዋታው ሲጀመር እንዲጠቀምበት እናስቀምጠዋለን
     boughtCardsNumbers[pendingCardId] = getFixedNumbers(pendingCardId);
     playerMarkedNumbers[pendingCardId] = new Set([12]);
     lockStake = currentStake;
@@ -109,18 +98,15 @@ function startBingoArena(stake) {
     document.getElementById('card-screen').classList.add('hidden');
     document.getElementById('stake-screen').classList.add('hidden');
     document.getElementById('game-screen').classList.remove('hidden');
-    
     const board = document.getElementById('numbers-board');
     for(let i=1; i<=75; i++) {
         const div = document.createElement('div'); div.className = 'board-cell'; div.id = `ball-${i}`; div.innerText = i; board.appendChild(div);
     }
-
     const container = document.getElementById('arena-cards-container');
     stakeData[stake].bought.forEach(id => {
         const wrapper = document.createElement('div'); wrapper.className = 'arena-card-wrapper';
         wrapper.innerHTML = `<div class="card-label-small">CARD #${id}</div>`;
         const cardGrid = document.createElement('div'); cardGrid.className = 'player-card-arena';
-        
         boughtCardsNumbers[id].forEach((n, idx) => {
             const cell = document.createElement('div'); cell.className = 'arena-cell' + (idx === 12 ? ' marked' : '');
             cell.innerText = idx === 12 ? 'F' : n; 
@@ -132,7 +118,6 @@ function startBingoArena(stake) {
         btn.onclick = () => manualBingoCheck(id);
         wrapper.appendChild(btn); container.appendChild(wrapper);
     });
-
     let pool = Array.from({length:75}, (_,i)=>i+1).sort(()=>Math.random()-0.5), idx = 0;
     gameInterval = setInterval(() => {
         if(idx >= 75) return clearInterval(gameInterval);
