@@ -11,36 +11,39 @@
         .winner-cell { background: #4caf50 !important; color: white !important; border: 1px solid #fff; }
         .hidden { display: none !important; }
         
-        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .balance-status-box { background: #efae10; color: black; padding: 5px 15px; border-radius: 15px; font-weight: 900; font-size: 13px; display: flex; align-items: center; gap: 5px; }
-        .refresh-btn { background: #444; color: white; border: none; padding: 5px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; }
-        .bottom-bar { display: flex; justify-content: space-between; align-items: center; }
-        .deposit-btn { background: #efae10; border: none; padding: 6px 15px; border-radius: 5px; font-weight: bold; font-size: 13px; cursor: pointer; }
+        /* የተስተካከለው Header Style */
+        .top-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 12px;
+            width: 100%;
+        }
+        .balance-status-box { 
+            background: #efae10; 
+            color: black; 
+            padding: 6px 12px; 
+            border-radius: 20px; 
+            font-weight: 900; 
+            font-size: 13px; 
+            display: flex; 
+            align-items: center; 
+            gap: 5px;
+            white-space: nowrap; /* ጽሁፉ እንዳይቆረጥ */
+            min-width: fit-content;
+        }
+        .refresh-btn { background: #444; color: white; border: none; padding: 6px 15px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .bottom-bar { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .deposit-btn { background: #efae10; border: none; padding: 8px 18px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; }
         .logo { font-weight: bold; font-size: 1.2rem; color: #efae10; letter-spacing: 1px; }
 
-        .modal-content { 
-            background: #00332c; 
-            width: 90%; 
-            max-width: 320px; 
-            padding: 20px; 
-            border-radius: 15px; 
-            text-align: center; 
-            border: 1px solid #efae10;
-        }
-        #preview-grid { 
-            display: grid; 
-            grid-template-columns: repeat(5, 1fr); 
-            gap: 2px; 
-            background: #fff; 
-            padding: 5px; 
-            border-radius: 5px;
-            margin: 10px 0;
-        }
+        .modal-content { background: #00332c; width: 90%; max-width: 320px; padding: 20px; border-radius: 15px; text-align: center; border: 1px solid #efae10; }
+        #preview-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; background: #fff; padding: 5px; border-radius: 5px; margin: 10px 0; }
     </style>
 </head>
 <body>
     <div id="app">
-        <header class="main-header" style="background: #00332c; padding: 12px; border-radius: 10px; margin-bottom: 10px; border-bottom: 3px solid #efae10;">
+        <header class="main-header" style="background: #00332c; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-bottom: 3px solid #efae10;">
             <div class="top-bar">
                 <button onclick="location.reload()" class="refresh-btn">Refresh</button>
                 <div class="balance-status-box">💰 ETB <span id="balance">0.00</span></div>
