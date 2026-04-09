@@ -8,6 +8,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background-color: #00221c; color: white; overflow-x: hidden; }
 
+        /* Header */
         .header {
             background: #00332c;
             padding: 15px;
@@ -38,16 +39,15 @@
             border: 1px solid rgba(239, 174, 16, 0.1);
             transition: 0.2s;
         }
-        .bank-option:active { background: #005a4b; transform: scale(0.98); }
+        .bank-option:active { transform: scale(0.98); background: #005a4b; }
         .bank-info { display: flex; align-items: center; gap: 15px; }
         
         .bank-logo { 
-            width: 50px; 
-            height: 50px; 
-            border-radius: 10px; 
-            object-fit: cover; 
+            width: 45px; 
+            height: 45px; 
+            border-radius: 8px; 
+            object-fit: contain; 
             background: white;
-            border: 1px solid #ddd;
         }
         
         .arrow { color: #efae10; font-size: 18px; font-weight: bold; }
@@ -55,51 +55,48 @@
         /* Detail Card */
         .detail-card {
             background: #00332c;
-            border-radius: 20px;
-            padding: 25px;
+            border-radius: 15px;
+            padding: 20px;
             text-align: center;
             border: 1px solid #efae10;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
         .account-box {
             background: #00221c;
-            padding: 20px;
-            border-radius: 12px;
+            padding: 15px;
+            border-radius: 10px;
             margin: 20px 0;
             border: 1px dashed #efae10;
         }
-        .account-label { font-size: 13px; color: #aaa; margin-bottom: 8px; }
-        .account-number { font-size: 1.6rem; font-weight: bold; color: #efae10; letter-spacing: 1.5px; }
+        .account-label { font-size: 12px; color: #aaa; margin-bottom: 5px; }
+        .account-number { font-size: 1.5rem; font-weight: bold; color: #efae10; letter-spacing: 1px; }
         
         .action-btn {
             background: #efae10;
             color: black;
             border: none;
-            padding: 14px;
-            border-radius: 10px;
+            padding: 12px;
+            border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
             width: 100%;
             margin-top: 10px;
-            font-size: 15px;
         }
         
-        .submit-btn { background: #28a745; color: white; margin-top: 15px; border: 1px solid #1e7e34; }
+        .submit-btn { background: #28a745; color: white; margin-top: 15px; }
 
-        .instruction { font-size: 0.9rem; color: #ccc; line-height: 1.6; margin-top: 15px; text-align: left; }
+        .instruction { font-size: 0.85rem; color: #ccc; line-height: 1.6; margin-top: 15px; text-align: left; }
         .amount-input {
             width: 100%;
-            padding: 14px;
+            padding: 12px;
             margin-top: 15px;
             background: #001a15;
             border: 1px solid #444;
-            border-radius: 10px;
+            border-radius: 8px;
             color: white;
             text-align: center;
-            font-size: 20px;
+            font-size: 18px;
             outline: none;
         }
-        .amount-input:focus { border-color: #efae10; }
     </style>
 </head>
 <body>
@@ -113,25 +110,25 @@
         <div id="selection-page">
             <h2>የክፍያ አማራጭ ይምረጡ</h2>
             
-            <div class="bank-option" onclick="showDetail('Telebirr', '0979429028', 'image_73cc78.png')">
+            <div class="bank-option" onclick="showDetail('Telebirr', '0979429028', 'telebirr.png')">
                 <div class="bank-info">
-                    <img src="image_73cc78.png" alt="telebirr" class="bank-logo">
+                    <img src="telebirr.png" alt="telebirr" class="bank-logo">
                     <span>Telebirr / ቴሌ ብር</span>
                 </div>
                 <span class="arrow">❯</span>
             </div>
 
-            <div class="bank-option" onclick="showDetail('CBE Birr', '0979429028', 'image_73c133.png')">
+            <div class="bank-option" onclick="showDetail('CBE Birr', '0979429028', 'cbebirr.png')">
                 <div class="bank-info">
-                    <img src="image_73c133.png" alt="cbebirr" class="bank-logo">
+                    <img src="cbebirr.png" alt="cbebirr" class="bank-logo">
                     <span>CBE Birr / ሲቢኢ ብር</span>
                 </div>
                 <span class="arrow">❯</span>
             </div>
 
-            <div class="bank-option" onclick="showDetail('CBE Bank', '1000277987067', 'image_73c133.png')">
+            <div class="bank-option" onclick="showDetail('CBE Bank', '1000277987067', 'cbe.png')">
                 <div class="bank-info">
-                    <img src="image_73c133.png" alt="cbe" class="bank-logo">
+                    <img src="cbe.png" alt="cbe" class="bank-logo">
                     <span>CBE Bank / ንግድ ባንክ</span>
                 </div>
                 <span class="arrow">❯</span>
@@ -140,7 +137,7 @@
 
         <div id="detail-page" class="hidden">
             <div class="detail-card">
-                <img id="detail-logo" src="" alt="logo" class="bank-logo" style="margin-bottom: 10px; width: 60px; height: 60px;">
+                <img id="detail-logo" src="" alt="logo" class="bank-logo" style="margin-bottom: 10px;">
                 <h3 id="selected-bank-name" style="color: #efae10;">Bank Name</h3>
                 
                 <div class="account-box">
@@ -202,11 +199,10 @@
         function submitRequest() {
             const amount = document.getElementById('sent-amount').value;
             if(!amount || amount < 10) {
-                alert("እባክዎ ትክክለኛ የብር መጠን ያስገቡ (ትንሹ 10 ብር)!");
+                alert("እባክዎ ትክክለኛ የብር መጠን ያስገቡ!");
                 return;
             }
-            // እዚህ ጋር ለወደፊቱ ዳታቤዝ ጋር ማገናኘት ይቻላል
-            alert("እናመሰግናለን! " + amount + " ብር የማስገባት ጥያቄዎ ለAdmin ተልኳል። በቅርቡ ይረጋገጣል።");
+            alert("እናመሰግናለን! " + amount + " ብር የማስገባት ጥያቄዎ ለAdmin ተልኳል።");
             window.location.href = 'index.html';
         }
     </script>
