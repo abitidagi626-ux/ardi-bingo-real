@@ -84,6 +84,18 @@
         
         .submit-btn { background: #28a745; color: white; margin-top: 15px; }
 
+        /* Support Text */
+        .support-text {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #efae10;
+            line-height: 1.6;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .support-text a { color: white; text-decoration: none; font-weight: bold; }
+
         .instruction { font-size: 0.85rem; color: #ccc; line-height: 1.6; margin-top: 15px; text-align: left; }
         
         .amount-input, .message-input {
@@ -164,6 +176,10 @@
                 <textarea id="transaction-msg" class="message-input" placeholder="የደረሰዎትን ሙሉ መልእክት (SMS) ወይም የትራንዛክሽን ቁጥር እዚህ ይለጥፉ..."></textarea>
 
                 <button class="action-btn submit-btn" onclick="submitRequest()">አረጋግጥ / Confirm</button>
+
+                <div class="support-text">
+                    የሚያጋጥማቹ የክፍያ ችግር ካለ በዚ <a href="https://t.me/ArdiiiBingoBot" target="_blank">@ArdiiiBingoBot</a> ኤጀንቱን ማዋራት ይችላሉ
+                </div>
             </div>
         </div>
     </div>
