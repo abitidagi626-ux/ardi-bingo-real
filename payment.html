@@ -9,7 +9,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background-color: #00221c; color: white; overflow-x: hidden; }
 
-        /* Header */
         .header {
             background: #00332c;
             padding: 15px;
@@ -21,13 +20,11 @@
             z-index: 100;
         }
         .back-btn { background: none; border: none; color: #efae10; font-size: 24px; cursor: pointer; margin-right: 15px; }
-        
         .container { padding: 20px; max-width: 500px; margin: auto; }
-        .hidden { display: none; }
+        .hidden { display: none !important; }
 
         h2 { color: #efae10; margin-bottom: 20px; font-size: 1.1rem; text-align: center; }
 
-        /* Bank Selection Style */
         .bank-option {
             background: #004d40;
             padding: 12px 15px;
@@ -38,22 +35,11 @@
             justify-content: space-between;
             cursor: pointer;
             border: 1px solid rgba(239, 174, 16, 0.1);
-            transition: 0.2s;
         }
-        .bank-option:active { transform: scale(0.98); background: #005a4b; }
         .bank-info { display: flex; align-items: center; gap: 15px; }
-        
-        .bank-logo { 
-            width: 45px; 
-            height: 45px; 
-            border-radius: 8px; 
-            object-fit: contain; 
-            background: white;
-        }
-        
+        .bank-logo { width: 45px; height: 45px; border-radius: 8px; object-fit: contain; background: white; }
         .arrow { color: #efae10; font-size: 18px; font-weight: bold; }
 
-        /* Detail Card */
         .detail-card {
             background: #00332c;
             border-radius: 15px;
@@ -68,8 +54,7 @@
             margin: 20px 0;
             border: 1px dashed #efae10;
         }
-        .account-label { font-size: 14px; color: #efae10; margin-bottom: 5px; font-weight: bold; }
-        .account-number { font-size: 1.5rem; font-weight: bold; color: #ffffff; letter-spacing: 1px; margin-bottom: 10px; }
+        .account-number { font-size: 1.5rem; font-weight: bold; color: #ffffff; margin-bottom: 10px; }
         
         .action-btn {
             background: #efae10;
@@ -80,25 +65,10 @@
             font-weight: bold;
             cursor: pointer;
             width: 100%;
-            margin-top: 10px;
         }
         
-        .submit-btn { background: #28a745; color: white; margin-top: 15px; }
+        .submit-btn { background: #28a745; color: white; margin-top: 15px; font-size: 16px; }
 
-        /* Support Text */
-        .support-text {
-            margin-top: 20px;
-            font-size: 13px;
-            color: #efae10;
-            line-height: 1.6;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 10px;
-            border-radius: 8px;
-        }
-        .support-text a { color: white; text-decoration: none; font-weight: bold; }
-
-        .instruction { font-size: 0.85rem; color: #ccc; line-height: 1.6; margin-top: 15px; text-align: left; }
-        
         .amount-input, .message-input {
             width: 100%;
             padding: 12px;
@@ -108,16 +78,10 @@
             border-radius: 8px;
             color: white;
             text-align: center;
-            font-size: 16px;
             outline: none;
         }
-        .amount-input { font-size: 18px; }
-        .message-input { 
-            text-align: left; 
-            height: 80px; 
-            resize: none;
-            font-size: 14px;
-        }
+        .message-input { text-align: left; height: 80px; resize: none; }
+        .instruction { font-size: 0.85rem; color: #ccc; margin-top: 15px; text-align: left; line-height: 1.5; }
     </style>
 </head>
 <body>
@@ -130,65 +94,47 @@
     <div class="container">
         <div id="selection-page">
             <h2>የክፍያ አማራጭ ይምረጡ</h2>
-            
             <div class="bank-option" onclick="showDetail('Telebirr', '0979429028', 'telebirr.png')">
-                <div class="bank-info">
-                    <img src="telebirr.png" alt="telebirr" class="bank-logo">
-                    <span>Telebirr / ቴሌ ብር</span>
-                </div>
+                <div class="bank-info"><img src="telebirr.png" class="bank-logo"><span>Telebirr / ቴሌ ብር</span></div>
                 <span class="arrow">❯</span>
             </div>
-
             <div class="bank-option" onclick="showDetail('CBE Birr', '0979429028', 'cbebirr.png')">
-                <div class="bank-info">
-                    <img src="cbebirr.png" alt="cbebirr" class="bank-logo">
-                    <span>CBE Birr / ሲቢኢ ብር</span>
-                </div>
+                <div class="bank-info"><img src="cbebirr.png" class="bank-logo"><span>CBE Birr / ሲቢኢ ብር</span></div>
                 <span class="arrow">❯</span>
             </div>
-
             <div class="bank-option" onclick="showDetail('CBE Bank', '1000277987067', 'cbe.png')">
-                <div class="bank-info">
-                    <img src="cbe.png" alt="cbe" class="bank-logo">
-                    <span>CBE Bank / ንግድ ባንክ</span>
-                </div>
+                <div class="bank-info"><img src="cbe.png" class="bank-logo"><span>CBE Bank / ንግድ ባንክ</span></div>
                 <span class="arrow">❯</span>
             </div>
         </div>
 
         <div id="detail-page" class="hidden">
             <div class="detail-card">
-                <img id="detail-logo" src="" alt="logo" class="bank-logo" style="margin-bottom: 10px;">
-                <h3 id="selected-bank-name" style="color: #efae10;">Bank Name</h3>
+                <img id="detail-logo" src="" class="bank-logo">
+                <h3 id="selected-bank-name" style="color: #efae10; margin-top: 5px;">Bank Name</h3>
                 
                 <div class="account-box">
-                    <p class="account-label">Yordanos</p>
-                    <p class="account-number" id="target-number">ቁጥር</p>
+                    <p style="color: #efae10; font-size: 12px;">Account Name: Yordanos</p>
+                    <p class="account-number" id="target-number">---</p>
                     <button class="action-btn" onclick="copyNumber()">Copy / ኮፒ አድርግ</button>
                 </div>
 
                 <div class="instruction">
-                    <p><strong>መመሪያ፦</strong></p>
-                    <p>1. ከላይ ያለውን ቁጥር ኮፒ አድርገው በባንክ ወይም በቴሌብር አፕዎ ብር ይላኩ።</p>
-                    <p>2. ብር ከላኩ በኋላ የላኩትን መጠን እና የደረሰዎትን መልእክት (SMS) ከታች ባሉት ሳጥኖች ውስጥ ያስገቡ።</p>
+                    <p>1. ከላይ ያለውን ቁጥር ኮፒ አድርገው ብር ይላኩ።</p>
+                    <p>2. የላኩትን መጠን እና የደረሰዎትን SMS ከታች ባሉት ሳጥኖች ይሙሉ በጥንቃቄ ይሙሉ::</p>
                 </div>
 
                 <input type="number" id="sent-amount" class="amount-input" placeholder="የላኩት የብር መጠን">
-                <textarea id="transaction-msg" class="message-input" placeholder="የደረሰዎትን ሙሉ መልእክት (SMS) ወይም የትራንዛክሽን ቁጥር እዚህ ይለጥፉ..."></textarea>
+                <textarea id="transaction-msg" class="message-input" placeholder="የደረሰዎትን የትራንዛክሽን ቁጥር ወይም SMS እዚህ ይለጥፉ..."></textarea>
 
                 <button class="action-btn submit-btn" onclick="submitRequest()">አረጋግጥ / Confirm</button>
-
-                <div class="support-text">
-                    የሚያጋጥማቹ የክፍያ ችግር ካለ በዚ <a href="https://t.me/ArdiiiBingoBot" target="_blank">@ArdiiiBingoBot</a> ኤጀንቱን ማዋራት ይችላሉ
-                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ቴሌግራም WebApp መጀመር
         const tg = window.Telegram.WebApp;
-        tg.expand(); 
+        tg.expand();
 
         let currentPage = 'selection';
 
@@ -199,9 +145,7 @@
             document.getElementById('selected-bank-name').innerText = bank;
             document.getElementById('target-number').innerText = number;
             document.getElementById('detail-logo').src = logo;
-            
             currentPage = 'detail';
-            window.scrollTo(0, 0);
         }
 
         function goBack() {
@@ -217,21 +161,19 @@
 
         function copyNumber() {
             const num = document.getElementById('target-number').innerText;
-            navigator.clipboard.writeText(num);
-            tg.showAlert("ቁጥሩ ኮፒ ተደርጓል፦ " + num);
+            navigator.clipboard.writeText(num).then(() => {
+                tg.showAlert("ቁጥሩ ኮፒ ተደርጓል፦ " + num);
+            });
         }
 
-        // ለAdmin መረጃ የሚልክ ተግባር
         function submitRequest() {
             const amount = document.getElementById('sent-amount').value;
             const message = document.getElementById('transaction-msg').value;
             const bank = document.getElementById('selected-bank-name').innerText;
-            
-            // የተጠቃሚ መረጃ ከቴሌግራም ማግኘት
             const user = tg.initDataUnsafe.user;
 
             if(!amount || amount < 10) {
-                tg.showAlert("እባክዎ ትክክለኛ የብር መጠን ያስገቡ (ቢያንስ 10 ብር)!");
+                tg.showAlert("እባክዎ ትክክለኛ የብር መጠን ያስገቡ!");
                 return;
             }
             if(!message || message.trim().length < 5) {
@@ -239,25 +181,20 @@
                 return;
             }
 
-            // ለቦቱ የሚላክ የዳታ መዋቅር
-            const depositRequest = {
+            // ለቦቱ የሚላክ ዳታ
+            const data = {
                 type: 'deposit_request',
-                userId: user ? user.id : 'unknown',
-                userName: user ? (user.first_name + (user.last_name ? " " + user.last_name : "")) : 'Guest User',
+                user_id: user ? user.id : 'Unknown',
+                user_name: user ? (user.first_name + " " + (user.last_name || "")) : 'Guest',
                 amount: amount,
                 bank: bank,
-                details: message
+                transaction: message
             };
 
-            // ዳታውን ለ server.js መላክ (በ Telegram.WebApp.sendData በኩል)
-            tg.sendData(JSON.stringify(depositRequest));
+            tg.sendData(JSON.stringify(data));
+            tg.showAlert("ጥያቄዎ ለAdmin ተልኳል! ሲረጋገጥ ባላንስዎ ላይ ይጨመራል።");
             
-            tg.showAlert("እናመሰግናለን! የዲፖዚት ጥያቄዎ ለAdmin ተልኳል። አስተዳዳሪው ሲያረጋግጥ በሂሳብዎ ላይ ይጨመራል።");
-            
-            // WebAppን መዝጋት
-            setTimeout(() => {
-                tg.close();
-            }, 2000);
+            setTimeout(() => { tg.close(); }, 1500);
         }
     </script>
 </body>
