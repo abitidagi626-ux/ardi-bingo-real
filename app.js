@@ -46,14 +46,31 @@ function generateCardGrid() {
 }
 
 function showPreview(id) {
-    pendingCardId = id; document.getElementById('modal-card-no').innerText = `Card No. ${id}`;
-    const previewGrid = document.getElementById('preview-grid'); previewGrid.innerHTML = "";
-    let temp = generateBingoNumbers();
-    temp.forEach((n, idx) => {
-        const cell = document.createElement('div'); cell.className = 'arena-cell' + (idx === 12 ? ' marked' : '');
-        cell.innerText = idx === 12 ? 'F' : n; previewGrid.appendChild(cell);
+    pendingCardId = id; 
+    document.getElementById('modal-card-no').innerText = `Card No. ${id}`;
+    const previewGrid = document.getElementById('preview-grid'); 
+    previewGrid.innerHTML = "";
+    
+    // ቁጥሮቹ አንድ አይነት እንዲሆኑ እዚህ ጋር ይፈጠራሉ
+    let tempNumbers = generateBingoNumbers();
+    
+    tempNumbers.forEach((n, idx) => {
+        const cell = document.createElement('div'); 
+        cell.className = 'arena-cell' + (idx === 12 ? ' marked' : '');
+        cell.style.border = "1px solid #ddd";
+        cell.style.aspectRatio = "1";
+        cell.style.display = "flex";
+        cell.style.alignItems = "center";
+        cell.style.justifyContent = "center";
+        cell.style.fontWeight = "bold";
+        cell.style.color = "black";
+        cell.innerText = idx === 12 ? 'F' : n; 
+        previewGrid.appendChild(cell);
     });
-    boughtCardsNumbers["temp"] = temp; document.getElementById('card-modal').classList.remove('hidden');
+    
+    // ለጊዜው በ "temp" ቁልፍ እናስቀምጠዋለን
+    boughtCardsNumbers["temp_numbers"] = tempNumbers; 
+    document.getElementById('card-modal').classList.remove('hidden');
 }
 
 function generateBingoNumbers() {
@@ -65,7 +82,8 @@ function generateBingoNumbers() {
 
 function confirmPurchase() {
     stakeData[currentStake].bought.add(pendingCardId);
-    boughtCardsNumbers[pendingCardId] = boughtCardsNumbers["temp"];
+    // Preview ላይ የታየውን ቁጥር በትክክል ለዚህ ካርድ መመደብ
+    boughtCardsNumbers[pendingCardId] = [...boughtCardsNumbers["temp_numbers"]];
     playerMarkedNumbers[pendingCardId] = new Set([12]);
     lockStake = currentStake;
     const win = (currentStake * stakeData[currentStake].bought.size * 0.8).toFixed(2);
@@ -89,6 +107,8 @@ function startBingoArena(stake) {
         const wrapper = document.createElement('div'); wrapper.className = 'arena-card-wrapper';
         wrapper.innerHTML = `<div class="card-label-small">CARD #${id}</div>`;
         const cardGrid = document.createElement('div'); cardGrid.className = 'player-card-arena';
+        
+        // እዚህ ጋር የገዛውን ቁጥር በትክክል እንጠቀማለን
         boughtCardsNumbers[id].forEach((n, idx) => {
             const cell = document.createElement('div'); cell.className = 'arena-cell' + (idx === 12 ? ' marked' : '');
             cell.innerText = idx === 12 ? 'F' : n; 
@@ -113,36 +133,28 @@ function startBingoArena(stake) {
 
 function manualBingoCheck(id) {
     const marked = playerMarkedNumbers[id];
-    // Image 2 ላለው ችግር መፍትሄ፡ አራቱ ማዕዘን [0, 4, 20, 24] ተጨምረዋል
     const patterns = [
-        [0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24], // Rows
-        [0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24], // Cols
-        [0,6,12,18,24],[4,8,12,16,20], // Diagonals
-        [0, 4, 20, 24] // Four Corners - Image 2 ላይ እምቢ ያለው እዚህ ተስተካክሏል
+        [0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24], 
+        [0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24], 
+        [0,6,12,18,24],[4,8,12,16,20], 
+        [0, 4, 20, 24] 
     ];
-    
     let winningPattern = patterns.find(p => p.every(idx => marked.has(idx)));
-
-    if (winningPattern) {
-        clearInterval(gameInterval);
-        showBingoWinner(id, winningPattern);
-    } else { alert("Not Bingo yet!"); }
+    if (winningPattern) { clearInterval(gameInterval); showBingoWinner(id, winningPattern); } 
+    else { alert("Not Bingo yet!"); }
 }
 
 function showBingoWinner(cardId, pattern) {
     const overlay = document.getElementById('winner-display-overlay');
     const text = document.getElementById('winner-text');
     const preview = document.getElementById('winning-card-preview');
-    
     text.innerText = `Card Number #${cardId} is the Winner!`;
     overlay.classList.remove('hidden');
-    
     const cardGrid = document.createElement('div');
     cardGrid.className = 'player-card-arena';
     cardGrid.style.display = 'grid';
     cardGrid.style.gridTemplateColumns = 'repeat(5, 1fr)';
     cardGrid.style.gap = '2px';
-    
     boughtCardsNumbers[cardId].forEach((n, idx) => {
         const cell = document.createElement('div');
         cell.className = 'arena-cell';
@@ -150,15 +162,10 @@ function showBingoWinner(cardId, pattern) {
         cell.style.border = '1px solid #ccc';
         cell.style.display = 'flex'; cell.style.alignItems = 'center'; cell.style.justifyContent = 'center';
         cell.style.fontWeight = 'bold'; cell.style.color = 'black';
-        
         cell.innerText = idx === 12 ? 'F' : n;
-        
-        if (pattern.includes(idx)) {
-            cell.classList.add('winner-cell');
-        }
+        if (pattern.includes(idx)) cell.classList.add('winner-cell');
         cardGrid.appendChild(cell);
     });
-    
     preview.innerHTML = "";
     preview.appendChild(cardGrid);
 }
