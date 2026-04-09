@@ -1,7 +1,6 @@
 body { background: #004d40; color: white; font-family: Arial, sans-serif; margin: 0; display: flex; justify-content: center; }
-#app { width: 100%; max-width: 500px; padding: 10px; }
+#app { width: 100%; max-width: 900px; padding: 10px; } /* ስፋቱ ተጨምሯል */
 
-/* Header */
 .main-header { background: #00332c; padding: 8px; border-radius: 10px; margin-bottom: 8px; border-bottom: 3px solid #efae10; }
 .top-bar { display: flex; justify-content: space-between; align-items: center; }
 .balance-box { background: #efae10; color: black; padding: 3px 10px; border-radius: 15px; font-weight: 900; font-size: 13px; }
@@ -11,58 +10,41 @@ body { background: #004d40; color: white; font-family: Arial, sans-serif; margin
 .stake-table { background: #00332c; border-radius: 8px; overflow: hidden; }
 .stake-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; padding: 10px 5px; border-bottom: 1px solid #004d40; text-align: center; font-size: 13px; }
 
-/* Card Selection Grid */
+/* Card Selection */
 .card-grid { display: grid; grid-template-columns: repeat(11, 1fr); gap: 4px; background: #002b25; padding: 8px; border-radius: 8px; }
 .card-num { background: #b9b9c8; color: black; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 10px; border-radius: 3px; font-weight: bold; cursor: pointer; }
 .card-num.bought { background: #2196f3 !important; color: white !important; }
 
-/* Arena Card Size & Side-by-Side (Image 3) */
+/* Game Arena - Main Layout Side by Side */
+.game-arena-layout {
+    display: flex; /* ቁጥሮች እና ካርዶች ጎን ለጎን እንዲሆኑ */
+    gap: 15px;
+    align-items: start;
+    margin-top: 10px;
+}
+
+/* Left side: Drawn Ball & Numbers Board */
+.game-status-side { flex: 1; min-width: 250px; text-align: center; }
+.drawn-ball { width: 50px; height: 50px; background: white; color: black; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; margin: 5px auto; border: 3px solid #efae10; }
+.numbers-board { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; margin-top: 10px; }
+.board-cell { background: rgba(255,255,255,0.1); font-size: 9px; padding: 3px; border-radius: 2px; }
+.board-cell.hit { background: #efae10; color: black; font-weight: bold; }
+
+/* Right side: Cards Container */
+.cards-side { flex: 1.5; }
 #arena-cards-container { 
     display: grid; 
-    grid-template-columns: 1fr 1fr; /* ካርዶቹ ጎን ለጎን እንዲሆኑ */
+    grid-template-columns: 1fr 1fr; /* ካርዶቹ በሁለት ረድፍ ጎን ለጎን */
     gap: 8px; 
-    margin-top: 10px; 
 }
-.arena-card-wrapper { 
-    background: #002b25; 
-    padding: 5px; 
-    border-radius: 8px; 
-    border: 1px solid #444; 
-}
+
+.arena-card-wrapper { background: #002b25; padding: 5px; border-radius: 8px; border: 1px solid #444; }
 .card-label-small { font-size: 10px; color: #efae10; margin-bottom: 3px; font-weight: bold; }
 .player-card-arena { background: white; padding: 2px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; border-radius: 3px; }
-.arena-cell { 
-    border: 0.5px solid #ccc; 
-    aspect-ratio: 1; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    font-size: 11px; /* ቁጥሮቹ እንዲያንሱ */
-    font-weight: bold; 
-    color: #333; 
-    cursor: pointer;
-}
+.arena-cell { border: 0.5px solid #ccc; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: #333; cursor: pointer; }
 .arena-cell.marked { background: #efae10 !important; color: black !important; }
 
-/* Bingo Button */
-.bingo-btn-card { 
-    background: linear-gradient(to bottom, #ff0000, #cc0000); 
-    color: white; 
-    border: 1px solid white; 
-    width: 100%; 
-    padding: 6px; 
-    font-weight: bold; 
-    border-radius: 5px; 
-    margin-top: 5px; 
-    cursor: pointer; 
-    font-size: 13px; 
-}
-
-/* Ball and Game Status */
-.drawn-ball { width: 55px; height: 55px; background: white; color: black; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: bold; margin: 10px auto; border: 4px solid #efae10; }
-.numbers-board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; }
-.board-cell { background: rgba(255,255,255,0.1); font-size: 10px; padding: 4px; border-radius: 2px; }
-.board-cell.hit { background: #efae10; color: black; }
+.bingo-btn-card { background: linear-gradient(to bottom, #ff0000, #cc0000); color: white; border: 1px solid white; width: 100%; padding: 6px; font-weight: bold; border-radius: 5px; margin-top: 5px; cursor: pointer; font-size: 13px; }
 
 .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 1000; }
 .modal-content { background: #00332c; width: 85%; max-width: 300px; padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #efae10; }
