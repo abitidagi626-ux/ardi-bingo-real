@@ -85,7 +85,8 @@
         .submit-btn { background: #28a745; color: white; margin-top: 15px; }
 
         .instruction { font-size: 0.85rem; color: #ccc; line-height: 1.6; margin-top: 15px; text-align: left; }
-        .amount-input {
+        
+        .amount-input, .message-input {
             width: 100%;
             padding: 12px;
             margin-top: 15px;
@@ -94,8 +95,15 @@
             border-radius: 8px;
             color: white;
             text-align: center;
-            font-size: 18px;
+            font-size: 16px;
             outline: none;
+        }
+        .amount-input { font-size: 18px; }
+        .message-input { 
+            text-align: left; 
+            height: 80px; 
+            resize: none;
+            font-size: 14px;
         }
     </style>
 </head>
@@ -149,10 +157,13 @@
                 <div class="instruction">
                     <p><strong>መመሪያ፦</strong></p>
                     <p>1. ከላይ ያለውን ቁጥር ኮፒ አድርገው በባንክ አፕዎ ብር ይላኩ።</p>
-                    <p>2. ብር ከላኩ በኋላ የላኩትን መጠን ከታች ባለው ሳጥን ውስጥ ይጻፉ።</p>
+                    <p>2. ብር ከላኩ በኋላ የላኩትን መጠን እና የደረሰዎትን መልእክት (SMS) ከታች ባሉት ሳጥኖች ውስጥ ያስገቡ።</p>
                 </div>
 
                 <input type="number" id="sent-amount" class="amount-input" placeholder="የላኩት የብር መጠን">
+                
+                <textarea id="transaction-msg" class="message-input" placeholder="የደረሰዎትን ሙሉ መልእክት (SMS) ወይም የትራንዛክሽን ቁጥር እዚህ ይለጥፉ..."></textarea>
+
                 <button class="action-btn submit-btn" onclick="submitRequest()">አረጋግጥ / Confirm</button>
             </div>
         </div>
@@ -198,11 +209,18 @@
 
         function submitRequest() {
             const amount = document.getElementById('sent-amount').value;
+            const message = document.getElementById('transaction-msg').value;
+
             if(!amount || amount < 10) {
                 alert("እባክዎ ትክክለኛ የብር መጠን ያስገቡ!");
                 return;
             }
-            alert("እናመሰግናለን! " + amount + " ብር የማስገባት ጥያቄዎ ለAdmin ተልኳል።");
+            if(!message || message.trim().length < 5) {
+                alert("እባክዎ የትራንዛክሽን መረጃውን ወይም የደረሰዎትን SMS ያስገቡ!");
+                return;
+            }
+
+            alert("እናመሰግናለን! " + amount + " ብር የማስገባት ጥያቄዎ ከትራንዛክሽን መረጃው ጋር ለAdmin ተልኳል።");
             window.location.href = 'index.html';
         }
     </script>
