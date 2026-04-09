@@ -124,13 +124,15 @@
                     <p>2. የላኩትን መጠን እና የደረሰዎትን SMS ከታች ባሉት ሳጥኖች ይሙሉ በጥንቃቄ ይሙሉ::</p>
                 </div>
 
-                <input type="number" id="sent-amount" class="amount-input" placeholder="የላኩት የብር መጠን">
-                <textarea id="transaction-msg" class="message-input" placeholder="የደረሰዎትን የትራንዛክሽን ቁጥር ወይም SMS እዚህ ይለጥፉ..."></textarea>
+                <input type="number" id="sent-amount" class="amount-input" placeholder="የላኩት የብር መጠን" required>
+                <textarea id="transaction-msg" class="message-input" placeholder="የደረሰዎትን የትራንዛክሽን ቁጥር ወይም SMS እዚህ ይለጥፉ..." required></textarea>
 
-                <button class="action-btn submit-btn" onclick="submitRequest()">አረጋግጥ / Confirm</button>
+                <button id="confirm-btn" class="action-btn submit-btn" onclick="submitRequest()">አረጋግጥ / Confirm</button>
             </div>
         </div>
     </div>
+
+    <script src="balance-manager.js"></script>
 
     <script>
         const tg = window.Telegram.WebApp;
@@ -166,35 +168,37 @@
             });
         }
 
-        function submitRequest() {
-            const amount = document.getElementById('sent-amount').value;
-            const message = document.getElementById('transaction-msg').value;
-            const bank = document.getElementById('selected-bank-name').innerText;
-            const user = tg.initDataUnsafe.user;
+        // ማሳሰቢያ፡ submitRequest() ፋንሽን በ balance-manager.js ውስጥ መገኘት አለበት።
+        // ካልተገኘ ግን ከታች ያለው ኮድ እንደ አማራጭ ይሰራል፡
+        if (typeof submitRequest !== 'function') {
+            window.submitRequest = function() {
+                const amount = document.getElementById('sent-amount').value;
+                const message = document.getElementById('transaction-msg').value;
+                const bank = document.getElementById('selected-bank-name').innerText;
+                const user = tg.initDataUnsafe.user;
 
-            if(!amount || amount < 10) {
-                tg.showAlert("እባክዎ ትክክለኛ የብር መጠን ያስገቡ!");
-                return;
-            }
-            if(!message || message.trim().length < 5) {
-                tg.showAlert("እባክዎ የትራንዛክሽን መረጃውን (SMS) ያስገቡ!");
-                return;
-            }
+                if(!amount || amount < 10) {
+                    tg.showAlert("እባክዎ ትክክለኛ የብር መጠን ያስገቡ!");
+                    return;
+                }
+                if(!message || message.trim().length < 5) {
+                    tg.showAlert("እባክዎ የትራንዛክሽን መረጃውን (SMS) ያስገቡ!");
+                    return;
+                }
 
-            // ለቦቱ የሚላክ ዳታ
-            const data = {
-                type: 'deposit_request',
-                user_id: user ? user.id : 'Unknown',
-                user_name: user ? (user.first_name + " " + (user.last_name || "")) : 'Guest',
-                amount: amount,
-                bank: bank,
-                transaction: message
+                const data = {
+                    type: 'deposit_request',
+                    user_id: user ? user.id : 'Unknown',
+                    user_name: user ? (user.first_name + " " + (user.last_name || "")) : 'Guest',
+                    amount: amount,
+                    bank: bank,
+                    transaction: message
+                };
+
+                tg.sendData(JSON.stringify(data));
+                tg.showAlert("ጥያቄዎ ለAdmin ተልኳል! ሲረጋገጥ ባላንስዎ ላይ ይጨመራል።");
+                setTimeout(() => { tg.close(); }, 1500);
             };
-
-            tg.sendData(JSON.stringify(data));
-            tg.showAlert("ጥያቄዎ ለAdmin ተልኳል! ሲረጋገጥ ባላንስዎ ላይ ይጨመራል።");
-            
-            setTimeout(() => { tg.close(); }, 1500);
         }
     </script>
 </body>
