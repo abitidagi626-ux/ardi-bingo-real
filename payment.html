@@ -8,78 +8,21 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background-color: #00221c; color: white; overflow-x: hidden; }
-
-        .header {
-            background: #00332c;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            border-bottom: 2px solid #efae10;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+        .header { background: #00332c; padding: 15px; display: flex; align-items: center; border-bottom: 2px solid #efae10; position: sticky; top: 0; z-index: 100; }
         .back-btn { background: none; border: none; color: #efae10; font-size: 24px; cursor: pointer; margin-right: 15px; }
         .container { padding: 20px; max-width: 500px; margin: auto; }
         .hidden { display: none !important; }
-
         h2 { color: #efae10; margin-bottom: 20px; font-size: 1.1rem; text-align: center; }
-
-        .bank-option {
-            background: #004d40;
-            padding: 12px 15px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-            border: 1px solid rgba(239, 174, 16, 0.1);
-        }
+        .bank-option { background: #004d40; padding: 12px 15px; border-radius: 12px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; border: 1px solid rgba(239, 174, 16, 0.1); }
         .bank-info { display: flex; align-items: center; gap: 15px; }
         .bank-logo { width: 45px; height: 45px; border-radius: 8px; object-fit: contain; background: white; }
         .arrow { color: #efae10; font-size: 18px; font-weight: bold; }
-
-        .detail-card {
-            background: #00332c;
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            border: 1px solid #efae10;
-        }
-        .account-box {
-            background: #00221c;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            border: 1px dashed #efae10;
-        }
+        .detail-card { background: #00332c; border-radius: 15px; padding: 20px; text-align: center; border: 1px solid #efae10; }
+        .account-box { background: #00221c; padding: 15px; border-radius: 10px; margin: 20px 0; border: 1px dashed #efae10; }
         .account-number { font-size: 1.5rem; font-weight: bold; color: #ffffff; margin-bottom: 10px; }
-        
-        .action-btn {
-            background: #efae10;
-            color: black;
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-        }
-        
+        .action-btn { background: #efae10; color: black; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
         .submit-btn { background: #28a745; color: white; margin-top: 15px; font-size: 16px; }
-
-        .amount-input, .message-input {
-            width: 100%;
-            padding: 12px;
-            margin-top: 15px;
-            background: #001a15;
-            border: 1px solid #444;
-            border-radius: 8px;
-            color: white;
-            text-align: center;
-            outline: none;
-        }
+        .amount-input, .message-input { width: 100%; padding: 12px; margin-top: 15px; background: #001a15; border: 1px solid #444; border-radius: 8px; color: white; text-align: center; outline: none; }
         .message-input { text-align: left; height: 80px; resize: none; }
         .instruction { font-size: 0.85rem; color: #ccc; margin-top: 15px; text-align: left; line-height: 1.5; }
     </style>
@@ -112,32 +55,25 @@
             <div class="detail-card">
                 <img id="detail-logo" src="" class="bank-logo">
                 <h3 id="selected-bank-name" style="color: #efae10; margin-top: 5px;">Bank Name</h3>
-                
                 <div class="account-box">
                     <p style="color: #efae10; font-size: 12px;">Account Name: Yordanos</p>
                     <p class="account-number" id="target-number">---</p>
                     <button class="action-btn" onclick="copyNumber()">Copy / ኮፒ አድርግ</button>
                 </div>
-
                 <div class="instruction">
                     <p>1. ከላይ ያለውን ቁጥር ኮፒ አድርገው ብር ይላኩ።</p>
-                    <p>2. የላኩትን መጠን እና የደረሰዎትን SMS ከታች ባሉት ሳጥኖች ይሙሉ በጥንቃቄ ይሙሉ::</p>
+                    <p>2. የላኩትን መጠን እና የደረሰዎትን SMS ከታች ይሙሉ::</p>
                 </div>
-
                 <input type="number" id="sent-amount" class="amount-input" placeholder="የላኩት የብር መጠን" required>
-                <textarea id="transaction-msg" class="message-input" placeholder="የደረሰዎትን የትራንዛክሽን ቁጥር ወይም SMS እዚህ ይለጥፉ..." required></textarea>
-
-                <button id="confirm-btn" class="action-btn submit-btn" onclick="submitRequest()">አረጋግጥ / Confirm</button>
+                <textarea id="transaction-msg" class="message-input" placeholder="የትራንዛክሽን ቁጥር ወይም SMS እዚህ ይለጥፉ..." required></textarea>
+                <button id="confirm-btn" class="action-btn submit-btn" onclick="finalSubmit()">አረጋግጥ / Confirm</button>
             </div>
         </div>
     </div>
 
-    <script src="balance-manager.js"></script>
-
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-
         let currentPage = 'selection';
 
         function showDetail(bank, number, logo) {
@@ -154,51 +90,42 @@
             if(currentPage === 'detail') {
                 document.getElementById('detail-page').classList.add('hidden');
                 document.getElementById('selection-page').classList.remove('hidden');
-                document.getElementById('header-title').innerText = 'Deposit / ብር ያስገቡ';
                 currentPage = 'selection';
-            } else {
-                window.location.href = 'index.html';
-            }
+            } else { window.location.href = 'index.html'; }
         }
 
         function copyNumber() {
             const num = document.getElementById('target-number').innerText;
-            navigator.clipboard.writeText(num).then(() => {
-                tg.showAlert("ቁጥሩ ኮፒ ተደርጓል፦ " + num);
-            });
+            navigator.clipboard.writeText(num).then(() => { tg.showAlert("ቁጥሩ ኮፒ ተደርጓል!"); });
         }
 
-        // ማሳሰቢያ፡ submitRequest() ፋንሽን በ balance-manager.js ውስጥ መገኘት አለበት።
-        // ካልተገኘ ግን ከታች ያለው ኮድ እንደ አማራጭ ይሰራል፡
-        if (typeof submitRequest !== 'function') {
-            window.submitRequest = function() {
-                const amount = document.getElementById('sent-amount').value;
-                const message = document.getElementById('transaction-msg').value;
-                const bank = document.getElementById('selected-bank-name').innerText;
-                const user = tg.initDataUnsafe.user;
+        function finalSubmit() {
+            const amount = document.getElementById('sent-amount').value;
+            const message = document.getElementById('transaction-msg').value;
+            const bank = document.getElementById('selected-bank-name').innerText;
+            const user = tg.initDataUnsafe.user;
 
-                if(!amount || amount < 10) {
-                    tg.showAlert("እባክዎ ትክክለኛ የብር መጠን ያስገቡ!");
-                    return;
-                }
-                if(!message || message.trim().length < 5) {
-                    tg.showAlert("እባክዎ የትራንዛክሽን መረጃውን (SMS) ያስገቡ!");
-                    return;
-                }
+            if(!amount || amount < 10) {
+                tg.showAlert("እባክዎ ትክክለኛ የብር መጠን ያስገቡ!");
+                return;
+            }
+            if(!message || message.trim().length < 5) {
+                tg.showAlert("እባክዎ የትራንዛክሽን መረጃውን (SMS) ያስገቡ!");
+                return;
+            }
 
-                const data = {
-                    type: 'deposit_request',
-                    user_id: user ? user.id : 'Unknown',
-                    user_name: user ? (user.first_name + " " + (user.last_name || "")) : 'Guest',
-                    amount: amount,
-                    bank: bank,
-                    transaction: message
-                };
-
-                tg.sendData(JSON.stringify(data));
-                tg.showAlert("ጥያቄዎ ለAdmin ተልኳል! ሲረጋገጥ ባላንስዎ ላይ ይጨመራል።");
-                setTimeout(() => { tg.close(); }, 1500);
+            const data = {
+                type: 'deposit_request',
+                user_id: user ? user.id : 'Unknown',
+                user_name: user ? (user.first_name + " " + (user.last_name || "")) : 'Guest',
+                amount: amount,
+                bank: bank,
+                transaction: message
             };
+
+            tg.sendData(JSON.stringify(data));
+            tg.showAlert("ጥያቄዎ ለAdmin ተልኳል! ሲረጋገጥ ባላንስዎ ላይ ይጨመራል።");
+            setTimeout(() => { tg.close(); }, 2000);
         }
     </script>
 </body>
