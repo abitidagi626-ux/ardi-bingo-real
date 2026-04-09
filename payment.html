@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Deposit - Ardi Bingo</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background-color: #00221c; color: white; overflow-x: hidden; }
@@ -186,10 +185,6 @@
     </div>
 
     <script>
-        // የቴሌግራም ዌብ አፕ ጅምር
-        const tg = window.Telegram.WebApp;
-        tg.expand(); // ገጹን ሙሉ እንዲሆን ማድረግ
-
         let currentPage = 'selection';
 
         function showDetail(bank, number, logo) {
@@ -217,43 +212,25 @@
 
         function copyNumber() {
             const num = document.getElementById('target-number').innerText;
-            navigator.clipboard.writeText(num).then(() => {
-                tg.showAlert("ቁጥሩ ኮፒ ተደርጓል፦ " + num);
-            });
+            navigator.clipboard.writeText(num);
+            alert("ቁጥሩ ኮፒ ተደርጓል፦ " + num);
         }
 
         function submitRequest() {
             const amount = document.getElementById('sent-amount').value;
             const message = document.getElementById('transaction-msg').value;
-            const bankName = document.getElementById('selected-bank-name').innerText;
-            const user = tg.initDataUnsafe.user;
 
             if(!amount || amount < 10) {
-                tg.showAlert("እባክዎ ትክክለኛ የብር መጠን ያስገቡ (ቢያንስ 10 ብር)!");
+                alert("እባክዎ ትክክለኛ የብር መጠን ያስገቡ!");
                 return;
             }
             if(!message || message.trim().length < 5) {
-                tg.showAlert("እባክዎ የትራንዛክሽን መረጃውን (SMS) በትክክል ያስገቡ!");
+                alert("እባክዎ የትራንዛክሽን መረጃውን ያስገቡ!");
                 return;
             }
 
-            // ለ Admin የሚላክ ዳታ ማዘጋጀት
-            const depositData = {
-                type: 'deposit_request',
-                user_id: user ? user.id : 'Unknown',
-                user_name: user ? `${user.first_name} ${user.last_name || ''}` : 'Guest',
-                amount: amount,
-                bank: bankName,
-                transaction: message
-            };
-
-            // መረጃውን ለቴሌግራም ቦቱ መላክ
-            tg.sendData(JSON.stringify(depositData));
-
-            // ማረጋገጫ መልዕክት
-            tg.showAlert("እናመሰግናለን! የዲፖዚት ጥያቄዎ ለAdmin ተልኳል:: ሲረጋገጥ ባላንስዎ ላይ ይጨመራል::", () => {
-                tg.close(); // ዌብ አፑን መዝጋት
-            });
+            alert("እናመሰግናለን! ጥያቄዎ ለAdmin ተልኳል።");
+            window.location.href = 'index.html';
         }
     </script>
 </body>
