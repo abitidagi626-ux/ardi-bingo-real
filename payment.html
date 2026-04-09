@@ -5,143 +5,194 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Deposit - Ardi Bingo</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-        body { background-color: #00221c; color: white; padding-top: env(safe-area-inset-top); }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #00221c; color: white; overflow-x: hidden; }
+
+        /* Header */
         .header {
             background: #00332c;
-            padding: 20px;
+            padding: 15px;
             display: flex;
             align-items: center;
             border-bottom: 2px solid #efae10;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
         .back-btn { background: none; border: none; color: #efae10; font-size: 24px; cursor: pointer; margin-right: 15px; }
         
         .container { padding: 20px; max-width: 500px; margin: auto; }
-        
-        h2 { color: #efae10; margin-bottom: 20px; font-size: 1.2rem; }
+        .hidden { display: none; }
 
-        /* Payment Methods */
-        .methods { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
-        .method-item {
+        h2 { color: #efae10; margin-bottom: 20px; font-size: 1.1rem; text-align: center; }
+
+        /* Bank Selection Style (Image 2 & 3 መሰረት) */
+        .bank-option {
             background: #004d40;
             padding: 15px;
             border-radius: 12px;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            border: 2px solid transparent;
+            justify-content: space-between;
             cursor: pointer;
+            border: 1px solid rgba(239, 174, 16, 0.2);
             transition: 0.3s;
         }
-        .method-item.active { border-color: #efae10; background: #005a4b; }
-        .dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #efae10; position: relative; }
-        .method-item.active .dot::after {
-            content: ""; width: 10px; height: 10px; background: #efae10;
-            border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-        }
+        .bank-option:active { transform: scale(0.98); background: #005a4b; }
+        .bank-info { display: flex; align-items: center; gap: 15px; }
+        .bank-logo { width: 40px; height: 40px; background: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; font-size: 10px; text-align: center; }
+        .arrow { color: #efae10; font-weight: bold; }
 
-        /* Amount Input */
-        .amount-section { margin-bottom: 25px; }
-        .amount-input-wrapper { position: relative; }
-        .amount-input {
-            width: 100%;
-            padding: 15px;
+        /* Detail View Style (Image 4 መሰረት) */
+        .detail-card {
+            background: #00332c;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #efae10;
+        }
+        .account-box {
             background: #00221c;
-            border: 1px solid #444;
-            border-radius: 10px;
-            color: white;
-            font-size: 18px;
-            padding-left: 50px;
-            outline: none;
-        }
-        .currency-label { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #efae10; font-weight: bold; }
-
-        /* Fast Selection Buttons */
-        .fast-amounts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }
-        .fast-btn {
-            background: #00332c; border: 1px solid #444; color: white;
-            padding: 8px; border-radius: 8px; cursor: pointer; font-size: 14px;
-        }
-        .fast-btn:hover { border-color: #efae10; }
-
-        /* Submit Button */
-        .submit-btn {
-            width: 100%;
             padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px dashed #efae10;
+        }
+        .account-label { font-size: 12px; color: #aaa; margin-bottom: 5px; }
+        .account-number { font-size: 1.4rem; font-weight: bold; color: #efae10; letter-spacing: 1px; }
+        
+        .copy-btn {
             background: #efae10;
             color: black;
             border: none;
-            border-radius: 10px;
+            padding: 10px 20px;
+            border-radius: 8px;
             font-weight: bold;
-            font-size: 16px;
             cursor: pointer;
-            margin-top: 20px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .instruction { font-size: 0.9rem; color: #ddd; line-height: 1.5; margin-top: 15px; text-align: left; }
+        
+        .amount-input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background: #001a15;
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <button class="back-btn" onclick="history.back()">⬅</button>
-        <h3>Deposit / ብር ያስገቡ</h3>
+        <button class="back-btn" onclick="goBack()">⬅</button>
+        <h3 id="header-title">Deposit / ብር ያስገቡ</h3>
     </div>
 
     <div class="container">
-        <h2>የክፍያ አማራጭ ይምረጡ</h2>
-        <div class="methods">
-            <div class="method-item active" onclick="selectMethod(this, 'Telebirr')">
-                <span class="dot"></span>
-                <span>Telebirr / ቴሌ ብር</span>
+        <div id="selection-page">
+            <h2>ክፍያ የሚፈጽሙበትን ባንክ ይምረጡ</h2>
+            
+            <div class="bank-option" onclick="showDetail('Telebirr', '0979429028')">
+                <div class="bank-info">
+                    <div class="bank-logo" style="background: #2196F3; color: white;">tele<br>birr</div>
+                    <span>Telebirr / ቴሌ ብር</span>
+                </div>
+                <span class="arrow">❯</span>
             </div>
-            <div class="method-item" onclick="selectMethod(this, 'CBE')">
-                <span class="dot"></span>
-                <span>CBE Birr / ሲቢኢ ብር</span>
+
+            <div class="bank-option" onclick="showDetail('CBE Birr', '0979429028')">
+                <div class="bank-info">
+                    <div class="bank-logo" style="background: #4b2c85; color: white;">CBE<br>Birr</div>
+                    <span>CBE Birr / ሲቢኢ ብር</span>
+                </div>
+                <span class="arrow">❯</span>
+            </div>
+
+            <div class="bank-option" onclick="showDetail('CBE Bank', '1000277987067')">
+                <div class="bank-info">
+                    <div class="bank-logo" style="background: #4b2c85; color: white;">CBE</div>
+                    <span>CBE Bank / ንግድ ባንክ</span>
+                </div>
+                <span class="arrow">❯</span>
             </div>
         </div>
 
-        <div class="amount-section">
-            <h2>የብር መጠን</h2>
-            <div class="amount-input-wrapper">
-                <span class="currency-label">ETB</span>
-                <input type="number" id="amount" class="amount-input" placeholder="0.00" min="10">
-            </div>
-            <div class="fast-amounts">
-                <button class="fast-btn" onclick="setAmount(50)">50</button>
-                <button class="fast-btn" onclick="setAmount(100)">100</button>
-                <button class="fast-btn" onclick="setAmount(500)">500</button>
-                <button class="fast-btn" onclick="setAmount(1000)">1000</button>
+        <div id="detail-page" class="hidden">
+            <div class="detail-card">
+                <h3 id="selected-bank-name" style="color: #efae10;">Telebirr</h3>
+                
+                <div class="account-box">
+                    <p class="account-label" id="account-type-label">የስልክ ቁጥር</p>
+                    <p class="account-number" id="target-number">0979429028</p>
+                    <button class="copy-btn" onclick="copyNumber()">Copy / ቁጥሩን ኮፒ አድርግ</button>
+                </div>
+
+                <div class="instruction">
+                    <p><strong>እንዴት ብር ማስገባት ይቻላል?</strong></p>
+                    <p>1. ከላይ ያለውን ቁጥር ኮፒ ያድርጉ።</p>
+                    <p>2. ወደ ባንክ አፕሊኬሽንዎ በመሄድ የፈለጉትን የብር መጠን ይላኩ።</p>
+                    <p>3. ብር ከላኩ በኋላ ያስገቡትን የብር መጠን እዚህ ይጥቀሱ።</p>
+                </div>
+
+                <input type="number" id="sent-amount" class="amount-input" placeholder="ያስገቡት የብር መጠን">
+                <button class="copy-btn" style="background: #28a745; color: white; margin-top: 20px;" onclick="submitRequest()">ያለቀውን ፎርም ላክ</button>
             </div>
         </div>
-
-        <button class="submit-btn" onclick="confirmDeposit()">ብር አስገባ</button>
     </div>
 
     <script>
-        let selectedMethod = 'Telebirr';
+        let currentPage = 'selection';
 
-        function selectMethod(el, method) {
-            document.querySelectorAll('.method-item').forEach(m => m.classList.remove('active'));
-            el.classList.add('active');
-            selectedMethod = method;
-        }
-
-        function setAmount(val) {
-            document.getElementById('amount').value = val;
-        }
-
-        function confirmDeposit() {
-            const amount = document.getElementById('amount').value;
-            if(!amount || amount < 10) {
-                alert("እባክዎ ትክክለኛ የብር መጠን ያስገቡ (ትንሹ 10 ብር)!");
-                return;
+        function showDetail(bank, number) {
+            document.getElementById('selection-page').classList.add('hidden');
+            document.getElementById('detail-page').classList.remove('hidden');
+            document.getElementById('header-title').innerText = bank;
+            document.getElementById('selected-bank-name').innerText = bank;
+            document.getElementById('target-number').innerText = number;
+            
+            // ለንግድ ባንክ ከሆነ "የአካውንት ቁጥር" እንዲል
+            if(bank === 'CBE Bank') {
+                document.getElementById('account-type-label').innerText = 'የአካውንት ቁጥር';
+            } else {
+                document.getElementById('account-type-label').innerText = 'የስልክ ቁጥር';
             }
             
-            // እዚህ ጋር ወደ ክፍያ መነሻ መላክ ይቻላል
-            alert(`${amount} ብር በ ${selectedMethod} በኩል ለማስገባት ጥያቄዎ ቀርቧል።`);
-            
-            // ወደ ዋናው ገጽ ለመመለስ
-            window.location.href = 'index.html'; 
+            currentPage = 'detail';
+        }
+
+        function goBack() {
+            if(currentPage === 'detail') {
+                document.getElementById('detail-page').classList.add('hidden');
+                document.getElementById('selection-page').classList.remove('hidden');
+                document.getElementById('header-title').innerText = 'Deposit / ብር ያስገቡ';
+                currentPage = 'selection';
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        function copyNumber() {
+            const num = document.getElementById('target-number').innerText;
+            navigator.clipboard.writeText(num);
+            alert("ቁጥሩ ኮፒ ተደርጓል: " + num);
+        }
+
+        function submitRequest() {
+            const amount = document.getElementById('sent-amount').value;
+            if(!amount || amount < 10) {
+                alert("እባክዎ ትክክለኛ የብር መጠን ያስገቡ!");
+                return;
+            }
+            alert(amount + " ብር የማስገባት ጥያቄዎ ለሲስተም አስተዳዳሪ ተልኳል። በቅርቡ ባላንስዎ ላይ ይጨመራል።");
+            window.location.href = 'index.html';
         }
     </script>
 </body>
