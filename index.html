@@ -10,32 +10,30 @@
     <div id="app">
         <header class="main-header">
             <div class="top-bar">
-                <button onclick="location.reload()" style="background:#444; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">Refresh</button>
+                <button onclick="location.reload()" style="background:#444; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:11px;">Refresh</button>
                 <div class="balance-box">💰 ETB <span id="balance">0.00</span></div>
             </div>
-            <div style="display:flex; justify-content:space-between; margin-top:10px; align-items:center;">
-                <button style="background:#efae10; border:none; padding:5px 15px; border-radius:5px; font-weight:bold;">+ Deposit</button>
+            <div style="display:flex; justify-content:space-between; margin-top:8px; align-items:center;">
+                <button style="background:#efae10; border:none; padding:5px 12px; border-radius:4px; font-weight:bold; font-size:12px;">+ Deposit</button>
                 <div class="logo">ARDI BINGO</div>
             </div>
         </header>
 
         <div id="stake-screen">
-            <div class="stake-table">
-                <div id="stake-list"></div>
-            </div>
+            <div class="stake-table"><div id="stake-list"></div></div>
         </div>
 
         <div id="card-screen" class="hidden">
-            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:15px;">
-                <button onclick="showStakeScreen()" style="background:none; border:none; color:white; font-size:24px; cursor:pointer;">⬅</button>
-                <div style="font-weight:bold;"><span id="selected-stake-val">0</span> Birr | <span id="card-count-info">0</span>/4 Cards</div>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                <button onclick="showStakeScreen()" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;">⬅</button>
+                <div style="font-size:14px;"><span id="selected-stake-val">0</span> Birr | <span id="card-count-info">0</span>/4 Cards</div>
             </div>
             <div id="card-grid" class="card-grid"></div>
         </div>
 
         <div id="game-screen" class="hidden">
-            <div class="game-container">
-                <div style="color:#efae10; font-weight:bold; font-size:20px; margin-bottom:5px;">Win: <span id="arena-win-amount">0.00</span></div>
+            <div style="text-align:center;">
+                <div style="color:#efae10; font-weight:bold; font-size:16px;">Win: <span id="arena-win-amount">0.00</span></div>
                 <div class="drawn-ball" id="current-ball">-</div>
                 <div id="numbers-board" class="numbers-board"></div>
                 <div id="arena-cards-container"></div>
@@ -44,16 +42,16 @@
 
         <div id="card-modal" class="modal hidden">
             <div class="modal-content">
-                <div style="color:#00ff00; font-weight:bold; margin-bottom:12px; font-size:18px;" id="modal-timer">00:60</div>
-                <h4 id="modal-card-no" style="color: #efae10;">Card No. --</h4>
-                <div id="preview-grid" class="player-card-arena" style="background:#fff;"></div>
-                <div style="display:flex; gap:10px; margin-top:20px;">
-                    <button onclick="closeModal()" style="flex:1; padding:12px; border-radius:8px; border:none; background:#555; color:white; font-weight:bold;">Back</button>
-                    <button onclick="confirmPurchase()" style="flex:1; padding:12px; border-radius:8px; border:none; background:#efae10; font-weight:bold;">Confirm</button>
+                <div style="color:#00ff00; font-weight:bold; font-size:16px;" id="modal-timer">00:60</div>
+                <h4 id="modal-card-no" style="color:#efae10; margin:10px 0;">Card No. --</h4>
+                <div id="preview-grid" class="player-card-arena"></div>
+                <div style="display:flex; gap:10px; margin-top:15px;">
+                    <button onclick="closeModal()" style="flex:1; padding:10px; border-radius:5px; border:none; background:#555; color:white;">Back</button>
+                    <button onclick="confirmPurchase()" style="flex:1; padding:10px; border-radius:5px; border:none; background:#efae10; font-weight:bold;">Confirm</button>
                 </div>
             </div>
         </div>
-        <div id="bingo-overlay" style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); font-size:70px; font-weight:900; color:#efae10; z-index:2000; display:none; text-shadow:2px 2px 10px black;">BINGO!</div>
+        <div id="bingo-overlay" style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); font-size:60px; font-weight:900; color:#efae10; z-index:2000; display:none; text-shadow:2px 2px 10px black;">BINGO!</div>
     </div>
     <script src="app.js"></script>
 </body>
