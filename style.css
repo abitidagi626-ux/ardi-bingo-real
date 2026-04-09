@@ -6,12 +6,12 @@ body {
     display: flex; 
     justify-content: center; 
 }
-#app { width: 100%; max-width: 450px; padding: 10px; }
+#app { width: 100%; max-width: 500px; padding: 10px; }
 
-/* Header - Image 1 & 2 format */
+/* Header */
 .main-header { 
     background: #00332c; 
-    padding: 12px; 
+    padding: 10px; 
     border-radius: 10px; 
     margin-bottom: 10px; 
     border-bottom: 3px solid #efae10; 
@@ -20,31 +20,31 @@ body {
 .balance-box { 
     background: #efae10; 
     color: black; 
-    padding: 5px 12px; 
-    border-radius: 20px; 
+    padding: 4px 10px; 
+    border-radius: 15px; 
     font-weight: 900; 
-    font-size: 14px; 
+    font-size: 13px; 
 }
-.logo { font-weight: bold; font-size: 1.2rem; color: #efae10; }
+.logo { font-weight: bold; font-size: 1.1rem; color: #efae10; }
 
 /* Stake Table */
-.stake-table { background: #00332c; border-radius: 10px; overflow: hidden; }
+.stake-table { background: #00332c; border-radius: 8px; overflow: hidden; }
 .stake-row { 
     display: grid; 
     grid-template-columns: 1fr 1fr 1fr 1fr; 
-    padding: 12px 5px; 
+    padding: 10px 5px; 
     border-bottom: 1px solid #004d40; 
     text-align: center; 
-    align-items: center;
+    font-size: 13px;
 }
 
-/* Card Grid Selection */
+/* Card Selection */
 .card-grid { 
     display: grid; 
     grid-template-columns: repeat(11, 1fr); 
-    gap: 5px; 
+    gap: 4px; 
     background: #002b25; 
-    padding: 10px; 
+    padding: 8px; 
     border-radius: 8px; 
 }
 .card-num { 
@@ -55,76 +55,78 @@ body {
     align-items: center; 
     justify-content: center; 
     font-size: 10px; 
-    border-radius: 4px; 
+    border-radius: 3px; 
     font-weight: bold; 
-    cursor: pointer; 
 }
 .card-num.bought { background: #2196f3 !important; color: white !important; }
 
-/* Arena Card Layout - Image 3 & 4 format */
+/* Game Arena Layout - Side by Side (Image 3) */
+#arena-cards-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* ካርዶቹ ጎን ለጎን እንዲሆኑ */
+    gap: 10px;
+    margin-top: 10px;
+}
 .arena-card-wrapper { 
     background: #002b25; 
-    padding: 10px; 
-    border-radius: 12px; 
-    margin-bottom: 20px; 
+    padding: 6px; 
+    border-radius: 8px; 
     border: 1px solid #444; 
 }
 .card-label-small { 
-    font-size: 11px; 
+    font-size: 10px; 
     color: #efae10; 
-    text-align: left; 
-    margin-bottom: 5px; 
+    margin-bottom: 4px; 
     font-weight: bold; 
 }
 .player-card-arena { 
     background: white; 
-    padding: 4px; 
+    padding: 2px; 
     display: grid; 
     grid-template-columns: repeat(5, 1fr); 
-    gap: 2px; 
-    border-radius: 4px; 
+    gap: 1px; 
+    border-radius: 3px; 
 }
 .arena-cell { 
-    border: 1px solid #ddd; 
+    border: 0.5px solid #ccc; 
     aspect-ratio: 1; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
-    font-size: 14px; 
+    font-size: 11px; 
     font-weight: bold; 
-    color: black; 
-    cursor: pointer; 
+    color: #333; 
 }
 .arena-cell.marked { background: #efae10 !important; color: black !important; }
 
-/* Bingo Button - Image 3 & 4 style */
+/* Bingo Button */
 .bingo-btn-card { 
     background: linear-gradient(to bottom, #ff0000, #cc0000); 
     color: white; 
-    border: 2px solid white; 
+    border: 1px solid white; 
     width: 100%; 
-    padding: 12px; 
+    padding: 8px; 
     font-weight: bold; 
-    border-radius: 8px; 
-    margin-top: 10px; 
+    border-radius: 5px; 
+    margin-top: 6px; 
     cursor: pointer; 
-    font-size: 20px; 
+    font-size: 14px; 
 }
 
-/* Game Elements */
+/* Ball and Board */
 .drawn-ball { 
-    width: 70px; height: 70px; 
+    width: 60px; height: 60px; 
     background: white; color: black; 
     border-radius: 50%; 
     display: flex; align-items: center; justify-content: center; 
-    font-size: 32px; font-weight: bold; 
-    margin: 15px auto; 
+    font-size: 28px; font-weight: bold; 
+    margin: 10px auto; 
     border: 4px solid #efae10; 
 }
-.numbers-board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 20px; }
-.board-cell { background: rgba(255,255,255,0.1); font-size: 11px; padding: 5px; border-radius: 3px; }
-.board-cell.hit { background: #efae10; color: black; font-weight: bold; }
+.numbers-board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; }
+.board-cell { background: rgba(255,255,255,0.1); font-size: 10px; padding: 4px; border-radius: 2px; }
+.board-cell.hit { background: #efae10; color: black; }
 
 .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-.modal-content { background: #00332c; width: 90%; max-width: 350px; padding: 20px; border-radius: 20px; text-align: center; border: 1px solid #efae10; }
+.modal-content { background: #00332c; width: 90%; max-width: 320px; padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #efae10; }
 .hidden { display: none !important; }
