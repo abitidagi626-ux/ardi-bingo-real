@@ -1,28 +1,58 @@
-// balance-manager.js
+// የቴሌግራም WebApp ማቀናበሪያ
+const tg = window.Telegram.WebApp;
+tg.expand(); // WebApp ስክሪኑን ሙሉ እንዲሞላ
 
-// 1. የገንዘብ ማስገቢያ ጥያቄን ለAdmin ማጽደቂያ መላክ (Deposit Request)
-function requestDeposit(userId, amount, transactionId) {
-    const depositRequest = {
-        userId: userId,
+// --- 1. የዲፖዚት ፎርም መረጃን ለAdmin ማጽደቂያ መላክ (ከክፍያ ገጽ የሚመጣ) ---
+
+function submitRequest() {
+    // በ payment.html ላይ ያሉትን የ Input ID-ዎች በመጠቀም መረጃ መሰብሰብ
+    // ማሳሰቢያ፡ በ HTML ገጽህ ላይ ያሉት ID-ዎች 'amount' እና 'transaction' መሆናቸውን አረጋግጥ
+    const amountInput = document.getElementById('amount') || document.getElementById('sent-amount');
+    const transactionInput = document.getElementById('transaction') || document.getElementById('transaction-msg');
+    const bankDisplay = document.getElementById('bank-name') || document.getElementById('selected-bank-name');
+
+    const amount = amountInput ? amountInput.value : null;
+    const transaction = transactionInput ? transactionInput.value : null;
+    const bank = bankDisplay ? bankDisplay.innerText : "Unknown Bank";
+    const user = tg.initDataUnsafe.user;
+
+    // መረጃ መሞላቱን ማረጋገጫ
+    if (!amount || !transaction) {
+        tg.showAlert("እባክዎ መረጃውን በትክክል ይሙሉ።");
+        return;
+    }
+
+    // ለአድሚን የሚላክ መረጃ
+    const paymentData = {
+        type: 'deposit_request',
+        user_id: user ? user.id : 'Unknown',
+        user_name: user ? `${user.first_name} ${user.last_name || ''}` : 'Guest',
         amount: amount,
-        transactionId: transactionId,
-        status: 'pending', // Admin እስኪያጸድቀው ድረስ
+        bank: bank,
+        transaction: transaction,
         timestamp: new Date().getTime()
     };
-    // እዚህ ጋር ለAdmin Database መረጃው ይላካል
-    console.log("Deposit request sent for approval:", depositRequest);
-    return depositRequest;
+
+    // መረጃውን ወደ ሰርቨር (Telegram Bot) መላክ
+    tg.sendData(JSON.stringify(paymentData));
+
+    // ማረጋገጫ መልዕክት ማሳየት
+    tg.showAlert("እናመሰግናለን! ጥያቄዎ ለAdmin ተልኳል።", () => {
+        tg.close(); // WebApp መዝጊያ
+    });
 }
 
-// 2. በAdmin ሲጸድቅ Balance ላይ መደመር (Deposit Approve)
+// --- 2. የባላንስ አስተዳደር ሎጂክ (Logic) ---
+
+// በAdmin ሲጸድቅ Balance ላይ መደመር (Deposit Approve)
 function approveDeposit(userId, amount) {
     let currentBalance = getUserBalance(userId);
-    let newBalance = currentBalance + amount;
+    let newBalance = currentBalance + parseFloat(amount);
     updateUserBalance(userId, newBalance);
     console.log(`Deposit Approved! New Balance: ${newBalance} ETB`);
 }
 
-// 3. ጨዋታ ሲቀላቀሉ ከBalance ላይ መቀነስ (Stake Deduction)
+// ጨዋታ ሲቀላቀሉ ከBalance ላይ መቀነስ (Stake Deduction)
 function deductStake(userId, stakeAmount) {
     let currentBalance = getUserBalance(userId);
     if (currentBalance >= stakeAmount) {
@@ -31,44 +61,57 @@ function deductStake(userId, stakeAmount) {
         console.log(`Stake deducted: ${stakeAmount}. New Balance: ${newBalance}`);
         return true; // ክፍያው ተሳክቷል
     } else {
-        alert("በቂ ሂሳብ የሎትም! እባክዎ መጀመሪያ ተቀማጭ ያድርጉ።");
+        tg.showAlert("በቂ ሂሳብ የሎትም! እባክዎ መጀመሪያ ተቀማጭ ያድርጉ።");
         return false; // ክፍያው አልተሳካም
     }
 }
 
-// 4. ሲያሸንፉ Balance ላይ መደመር (Winning Credit)
+// ሲያሸንፉ Balance ላይ መደመር (Winning Credit)
 function addWinnings(userId, winAmount) {
     let currentBalance = getUserBalance(userId);
-    let newBalance = currentBalance + winAmount;
+    let newBalance = currentBalance + parseFloat(winAmount);
     updateUserBalance(userId, newBalance);
     console.log(`Winner! ${winAmount} ETB added. Total: ${newBalance}`);
 }
 
-// 5. ገንዘብ ለማውጣት ሲጠይቁ መቀነስ (Withdrawal Request)
+// ገንዘብ ለማውጣት ሲጠይቁ መቀነስ (Withdrawal Request)
 function requestWithdrawal(userId, amount) {
     let currentBalance = getUserBalance(userId);
     if (currentBalance >= amount) {
         let newBalance = currentBalance - amount;
         updateUserBalance(userId, newBalance);
-        // ለAdmin የክፍያ ጥያቄ ይላካል
+        // ለAdmin የክፍያ ጥያቄ እዚህ ጋር ይላካል
         console.log(`Withdrawal request for ${amount} ETB processed.`);
         return true;
     } else {
-        alert("ሊያወጡ የፈለጉት የብር መጠን ከሂሳብዎ ይበልጣል!");
+        tg.showAlert("ሊያወጡ የፈለጉት የብር መጠን ከሂሳብዎ ይበልጣል!");
         return false;
     }
 }
 
-// መረጃን ከዳታቤዝ ለማንበብ እና ለማስተካከል (Helper functions)
+// --- 3. መረጃን ከዳታቤዝ ለማንበብ እና ለማስተካከል (Helper functions) ---
+
 function getUserBalance(userId) {
-    // ለጊዜው ከLocalStorage ወይም ከDatabase ይመጣል። ለምሳሌ፡
+    // ለጊዜው ከLocalStorage መረጃውን ያነባል
     return parseFloat(localStorage.getItem(`balance_${userId}`)) || 0.00;
 }
 
 function updateUserBalance(userId, newAmount) {
+    // መረጃውን በLocalStorage ውስጥ ያስቀምጣል
     localStorage.setItem(`balance_${userId}`, newAmount.toFixed(2));
-    // በዋናው ገጽ ላይ እንዲታይ ያደርጋል
-    if(document.getElementById('balance-display')) {
-        document.getElementById('balance-display').innerText = `ETB ${newAmount.toFixed(2)}`;
+    
+    // በገጹ ላይ 'balance-display' የሚል ID ያለው ቦታ ካለ ወዲያውኑ እንዲቀየር ያደርጋል
+    const display = document.getElementById('balance-display');
+    if(display) {
+        display.innerText = `ETB ${newAmount.toFixed(2)}`;
     }
 }
+
+// ገጹ ሲከፈት የቆየውን ባላንስ ለማሳየት (ካስፈለገ)
+window.onload = function() {
+    const user = tg.initDataUnsafe.user;
+    if (user) {
+        const bal = getUserBalance(user.id);
+        updateUserBalance(user.id, bal);
+    }
+};
