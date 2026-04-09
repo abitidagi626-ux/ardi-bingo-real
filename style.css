@@ -1,23 +1,100 @@
-body { background: #004d40; color: white; font-family: Arial, sans-serif; margin: 0; display: flex; justify-content: center; }
-#app { width: 100%; max-width: 900px; padding: 10px; } /* ስፋቱ ተጨምሯል */
+/* ለሁሉም ኤለመንቶች መነሻ ማስተካከያ */
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+    -webkit-tap-highlight-color: transparent; 
+}
 
-.main-header { background: #00332c; padding: 8px; border-radius: 10px; margin-bottom: 8px; border-bottom: 3px solid #efae10; }
+html, body {
+    height: 100%;
+    width: 100%;
+    background-color: #00221c; /* ከበስተጀርባ ጥቁር አረንጓዴ */
+}
+
+body { 
+    background: #004d40; 
+    color: white; 
+    font-family: Arial, sans-serif; 
+    display: flex; 
+    justify-content: center; 
+    /* ለ Notch ስልኮች የላይኛው ባር ክፍተት እንዳይኖር */
+    padding-top: env(safe-area-inset-top);
+    overflow-x: hidden;
+}
+
+#app { 
+    width: 100%; 
+    max-width: 900px; 
+    padding: 0 10px 10px 10px; /* ከላይ padding አጥፍተነዋል */
+}
+
+/* Header ማስተካከያ - ከላይ ክፍተት እንዳይኖር */
+.main-header { 
+    background: #00332c; 
+    padding: 10px; 
+    border-radius: 0 0 12px 12px; /* ከላይ ማእዘኑ ቀጥ ያለ፣ ከታች ብቻ እንዲታጠፍ */
+    margin-bottom: 8px; 
+    border-bottom: 3px solid #efae10; 
+    margin-top: 0; 
+}
+
 .top-bar { display: flex; justify-content: space-between; align-items: center; }
-.balance-box { background: #efae10; color: black; padding: 3px 10px; border-radius: 15px; font-weight: 900; font-size: 13px; }
-.logo { font-weight: bold; font-size: 1.1rem; color: #efae10; }
+
+.balance-box { 
+    background: #efae10; 
+    color: black; 
+    padding: 4px 12px; 
+    border-radius: 20px; 
+    font-weight: 900; 
+    font-size: 13px; 
+    white-space: nowrap;
+}
+
+.logo { font-weight: bold; font-size: 1.1rem; color: #efae10; letter-spacing: 1px; }
 
 /* Stake Table */
-.stake-table { background: #00332c; border-radius: 8px; overflow: hidden; }
-.stake-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; padding: 10px 5px; border-bottom: 1px solid #004d40; text-align: center; font-size: 13px; }
+.stake-table { background: #00332c; border-radius: 8px; overflow: hidden; margin-top: 5px; }
+.stake-row { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr 1fr 1fr; 
+    padding: 12px 5px; 
+    border-bottom: 1px solid #004d40; 
+    text-align: center; 
+    font-size: 13px; 
+    align-items: center;
+}
 
 /* Card Selection */
-.card-grid { display: grid; grid-template-columns: repeat(11, 1fr); gap: 4px; background: #002b25; padding: 8px; border-radius: 8px; }
-.card-num { background: #b9b9c8; color: black; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 10px; border-radius: 3px; font-weight: bold; cursor: pointer; }
-.card-num.bought { background: #2196f3 !important; color: white !important; }
+.card-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(30px, 1fr)); 
+    gap: 5px; 
+    background: #002b25; 
+    padding: 10px; 
+    border-radius: 8px; 
+}
 
-/* Game Arena - Main Layout Side by Side */
+.card-num { 
+    background: #b9b9c8; 
+    color: black; 
+    aspect-ratio: 1; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 11px; 
+    border-radius: 4px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    transition: 0.2s;
+}
+
+.card-num.bought { background: #2196f3 !important; color: white !important; transform: scale(0.95); }
+
+/* Game Arena Layout */
 .game-arena-layout {
-    display: flex; /* ቁጥሮች እና ካርዶች ጎን ለጎን እንዲሆኑ */
+    display: flex;
+    flex-wrap: wrap; /* ለሞባይል እንዲመች ተጨምሯል */
     gap: 15px;
     align-items: start;
     margin-top: 10px;
@@ -25,27 +102,97 @@ body { background: #004d40; color: white; font-family: Arial, sans-serif; margin
 
 /* Left side: Drawn Ball & Numbers Board */
 .game-status-side { flex: 1; min-width: 250px; text-align: center; }
-.drawn-ball { width: 50px; height: 50px; background: white; color: black; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; margin: 5px auto; border: 3px solid #efae10; }
+.drawn-ball { 
+    width: 60px; 
+    height: 60px; 
+    background: white; 
+    color: black; 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 28px; 
+    font-weight: bold; 
+    margin: 5px auto; 
+    border: 4px solid #efae10; 
+    box-shadow: 0 0 10px rgba(239, 174, 16, 0.5);
+}
+
 .numbers-board { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; margin-top: 10px; }
-.board-cell { background: rgba(255,255,255,0.1); font-size: 9px; padding: 3px; border-radius: 2px; }
+.board-cell { background: rgba(255,255,255,0.1); font-size: 10px; padding: 4px 0; border-radius: 2px; }
 .board-cell.hit { background: #efae10; color: black; font-weight: bold; }
 
 /* Right side: Cards Container */
-.cards-side { flex: 1.5; }
+.cards-side { flex: 1.5; min-width: 280px; }
 #arena-cards-container { 
     display: grid; 
-    grid-template-columns: 1fr 1fr; /* ካርዶቹ በሁለት ረድፍ ጎን ለጎን */
-    gap: 8px; 
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+    gap: 10px; 
 }
 
-.arena-card-wrapper { background: #002b25; padding: 5px; border-radius: 8px; border: 1px solid #444; }
-.card-label-small { font-size: 10px; color: #efae10; margin-bottom: 3px; font-weight: bold; }
-.player-card-arena { background: white; padding: 2px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; border-radius: 3px; }
-.arena-cell { border: 0.5px solid #ccc; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: #333; cursor: pointer; }
-.arena-cell.marked { background: #efae10 !important; color: black !important; }
+.arena-card-wrapper { background: #002b25; padding: 8px; border-radius: 10px; border: 1px solid #444; }
+.card-label-small { font-size: 11px; color: #efae10; margin-bottom: 5px; font-weight: bold; }
 
-.bingo-btn-card { background: linear-gradient(to bottom, #ff0000, #cc0000); color: white; border: 1px solid white; width: 100%; padding: 6px; font-weight: bold; border-radius: 5px; margin-top: 5px; cursor: pointer; font-size: 13px; }
+.player-card-arena { 
+    background: white; 
+    padding: 3px; 
+    display: grid; 
+    grid-template-columns: repeat(5, 1fr); 
+    gap: 2px; 
+    border-radius: 4px; 
+}
 
-.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-.modal-content { background: #00332c; width: 85%; max-width: 300px; padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #efae10; }
+.arena-cell { 
+    border: 0.5px solid #ddd; 
+    aspect-ratio: 1; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 12px; 
+    font-weight: bold; 
+    color: #333; 
+    cursor: pointer; 
+}
+
+.arena-cell.marked { background: #efae10 !important; color: black !important; position: relative; }
+
+/* ቢንጎ በተን */
+.bingo-btn-card { 
+    background: linear-gradient(to bottom, #ff4444, #cc0000); 
+    color: white; 
+    border: 1px solid white; 
+    width: 100%; 
+    padding: 8px; 
+    font-weight: bold; 
+    border-radius: 6px; 
+    margin-top: 8px; 
+    cursor: pointer; 
+    font-size: 14px; 
+    text-transform: uppercase;
+}
+
+/* Modals */
+.modal { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background: rgba(0,0,0,0.85); 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    z-index: 2000; 
+}
+
+.modal-content { 
+    background: #00332c; 
+    width: 90%; 
+    max-width: 320px; 
+    padding: 20px; 
+    border-radius: 15px; 
+    text-align: center; 
+    border: 1px solid #efae10; 
+}
+
 .hidden { display: none !important; }
