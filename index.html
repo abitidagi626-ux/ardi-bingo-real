@@ -2,52 +2,69 @@
 <html lang="am">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    
     <title>Ardi Bingo</title> 
     <link rel="stylesheet" href="style.css">
     <style>
-        /* ከላይ ያለውን ማንኛውንም ባዶ ቦታ (Gap) ለማጥፋት */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background-color: #00221c; overflow-x: hidden; }
-        #app { padding-top: 0px; margin-top: 0px; }
-
-        .winner-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 3000; text-align: center; }
-        .winner-card-box { background: white; padding: 10px; border-radius: 10px; margin-top: 15px; box-shadow: 0 0 20px #efae10; }
-        .winner-cell { background: #4caf50 !important; color: white !important; border: 1px solid #fff; }
-        .hidden { display: none !important; }
+        /* ሁሉንም margin እና padding በማጥፋት ከላይ ያለውን ባዶ ቦታ እናጠፋለን */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
+        body { 
+            background-color: #00221c; 
+            font-family: sans-serif;
+            overflow-x: hidden;
+            /* ከላይ ያለውን አድራሻ ባር ለመደበቅ የሚረዳ */
+            padding-top: env(safe-area-inset-top); 
+        }
+
+        #app { width: 100%; min-height: 100vh; }
+
+        /* Header ማስተካከያ - ከላይ ምንም ጋፕ እንዳይኖር */
+        .main-header {
+            background: #00332c; 
+            padding: 10px 15px; 
+            border-radius: 0 0 15px 15px; 
+            border-bottom: 3px solid #efae10;
+            margin-top: 0;
+        }
+
         .top-bar { 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
-            margin-bottom: 12px;
-            width: 100%;
+            margin-bottom: 10px;
         }
+
         .balance-status-box { 
             background: #efae10; 
             color: black; 
-            padding: 6px 12px; 
+            padding: 5px 12px; 
             border-radius: 20px; 
             font-weight: 900; 
             font-size: 13px; 
             display: flex; 
             align-items: center; 
             gap: 5px;
-            white-space: nowrap;
-            min-width: fit-content;
         }
-        .refresh-btn { background: #444; color: white; border: none; padding: 6px 15px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
-        .bottom-bar { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-        .deposit-btn { background: #efae10; border: none; padding: 8px 18px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; }
-        .logo { font-weight: bold; font-size: 1.2rem; color: #efae10; letter-spacing: 1px; }
 
-        .modal-content { background: #00332c; width: 90%; max-width: 320px; padding: 20px; border-radius: 15px; text-align: center; border: 1px solid #efae10; }
+        .refresh-btn { background: #444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; }
+        .bottom-bar { display: flex; justify-content: space-between; align-items: center; }
+        .deposit-btn { background: #efae10; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; }
+        .logo { font-weight: bold; font-size: 1.1rem; color: #efae10; letter-spacing: 1px; }
+
+        .winner-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 3000; text-align: center; }
+        .hidden { display: none !important; }
         #preview-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; background: #fff; padding: 5px; border-radius: 5px; margin: 10px 0; }
+        .modal-content { background: #00332c; width: 90%; max-width: 320px; padding: 20px; border-radius: 15px; text-align: center; border: 1px solid #efae10; }
     </style>
 </head>
 <body>
     <div id="app">
-        <header class="main-header" style="background: #00332c; padding: 15px; border-radius: 0 0 12px 12px; margin-bottom: 10px; border-bottom: 3px solid #efae10;">
+        <header class="main-header">
             <div class="top-bar">
                 <button onclick="location.reload()" class="refresh-btn">Refresh</button>
                 <div class="balance-status-box">💰 ETB <span id="balance">0.00</span></div>
@@ -63,15 +80,15 @@
         </div>
 
         <div id="card-screen" class="hidden">
-            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; padding: 0 10px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin:10px; color: white;">
                 <button onclick="showStakeScreen()" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;">⬅</button>
-                <div style="font-size:14px; color: white;"><span id="selected-stake-val">0</span> Birr | <span id="card-count-info">0</span>/4 Cards</div>
+                <div style="font-size:14px;"><span id="selected-stake-val">0</span> Birr | <span id="card-count-info">0</span>/4 Cards</div>
             </div>
             <div id="card-grid" class="card-grid"></div>
         </div>
 
         <div id="game-screen" class="hidden">
-            <div style="color:#efae10; font-weight:bold; font-size:16px; text-align:center;">Win: <span id="arena-win-amount">0.00</span></div>
+            <div style="color:#efae10; font-weight:bold; font-size:16px; text-align:center; margin-top: 5px;">Win: <span id="arena-win-amount">0.00</span></div>
             <div class="game-arena-layout">
                 <div class="game-status-side">
                     <div class="drawn-ball" id="current-ball">-</div>
@@ -98,11 +115,9 @@
         <div id="winner-display-overlay" class="winner-overlay hidden">
             <h1 style="color:#efae10; font-size:50px; margin:0; text-shadow: 2px 2px #000;">BINGO!</h1>
             <h2 id="winner-text" style="color:white; margin:10px 0;">Card #-- is the Winner!</h2>
-            <div id="winning-card-preview" class="winner-card-box"></div>
+            <div id="winning-card-preview" style="background: white; padding: 10px; border-radius: 10px;"></div>
             <button onclick="location.reload()" style="margin-top:20px; padding:10px 30px; background:#efae10; border:none; border-radius:5px; font-weight:bold; cursor:pointer;">Play Again</button>
         </div>
-
-        <div id="bingo-overlay" style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); font-size:60px; font-weight:900; color:#efae10; z-index:2000; display:none; text-shadow:2px 2px 10px black;">BINGO!</div>
     </div>
     <script src="app.js"></script>
 </body>
