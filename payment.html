@@ -27,7 +27,7 @@
 
         h2 { color: #efae10; margin-bottom: 20px; font-size: 1.1rem; text-align: center; }
 
-        /* Bank Selection */
+        /* Bank Selection Style */
         .bank-option {
             background: #004d40;
             padding: 12px 15px;
@@ -42,7 +42,15 @@
         }
         .bank-option:active { transform: scale(0.98); background: #005a4b; }
         .bank-info { display: flex; align-items: center; gap: 15px; }
-        .bank-logo { width: 45px; height: 45px; border-radius: 8px; object-fit: contain; background: white; }
+        
+        .bank-logo { 
+            width: 45px; 
+            height: 45px; 
+            border-radius: 8px; 
+            object-fit: contain; 
+            background: white;
+        }
+        
         .arrow { color: #efae10; font-size: 18px; font-weight: bold; }
 
         /* Detail Card */
@@ -60,6 +68,7 @@
             margin: 20px 0;
             border: 1px dashed #efae10;
         }
+        .account-label { font-size: 14px; color: #efae10; margin-bottom: 5px; font-weight: bold; }
         .account-number { font-size: 1.5rem; font-weight: bold; color: #ffffff; letter-spacing: 1px; margin-bottom: 10px; }
         
         .action-btn {
@@ -76,6 +85,20 @@
         
         .submit-btn { background: #28a745; color: white; margin-top: 15px; }
 
+        /* Support Text */
+        .support-text {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #efae10;
+            line-height: 1.6;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .support-text a { color: white; text-decoration: none; font-weight: bold; }
+
+        .instruction { font-size: 0.85rem; color: #ccc; line-height: 1.6; margin-top: 15px; text-align: left; }
+        
         .amount-input, .message-input {
             width: 100%;
             padding: 12px;
@@ -88,10 +111,13 @@
             font-size: 16px;
             outline: none;
         }
-        .message-input { text-align: left; height: 80px; resize: none; font-size: 14px; }
-
-        .support-text { margin-top: 20px; font-size: 13px; color: #efae10; line-height: 1.6; }
-        .support-text a { color: white; text-decoration: none; font-weight: bold; }
+        .amount-input { font-size: 18px; }
+        .message-input { 
+            text-align: left; 
+            height: 80px; 
+            resize: none;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -132,22 +158,28 @@
 
         <div id="detail-page" class="hidden">
             <div class="detail-card">
-                <img id="detail-logo" src="" alt="logo" class="bank-logo" style="margin-bottom: 10px; background: white; padding: 2px;">
+                <img id="detail-logo" src="" alt="logo" class="bank-logo" style="margin-bottom: 10px;">
                 <h3 id="selected-bank-name" style="color: #efae10;">Bank Name</h3>
                 
                 <div class="account-box">
-                    <p style="color: #efae10; font-size: 12px; margin-bottom: 5px;">Yordanos</p>
+                    <p class="account-label">Yordanos</p>
                     <p class="account-number" id="target-number">ቁጥር</p>
                     <button class="action-btn" onclick="copyNumber()">Copy / ኮፒ አድርግ</button>
                 </div>
 
+                <div class="instruction">
+                    <p><strong>መመሪያ፦</strong></p>
+                    <p>1. ከላይ ያለውን ቁጥር ኮፒ አድርገው በባንክ ወይም በቴሌብር አፕዎ ብር ይላኩ።</p>
+                    <p>2. ብር ከላኩ በኋላ የላኩትን መጠን እና የደረሰዎትን መልእክት (SMS) ከታች ባሉት ሳጥኖች ውስጥ ያስገቡ።</p>
+                </div>
+
                 <input type="number" id="sent-amount" class="amount-input" placeholder="የላኩት የብር መጠን">
-                <textarea id="transaction-msg" class="message-input" placeholder="የደረሰዎትን ሙሉ SMS ወይም የትራንዛክሽን ቁጥር እዚህ ይለጥፉ..."></textarea>
+                <textarea id="transaction-msg" class="message-input" placeholder="የደረሰዎትን ሙሉ መልእክት (SMS) ወይም የትራንዛክሽን ቁጥር እዚህ ይለጥፉ..."></textarea>
 
                 <button class="action-btn submit-btn" onclick="submitRequest()">አረጋግጥ / Confirm</button>
 
                 <div class="support-text">
-                    ችግር ካጋጠመዎት <a href="https://t.me/ArdiiiBingoBot" target="_blank">@ArdiiiBingoBot</a> ላይ ያሳውቁ።
+                    የሚያጋጥማቹ የክፍያ ችግር ካለ በዚ <a href="https://t.me/ArdiiiBingoBot" target="_blank">@ArdiiiBingoBot</a> ኤጀንቱን ማዋራት ይችላሉ
                 </div>
             </div>
         </div>
@@ -156,7 +188,7 @@
     <script>
         // ቴሌግራም WebApp መጀመር
         const tg = window.Telegram.WebApp;
-        tg.expand(); // ገጹን ሙሉ እንዲሆን ማድረግ
+        tg.expand(); 
 
         let currentPage = 'selection';
 
@@ -179,7 +211,7 @@
                 document.getElementById('header-title').innerText = 'Deposit / ብር ያስገቡ';
                 currentPage = 'selection';
             } else {
-                window.history.back();
+                window.location.href = 'index.html';
             }
         }
 
@@ -189,13 +221,13 @@
             tg.showAlert("ቁጥሩ ኮፒ ተደርጓል፦ " + num);
         }
 
-        // ለAdmin ጥያቄ የሚልክ ተግባር
+        // ለAdmin መረጃ የሚልክ ተግባር
         function submitRequest() {
             const amount = document.getElementById('sent-amount').value;
             const message = document.getElementById('transaction-msg').value;
             const bank = document.getElementById('selected-bank-name').innerText;
             
-            // የተጠቃሚ መረጃ ከቴሌግራም WebApp ማግኘት
+            // የተጠቃሚ መረጃ ከቴሌግራም ማግኘት
             const user = tg.initDataUnsafe.user;
 
             if(!amount || amount < 10) {
@@ -207,22 +239,22 @@
                 return;
             }
 
-            // ለቦቱ የሚላክ የዳታ ፓኬጅ
-            const depositData = {
-                action: 'deposit_request',
+            // ለቦቱ የሚላክ የዳታ መዋቅር
+            const depositRequest = {
+                type: 'deposit_request',
                 userId: user ? user.id : 'unknown',
-                fullName: user ? (user.first_name + " " + (user.last_name || "")) : 'Guest User',
+                userName: user ? (user.first_name + (user.last_name ? " " + user.last_name : "")) : 'Guest User',
                 amount: amount,
                 bank: bank,
-                transactionDetails: message
+                details: message
             };
 
-            // ዳታውን ለቦቱ መላክ
-            tg.sendData(JSON.stringify(depositData));
+            // ዳታውን ለ server.js መላክ (በ Telegram.WebApp.sendData በኩል)
+            tg.sendData(JSON.stringify(depositRequest));
             
-            tg.showAlert("እናመሰግናለን! የዲፖዚት ጥያቄዎ ለAdmin ተልኳል። ሲረጋገጥ በሂሳብዎ ላይ ይጨመራል።");
+            tg.showAlert("እናመሰግናለን! የዲፖዚት ጥያቄዎ ለAdmin ተልኳል። አስተዳዳሪው ሲያረጋግጥ በሂሳብዎ ላይ ይጨመራል።");
             
-            // WebAppን መዝጋት ወይም ወደ ዋና ገጽ መመለስ
+            // WebAppን መዝጋት
             setTimeout(() => {
                 tg.close();
             }, 2000);
