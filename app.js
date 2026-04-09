@@ -4,6 +4,32 @@ let boughtCardsNumbers = {}, drawnNumbers = new Set(), playerMarkedNumbers = {},
 
 const stakeData = { 10: { bought: new Set() }, 20: { bought: new Set() }, 30: { bought: new Set() }, 50: { bought: new Set() }, 80: { bought: new Set() }, 100: { bought: new Set() }, 150: { bought: new Set() }, 200: { bought: new Set() } };
 
+// የካርድ ቁጥሮችን Fixed ለማድረግ የሚያገለግል Helper (Seeded Random)
+function getFixedNumbers(cardId) {
+    let card = [];
+    const ranges = [[1,15], [16,30], [31,45], [46,60], [61,75]];
+    
+    // የካርድ ቁጥሩን (cardId) እንደ Seed በመጠቀም ሁሌም አንድ አይነት ቁጥር እንዲወጣ እናደርጋለን
+    ranges.forEach((range, colIdx) => {
+        let colNumbers = [];
+        for (let i = range[0]; i <= range[1]; i++) colNumbers.push(i);
+        
+        // Seeded shuffle: cardId በመጠቀም ሹፍል ማድረግ
+        let seed = cardId + colIdx;
+        for (let i = colNumbers.length - 1; i > 0; i--) {
+            seed = (seed * 9301 + 49297) % 233280;
+            let rnd = seed / 233280;
+            let j = Math.floor(rnd * (i + 1));
+            [colNumbers[i], colNumbers[j]] = [colNumbers[j], colNumbers[i]];
+        }
+        card.push(colNumbers.slice(0, 5));
+    });
+
+    let finalCard = [];
+    for(let r=0; r<5; r++) for(let c=0; c<5; c++) finalCard.push(card[c][r]);
+    return finalCard;
+}
+
 function init() {
     const list = document.getElementById('stake-list');
     list.innerHTML = `<div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; padding:10px 5px; font-size:11px; color:#aaa; text-align:center; border-bottom:1px solid #004d40;"><span>Stake</span><span>Active</span><span>Win</span><span>Join</span></div>`;
@@ -51,39 +77,26 @@ function showPreview(id) {
     const previewGrid = document.getElementById('preview-grid'); 
     previewGrid.innerHTML = "";
     
-    // ቁጥሮቹ አንድ አይነት እንዲሆኑ እዚህ ጋር ይፈጠራሉ
-    let tempNumbers = generateBingoNumbers();
+    // እዚህ ጋር በካርድ ቁጥሩ የታሰረ (Fixed) ቁጥር እናመጣለን
+    let fixedNumbers = getFixedNumbers(id);
     
-    tempNumbers.forEach((n, idx) => {
+    fixedNumbers.forEach((n, idx) => {
         const cell = document.createElement('div'); 
         cell.className = 'arena-cell' + (idx === 12 ? ' marked' : '');
-        cell.style.border = "1px solid #ddd";
-        cell.style.aspectRatio = "1";
-        cell.style.display = "flex";
-        cell.style.alignItems = "center";
-        cell.style.justifyContent = "center";
-        cell.style.fontWeight = "bold";
-        cell.style.color = "black";
+        cell.style.border = "1px solid #ddd"; cell.style.aspectRatio = "1";
+        cell.style.display = "flex"; cell.style.alignItems = "center"; cell.style.justifyContent = "center";
+        cell.style.fontWeight = "bold"; cell.style.color = "black";
         cell.innerText = idx === 12 ? 'F' : n; 
         previewGrid.appendChild(cell);
     });
     
-    // ለጊዜው በ "temp" ቁልፍ እናስቀምጠዋለን
-    boughtCardsNumbers["temp_numbers"] = tempNumbers; 
     document.getElementById('card-modal').classList.remove('hidden');
-}
-
-function generateBingoNumbers() {
-    let card = []; const ranges = [[1,15], [16,30], [31,45], [46,60], [61,75]];
-    let columns = ranges.map(r => Array.from({length:15}, (_,i)=>r[0]+i).sort(()=>Math.random()-0.5).slice(0,5));
-    for(let r=0; r<5; r++) for(let c=0; c<5; c++) card.push(columns[c][r]);
-    return card;
 }
 
 function confirmPurchase() {
     stakeData[currentStake].bought.add(pendingCardId);
-    // Preview ላይ የታየውን ቁጥር በትክክል ለዚህ ካርድ መመደብ
-    boughtCardsNumbers[pendingCardId] = [...boughtCardsNumbers["temp_numbers"]];
+    // ጨዋታው ሲጀመር እንዲጠቀምበት እናስቀምጠዋለን
+    boughtCardsNumbers[pendingCardId] = getFixedNumbers(pendingCardId);
     playerMarkedNumbers[pendingCardId] = new Set([12]);
     lockStake = currentStake;
     const win = (currentStake * stakeData[currentStake].bought.size * 0.8).toFixed(2);
@@ -108,7 +121,6 @@ function startBingoArena(stake) {
         wrapper.innerHTML = `<div class="card-label-small">CARD #${id}</div>`;
         const cardGrid = document.createElement('div'); cardGrid.className = 'player-card-arena';
         
-        // እዚህ ጋር የገዛውን ቁጥር በትክክል እንጠቀማለን
         boughtCardsNumbers[id].forEach((n, idx) => {
             const cell = document.createElement('div'); cell.className = 'arena-cell' + (idx === 12 ? ' marked' : '');
             cell.innerText = idx === 12 ? 'F' : n; 
@@ -136,8 +148,7 @@ function manualBingoCheck(id) {
     const patterns = [
         [0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24], 
         [0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24], 
-        [0,6,12,18,24],[4,8,12,16,20], 
-        [0, 4, 20, 24] 
+        [0,6,12,18,24],[4,8,12,16,20], [0, 4, 20, 24] 
     ];
     let winningPattern = patterns.find(p => p.every(idx => marked.has(idx)));
     if (winningPattern) { clearInterval(gameInterval); showBingoWinner(id, winningPattern); } 
@@ -152,22 +163,17 @@ function showBingoWinner(cardId, pattern) {
     overlay.classList.remove('hidden');
     const cardGrid = document.createElement('div');
     cardGrid.className = 'player-card-arena';
-    cardGrid.style.display = 'grid';
-    cardGrid.style.gridTemplateColumns = 'repeat(5, 1fr)';
-    cardGrid.style.gap = '2px';
+    cardGrid.style.display = 'grid'; cardGrid.style.gridTemplateColumns = 'repeat(5, 1fr)'; cardGrid.style.gap = '2px';
     boughtCardsNumbers[cardId].forEach((n, idx) => {
-        const cell = document.createElement('div');
-        cell.className = 'arena-cell';
-        cell.style.width = '40px'; cell.style.height = '40px';
-        cell.style.border = '1px solid #ccc';
+        const cell = document.createElement('div'); cell.className = 'arena-cell';
+        cell.style.width = '40px'; cell.style.height = '40px'; cell.style.border = '1px solid #ccc';
         cell.style.display = 'flex'; cell.style.alignItems = 'center'; cell.style.justifyContent = 'center';
         cell.style.fontWeight = 'bold'; cell.style.color = 'black';
         cell.innerText = idx === 12 ? 'F' : n;
         if (pattern.includes(idx)) cell.classList.add('winner-cell');
         cardGrid.appendChild(cell);
     });
-    preview.innerHTML = "";
-    preview.appendChild(cardGrid);
+    preview.innerHTML = ""; preview.appendChild(cardGrid);
 }
 
 function closeModal() { document.getElementById('card-modal').classList.add('hidden'); }
