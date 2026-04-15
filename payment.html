@@ -20,10 +20,8 @@
             z-index: 100;
         }
         .back-btn { background: none; border: none; color: #efae10; font-size: 24px; cursor: pointer; margin-right: 15px; }
-        
         .container { padding: 20px; max-width: 500px; margin: auto; }
         .hidden { display: none; }
-
         h2 { color: #efae10; margin-bottom: 20px; font-size: 1.1rem; text-align: center; }
 
         .bank-option {
@@ -36,20 +34,10 @@
             justify-content: space-between;
             cursor: pointer;
             border: 1px solid rgba(239, 174, 16, 0.1);
-            transition: 0.2s;
         }
-        .bank-option:active { transform: scale(0.98); background: #005a4b; }
         .bank-info { display: flex; align-items: center; gap: 15px; }
-        
-        .bank-logo { 
-            width: 45px; 
-            height: 45px; 
-            border-radius: 8px; 
-            object-fit: contain; 
-            background: white;
-        }
-        
-        .arrow { color: #efae10; font-size: 18px; font-weight: bold; }
+        .bank-logo { width: 45px; height: 45px; border-radius: 8px; object-fit: contain; background: white; }
+        .arrow { color: #efae10; font-size: 18px; }
 
         .detail-card {
             background: #00332c;
@@ -65,8 +53,8 @@
             margin: 20px 0;
             border: 1px dashed #efae10;
         }
-        .account-label { font-size: 14px; color: #efae10; margin-bottom: 5px; font-weight: bold; }
-        .account-number { font-size: 1.5rem; font-weight: bold; color: #ffffff; letter-spacing: 1px; margin-bottom: 10px; }
+        .account-label { font-size: 14px; color: #efae10; font-weight: bold; }
+        .account-number { font-size: 1.5rem; font-weight: bold; color: #ffffff; margin-bottom: 10px; }
         
         .action-btn {
             background: #efae10;
@@ -77,24 +65,9 @@
             font-weight: bold;
             cursor: pointer;
             width: 100%;
-            margin-top: 10px;
         }
-        
         .submit-btn { background: #28a745; color: white; margin-top: 15px; }
 
-        .support-text {
-            margin-top: 20px;
-            font-size: 13px;
-            color: #efae10;
-            line-height: 1.6;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 10px;
-            border-radius: 8px;
-        }
-        .support-text a { color: white; text-decoration: none; font-weight: bold; }
-
-        .instruction { font-size: 0.85rem; color: #ccc; line-height: 1.6; margin-top: 15px; text-align: left; }
-        
         .amount-input, .message-input {
             width: 100%;
             padding: 12px;
@@ -104,9 +77,9 @@
             border-radius: 8px;
             color: white;
             text-align: center;
-            font-size: 16px;
             outline: none;
         }
+        .message-input { text-align: left; height: 80px; resize: none; }
     </style>
 </head>
 <body>
@@ -119,52 +92,31 @@
     <div class="container">
         <div id="selection-page">
             <h2>የክፍያ አማራጭ ይምረጡ</h2>
-            
             <div class="bank-option" onclick="showDetail('Telebirr', '0979429028', 'telebirr.png')">
-                <div class="bank-info">
-                    <img src="telebirr.png" alt="telebirr" class="bank-logo">
-                    <span>Telebirr / ቴሌ ብር</span>
-                </div>
+                <div class="bank-info"><img src="telebirr.png" class="bank-logo"><span>Telebirr / ቴሌ ብር</span></div>
                 <span class="arrow">❯</span>
             </div>
-
             <div class="bank-option" onclick="showDetail('CBE Birr', '0979429028', 'cbebirr.png')">
-                <div class="bank-info">
-                    <img src="cbebirr.png" alt="cbebirr" class="bank-logo">
-                    <span>CBE Birr / ሲቢኢ ብር</span>
-                </div>
+                <div class="bank-info"><img src="cbebirr.png" class="bank-logo"><span>CBE Birr / ሲቢኢ ብር</span></div>
                 <span class="arrow">❯</span>
             </div>
-
             <div class="bank-option" onclick="showDetail('CBE Bank', '1000277987067', 'cbe.png')">
-                <div class="bank-info">
-                    <img src="cbe.png" alt="cbe" class="bank-logo">
-                    <span>CBE Bank / ንግድ ባንክ</span>
-                </div>
+                <div class="bank-info"><img src="cbe.png" class="bank-logo"><span>CBE Bank / ንግድ ባንክ</span></div>
                 <span class="arrow">❯</span>
             </div>
         </div>
 
         <div id="detail-page" class="hidden">
             <div class="detail-card">
-                <img id="detail-logo" src="" alt="logo" class="bank-logo" style="margin-bottom: 10px;">
+                <img id="detail-logo" src="" class="bank-logo" style="margin-bottom: 10px;">
                 <h3 id="selected-bank-name" style="color: #efae10;">Bank Name</h3>
-                
                 <div class="account-box">
                     <p class="account-label">Yordanos</p>
                     <p class="account-number" id="target-number">ቁጥር</p>
                     <button class="action-btn" onclick="copyNumber()">Copy / ኮፒ አድርግ</button>
                 </div>
-
-                <div class="instruction">
-                    <p><strong>መመሪያ፦</strong></p>
-                    <p>1. ከላይ ያለውን ቁጥር ኮፒ አድርገው ብር ይላኩ።</p>
-                    <p>2. የላኩትን መጠን እና የደረሰዎትን መልእክት (SMS) እዚህ ያስገቡ።</p>
-                </div>
-
                 <input type="number" id="sent-amount" class="amount-input" placeholder="የላኩት የብር መጠን">
-                <textarea id="transaction-msg" class="message-input" placeholder="የደረሰዎትን ሙሉ መልእክት (SMS) እዚህ ይለጥፉ..."></textarea>
-
+                <textarea id="transaction-msg" class="message-input" placeholder="የደረሰዎትን መልእክት እዚህ ይለጥፉ..."></textarea>
                 <button class="action-btn submit-btn" onclick="submitRequest()">አረጋግጥ / Confirm</button>
             </div>
         </div>
@@ -172,7 +124,7 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        let currentPage = 'selection';
+        tg.expand();
 
         function showDetail(bank, number, logo) {
             document.getElementById('selection-page').classList.add('hidden');
@@ -181,20 +133,19 @@
             document.getElementById('selected-bank-name').innerText = bank;
             document.getElementById('target-number').innerText = number;
             document.getElementById('detail-logo').src = logo;
-            currentPage = 'detail';
         }
 
         function goBack() {
-            if(currentPage === 'detail') {
+            if(!document.getElementById('detail-page').classList.contains('hidden')) {
                 document.getElementById('detail-page').classList.add('hidden');
                 document.getElementById('selection-page').classList.remove('hidden');
-                currentPage = 'selection';
+                document.getElementById('header-title').innerText = 'Deposit';
             } else { window.location.href = 'index.html'; }
         }
 
         function copyNumber() {
             navigator.clipboard.writeText(document.getElementById('target-number').innerText);
-            alert("ቁጥሩ ኮፒ ተደርጓል!");
+            alert("ኮፒ ተደርጓል!");
         }
 
         function submitRequest() {
@@ -202,12 +153,11 @@
             const message = document.getElementById('transaction-msg').value;
             const bank = document.getElementById('selected-bank-name').innerText;
 
-            if(!amount || !message) {
-                alert("እባክዎ መረጃውን ይሙሉ!");
+            if(!amount || amount < 10 || !message) {
+                alert("እባክዎ መረጃውን በትክክል ይሙሉ!");
                 return;
             }
 
-            // ለቦቱ የሚላክ ዳታ
             const data = {
                 type: 'deposit_request',
                 amount: amount,
@@ -215,8 +165,8 @@
                 transaction: message
             };
 
-            tg.sendData(JSON.stringify(data)); // ዳታውን ለቦቱ ይልካል
-            tg.close(); // ዌብ አፑን ይዘጋዋል
+            tg.sendData(JSON.stringify(data)); // መረጃውን ለቦቱ ይልካል
+            tg.close(); // ዌብ አፑን ይዘጋል
         }
     </script>
 </body>
