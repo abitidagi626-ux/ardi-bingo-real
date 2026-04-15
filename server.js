@@ -37,13 +37,11 @@ bot.on('contact', (ctx) => {
 });
 
 // --- 3. የዲፖዚት መረጃ ከ WebApp መቀበያ ---
-
 bot.on('web_app_data', async (ctx) => {
     try {
         const data = JSON.parse(ctx.webAppData.data());
-        const user = ctx.from; // መረጃውን የላከው ሰው
+        const user = ctx.from; 
 
-        // የዲፖዚት ጥያቄ ከሆነ
         if (data.type === 'deposit_request') {
             const adminMsg = `🔔 **አዲስ የዲፖዚት ጥያቄ**\n\n` +
                              `👤 ተጫዋች: ${user.first_name}\n` +
@@ -59,13 +57,11 @@ bot.on('web_app_data', async (ctx) => {
                 ]
             ]);
 
-            // መረጃውን ለአድሚን ይልካል
             await bot.telegram.sendMessage(ADMIN_ID, adminMsg, { 
                 parse_mode: 'Markdown', 
                 ...adminKeyboard 
             });
 
-            // ለተጫዋቹ ማረጋገጫ ይሰጣል
             ctx.reply("እናመሰግናለን! የዲፖዚት ጥያቄዎ ለAdmin ተልኳል:: ሲረጋገጥ ባላንስዎ ላይ ይጨመራል።");
         }
     } catch (e) {
@@ -75,7 +71,6 @@ bot.on('web_app_data', async (ctx) => {
 });
 
 // --- 4. የአድሚን ማረጋገጫ (Approve/Cancel) ሎጂክ ---
-
 bot.action(/app_(\d+)_(\d+)/, async (ctx) => {
     const userId = ctx.match[1];
     const amount = ctx.match[2];
@@ -83,8 +78,8 @@ bot.action(/app_(\d+)_(\d+)/, async (ctx) => {
     await ctx.editMessageText(ctx.callbackQuery.message.text + `\n\n✅ **ሁኔታ: ጸድቋል (Approved)**\nየተጨመረ ብር: ${amount} ETB`);
     
     try {
-        await bot.telegram.sendMessage(userId, `🎉 እንኳን ደስ አለዎት! የ ${amount} ብር ዲፖዚት ጥያቄዎ ተረጋግጦ ሂሳብዎ ላይ ተጨምሯል።`);
-    } catch (err) { console.log(err); }
+        await bot.telegram.sendMessage(userId, `🎉 እንኳን ደስ አለዎት! የ ${amount} ብር ዲፖዚት ጥያቄዎ ተረጋግጦ ሂሳብዎ ላይ ተጨምሯል። አሁኑኑ ተመልሰው ይጫወቱ!`);
+    } catch (err) { console.log("User blocked bot", err); }
 });
 
 bot.action(/can_(\d+)/, async (ctx) => {
@@ -93,16 +88,16 @@ bot.action(/can_(\d+)/, async (ctx) => {
     await ctx.editMessageText(ctx.callbackQuery.message.text + `\n\n❌ **ሁኔታ: ውድቅ ተደርጓል (Cancelled)**`);
     
     try {
-        await bot.telegram.sendMessage(userId, `⚠️ ይቅርታ፣ የዲፖዚት ጥያቄዎ በአስተዳዳሪው ውድቅ ተደርጓል።`);
-    } catch (err) { console.log(err); }
+        await bot.telegram.sendMessage(userId, `⚠️ ይቅርታ፣ የዲፖዚት ጥያቄዎ በአስተዳዳሪው ውድቅ ተደርጓል። እባክዎ ትክክለኛ መረጃ መላክዎን ያረጋግጡ።`);
+    } catch (err) { console.log("User blocked bot", err); }
 });
 
 bot.action('dep', (ctx) => ctx.reply("ብር ለማስገባት (Deposit) እባክዎ 'Play Now' ውስጥ ገብተው 'Deposit' የሚለውን ይጫኑ።"));
 bot.action('bal', (ctx) => ctx.reply("የአሁኑ ባላንስዎ በጨዋታው ውስጥ ከላይ ይታይዎታል።"));
-bot.action('sup', (ctx) => ctx.reply("ለእገዛ በ @YourAdminUsername ያነጋግሩን።"));
+bot.action('sup', (ctx) => ctx.reply("ለእገዛ @ArdiiiBingoBot ያነጋግሩን።"));
 
 bot.launch().then(() => {
-    console.log("Ardi Bingo Bot በመስመር ላይ ነው!");
+    console.log("Ardi Bingo Bot አሁን በመስመር ላይ ነው!");
 });
 
 process.once('SIGINT', () => bot.stop('SIGINT'));
