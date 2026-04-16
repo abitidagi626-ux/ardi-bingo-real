@@ -6,8 +6,8 @@
     <title>Deposit - Ardi Bingo</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: #00221c; color: white; overflow-x: hidden; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body { background-color: #00221c; color: white; overflow-x: hidden; padding-bottom: 20px; }
 
         /* Header */
         .header {
@@ -23,7 +23,7 @@
         .back-btn { background: none; border: none; color: #efae10; font-size: 24px; cursor: pointer; margin-right: 15px; }
         
         .container { padding: 20px; max-width: 500px; margin: auto; }
-        .hidden { display: none; }
+        .hidden { display: none !important; }
 
         h2 { color: #efae10; margin-bottom: 20px; font-size: 1.1rem; text-align: center; }
 
@@ -48,6 +48,7 @@
             border-radius: 8px; 
             object-fit: contain; 
             background: white;
+            padding: 2px;
         }
         
         .arrow { color: #efae10; font-size: 18px; font-weight: bold; }
@@ -73,45 +74,47 @@
             background: #efae10;
             color: black;
             border: none;
-            padding: 12px;
-            border-radius: 8px;
+            padding: 14px;
+            border-radius: 10px;
             font-weight: bold;
             cursor: pointer;
             width: 100%;
             margin-top: 10px;
+            font-size: 1rem;
         }
         
-        .submit-btn { background: #28a745; color: white; margin-top: 15px; }
+        .submit-btn { background: #28a745; color: white; margin-top: 20px; }
+        .submit-btn:active { background: #218838; }
 
         .support-text {
             margin-top: 20px;
             font-size: 13px;
             color: #efae10;
             line-height: 1.6;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px;
             border-radius: 8px;
         }
-        .support-text a { color: white; text-decoration: none; font-weight: bold; }
+        .support-text a { color: #fff; text-decoration: underline; font-weight: bold; }
 
         .instruction { font-size: 0.85rem; color: #ccc; line-height: 1.6; margin-top: 15px; text-align: left; }
         
         .amount-input, .message-input {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             margin-top: 15px;
             background: #001a15;
-            border: 1px solid #444;
-            border-radius: 8px;
+            border: 1px solid #333;
+            border-radius: 10px;
             color: white;
             text-align: center;
             font-size: 16px;
             outline: none;
         }
-        .amount-input { font-size: 18px; }
+        .amount-input:focus, .message-input:focus { border-color: #efae10; }
         .message-input { 
             text-align: left; 
-            height: 80px; 
+            height: 90px; 
             resize: none;
             font-size: 14px;
         }
@@ -159,39 +162,38 @@
                 <h3 id="selected-bank-name" style="color: #efae10;">Bank Name</h3>
                 
                 <div class="account-box">
-                    <p class="account-label">Yordanos</p>
+                    <p class="account-label">የባለቤቱ ስም፡ Yordanos</p>
                     <p class="account-number" id="target-number">ቁጥር</p>
                     <button class="action-btn" onclick="copyNumber()">Copy / ኮፒ አድርግ</button>
                 </div>
 
                 <div class="instruction">
                     <p><strong>መመሪያ፦</strong></p>
-                    <p>1. ከላይ ያለውን ቁጥር ኮፒ አድርገው በባንክ ወይም በቴሌብር  አፕዎ ብር ይላኩ።</p>
-                    <p>2. ብር ከላኩ በኋላ የላኩትን መጠን እና የደረሰዎትን መልእክት (SMS) ከታች ባሉት ሳጥኖች ውስጥ ያስገቡ።</p>
+                    <p>1. ከላይ ያለውን ቁጥር ኮፒ አድርገው በባንክ ወይም በቴሌብር አፕዎ ብር ይላኩ።</p>
+                    <p>2. ብር ከላኩ በኋላ የላኩትን መጠን እና የደረሰዎትን የSMS መልዕክት ከታች ባሉት ሳጥኖች ውስጥ ያስገቡ።</p>
                 </div>
 
-                <input type="number" id="sent-amount" class="amount-input" placeholder="የላኩት የብር መጠን">
-                <textarea id="transaction-msg" class="message-input" placeholder="የደረሰዎትን ሙሉ መልእክት (SMS) ወይም የትራንዛክሽን ቁጥር እዚህ ይለጥፉ..."></textarea>
+                <input type="number" id="sent-amount" class="amount-input" placeholder="የላኩት የብር መጠን (ETB)">
+                <textarea id="transaction-msg" class="message-input" placeholder="የደረሰዎትን ሙሉ መልእክት (SMS) እዚህ ይለጥፉ..."></textarea>
 
                 <button class="action-btn submit-btn" onclick="submitRequest()">አረጋግጥ / Confirm</button>
 
                 <div class="support-text">
-                    ሚያጋጥማቹ የክፍያ ችግር ካለ በዚ <a href="https://t.me/ArdiiiBingoBot" target="_blank">@ArdiiiBingoBot</a> ኤጀንቱን ማዋራት ይችላሉ
+                    ሚያጋጥማችሁ የክፍያ ችግር ካለ በቴሌግራም <a href="https://t.me/ArdiiiBingoBot" target="_blank">@ArdiiiBingoBot</a> ኤጀንቱን ማነጋገር ይችላሉ።
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // የቴሌግራም ዌብ አፕን Initialize ማድረግ
         const tg = window.Telegram.WebApp;
-        tg.expand(); // ዌብ አፑን ሙሉ ስክሪን እንዲሆን ያደርጋል
+        tg.expand();
 
         let currentPage = 'selection';
-        let selectedBank = '';
+        let selectedBankName = '';
 
         function showDetail(bank, number, logo) {
-            selectedBank = bank;
+            selectedBankName = bank;
             document.getElementById('selection-page').classList.add('hidden');
             document.getElementById('detail-page').classList.remove('hidden');
             document.getElementById('header-title').innerText = bank;
@@ -210,23 +212,29 @@
                 document.getElementById('header-title').innerText = 'Deposit / ብር ያስገቡ';
                 currentPage = 'selection';
             } else {
-                tg.close(); // ወደ ቴሌግራም ይመልሰዋል
+                tg.close();
             }
         }
 
         function copyNumber() {
             const num = document.getElementById('target-number').innerText;
-            navigator.clipboard.writeText(num).then(() => {
-                tg.showAlert("ቁጥሩ ኮፒ ተደርጓል፦ " + num);
-            });
+            // ለሞባይል ብሮውዘሮች አስተማማኝ የሆነ ኮፒ የማድረጊያ መንገድ
+            const el = document.createElement('textarea');
+            el.value = num;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            
+            tg.showAlert("ቁጥሩ ኮፒ ተደርጓል፦ " + num);
         }
 
         function submitRequest() {
             const amount = document.getElementById('sent-amount').value;
             const message = document.getElementById('transaction-msg').value;
 
-            if(!amount || amount < 10) {
-                tg.showAlert("እባክዎ ትክክለኛ የብር መጠን ያስገቡ (ቢያንስ 10 ብር)!");
+            if(!amount || amount < 5) {
+                tg.showAlert("እባክዎ ትክክለኛ የብር መጠን ያስገቡ!");
                 return;
             }
             if(!message || message.trim().length < 5) {
@@ -234,20 +242,19 @@
                 return;
             }
 
-            // ለቦቱ የሚላክ ዳታ
+            // ለቦቱ የሚላክ ዳታ (ከ server.js ጋር የሚስማማ)
             const depositData = {
                 type: 'deposit_request',
-                user_id: tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 'N/A',
-                user_name: tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : 'Player',
+                user_name: tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name) : 'Player',
                 amount: amount,
-                bank: selectedBank,
+                bank: selectedBankName,
                 transaction: message
             };
 
-            // መረጃውን ወደ server.js ይልካል
+            // ዳታውን ለቴሌግራም ቦት መላክ
             tg.sendData(JSON.stringify(depositData));
             
-            // ዌብ አፑን ይዘጋዋል
+            // ዌብ አፑን መዝጋት
             tg.close();
         }
     </script>
