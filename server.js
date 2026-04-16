@@ -1,96 +1,99 @@
 require('dotenv').config();
 const { Telegraf, Markup } = require('telegraf');
-const fs = require('fs');
 
-// ቦት ቶከን እና አድሚን ID
+// የቦት Token
 const bot = new Telegraf('8684712579:AAE9JK0cdSK-cVeycF7xAd_KSrUUqmN5HWI');
+
+// የአድሚን ID
 const ADMIN_ID = 1046142540; 
 
-// ባላንስን ፋይል ላይ ለማስቀመጥ
-const balanceFile = 'balances.json';
-
-function updateBalance(userId, amount) {
-    let balances = {};
-    if (fs.existsSync(balanceFile)) {
-        balances = JSON.parse(fs.readFileSync(balanceFile));
-    }
-    balances[userId] = (balances[userId] || 0) + parseFloat(amount);
-    fs.writeFileSync(balanceFile, JSON.stringify(balances, null, 2));
-    return balances[userId];
-}
-
-function getBalance(userId) {
-    if (!fs.existsSync(balanceFile)) return 0;
-    const balances = JSON.parse(fs.readFileSync(balanceFile));
-    return balances[userId] || 0;
-}
-
+// 1. ቦቱ ሲጀመር
 bot.start((ctx) => {
-    ctx.reply(`እንኳን ወደ Ardi Bingo በሰላም መጡ!`, 
-        Markup.keyboard([[Markup.button.contactRequest('📲 ስልክ ቁጥርዎን ያጋሩ')]]).oneTime().resize()
+    const welcomeText = `እንኳን ወደ Ardi Bingo በሰላም መጡ!\n\nተወዳጅ የቢንጎ ጨዋታ በቤትዎ ሆነው ይጫወቱ። በየ 90 ሰከንዱ በሚደረጉ ጨዋታዎች እድልዎን ይሞክሩና በሽዎች የሚቆጠሩ ብሮችን ያሸንፉ።\n\nለመቀጠል እባክዎ ከታች ያለውን "📲 ስልክ ቁጥርዎን ያጋሩ" የሚለውን ይጫኑ።`;
+    
+    ctx.reply(welcomeText, 
+        Markup.keyboard([
+            [Markup.button.contactRequest('📲 ስልክ ቁጥርዎን ያጋሩ')]
+        ]).oneTime().resize()
     );
 });
 
+// 2. ስልክ ቁጥር ሲላክ
 bot.on('contact', (ctx) => {
-    ctx.reply(`✅ በትክክል ተመዝግበዋል!`, Markup.removeKeyboard());
+    const firstName = ctx.from.first_name;
+    ctx.reply(`✅ በትክክል ተመዝግበዋል ${firstName}!`, Markup.removeKeyboard());
+
     setTimeout(() => {
-        ctx.reply(`🕹 Welcome To Ardi Bingo!`, 
+        ctx.reply(`🕹 Welcome To Ardi Bingo!\n\nEvery Square Counts – Grab Your Cartela, Join the Game, and Let the Fun Begin!`, 
             Markup.inlineKeyboard([
-                [Markup.button.webApp('🎮 Play Now', 'https://abitidagi626-ux.github.io/ardi-bingo-real/')],
-                [Markup.button.callback('💰 Check Balance', 'bal'), Markup.button.callback('💵 Make a Deposit', 'dep')]
+                [Markup.button.webApp('🎮 Play Now', 'https://abitidagi626-ux.github.io/ardi-bingo-real/')], 
+                [Markup.button.callback('💰 Check Balance', 'bal'), Markup.button.callback('💵 Make a Deposit', 'dep')],
+                [Markup.button.callback('📞 Support', 'sup'), Markup.button.callback('📖 Instructions', 'inst')],
+                [Markup.button.callback('📩 Invite', 'inv'), Markup.button.callback('🏆 Win Patterns', 'patt')],
+                [Markup.button.callback('👤 Change Username', 'user'), Markup.button.callback('🥇 Leaderboard', 'lead')]
             ])
         );
     }, 1000);
 });
 
-// የዌብ አፕ መረጃ መቀበያ
+// 3. ከ WebApp (payment.html) የሚመጣ የዲፖዚት መረጃ መቀበያ
 bot.on('web_app_data', async (ctx) => {
     try {
         const data = JSON.parse(ctx.webAppData.data());
+
         if (data.type === 'deposit_request') {
-            const adminMsg = `🔔 **አዲስ የዲፖዚት ጥያቄ**\n\n👤 ተጫዋች: ${data.user_name}\n🆔 ID: \`${data.user_id}\`\n💰 መጠን: ${data.amount} ETB\n🏦 ባንክ: ${data.bank}\n📝 Tx: ${data.transaction}`;
-            
+            const adminMsg = `🔔 **አዲስ የዲፖዚት ጥያቄ**\n\n` +
+                             `👤 ተጫዋች: ${ctx.from.first_name}\n` +
+                             `🆔 User ID: \`${ctx.from.id}\`\n` +
+                             `💰 መጠን: ${data.amount} ETB\n` +
+                             `🏦 ባንክ: ${data.bank}\n` +
+                             `📝 ትራንዛክሽን: \n_${data.transaction}_`;
+
             const adminKeyboard = Markup.inlineKeyboard([
-                [Markup.button.callback("✅ Approve", `app_${data.user_id}_${data.amount}`),
-                 Markup.button.callback("❌ Reject", `can_${data.user_id}`)]
+                [
+                    Markup.button.callback("✅ አጽድቅ (Approve)", `app_${ctx.from.id}_${data.amount}`),
+                    Markup.button.callback("❌ ሰርዝ (Cancel)", `can_${ctx.from.id}`)
+                ]
             ]);
 
-            await bot.telegram.sendMessage(ADMIN_ID, adminMsg, { parse_mode: 'Markdown', ...adminKeyboard });
-            ctx.reply("ጥያቄዎ ለAdmin ተልኳል! ሲረጋገጥ ባላንስዎ ላይ ይጨመራል።");
+            await bot.telegram.sendMessage(ADMIN_ID, adminMsg, { 
+                parse_mode: 'Markdown', 
+                ...adminKeyboard 
+            });
+
+            ctx.reply("እናመሰግናለን! የዲፖዚት ጥያቄዎ ለAdmin ተልኳል:: ሲረጋገጥ ባላንስዎ ላይ ይጨመራል።");
         }
-    } catch (e) { console.error(e); }
+    } catch (e) {
+        console.error("WebAppData Error:", e);
+        ctx.reply("ይቅርታ፣ መረጃውን ማስተላለፍ አልተቻለም።");
+    }
 });
 
-// Approve Logic
-bot.action(/app_(\d+)_([\d.]+)/, async (ctx) => {
+// 4. የአድሚን ማረጋገጫ (Approve/Cancel) ሎጂክ
+bot.action(/app_(\d+)_(\d+)/, async (ctx) => {
     const userId = ctx.match[1];
     const amount = ctx.match[2];
-    const newTotal = updateBalance(userId, amount);
-
     await ctx.answerCbQuery("ክፍያው ጸድቋል!");
-    await ctx.editMessageText(ctx.callbackQuery.message.text + `\n\n✅ ጸድቋል! አዲስ ባላንስ: ${newTotal}`);
-    
+    await ctx.editMessageText(ctx.callbackQuery.message.text + `\n\n✅ **ሁኔታ: ጸድቋል (Approved)**\nየተጨመረ ብር: ${amount} ETB`);
     try {
-        await bot.telegram.sendMessage(userId, `🎉 የ ${amount} ብር ክፍያዎ ጸድቆ ባላንስዎ ላይ ተጨምሯል!`);
-    } catch (e) { console.log("User blocked bot"); }
+        await bot.telegram.sendMessage(userId, `🎉 እንኳን ደስ አለዎት! የ ${amount} ብር ዲፖዚት ጥያቄዎ ተረጋግጦ ሂሳብዎ ላይ ተጨምሯል።`);
+    } catch (err) { console.log(err); }
 });
 
-// Reject Logic
 bot.action(/can_(\d+)/, async (ctx) => {
     const userId = ctx.match[1];
     await ctx.answerCbQuery("ውድቅ ተደርጓል!");
-    await ctx.editMessageText(ctx.callbackQuery.message.text + `\n\n❌ ውድቅ ተደርጓል!`);
+    await ctx.editMessageText(ctx.callbackQuery.message.text + `\n\n❌ **ሁኔታ: ውድቅ ተደርጓል (Cancelled)**`);
     try {
-        await bot.telegram.sendMessage(userId, `⚠️ የዲፖዚት ጥያቄዎ ውድቅ ተደርጓል። እባክዎ በትክክል መላክዎን ያረጋግጡ።`);
-    } catch (e) { console.log("User blocked bot"); }
+        await bot.telegram.sendMessage(userId, `⚠️ ይቅርታ፣ የዲፖዚት ጥያቄዎ በአስተዳዳሪው ውድቅ ተደርጓል።`);
+    } catch (err) { console.log(err); }
 });
 
-bot.action('bal', (ctx) => {
-    const bal = getBalance(ctx.from.id);
-    ctx.reply(`💰 የአሁኑ ባላንስዎ፡ ${bal} ETB`);
-});
+bot.action('dep', (ctx) => ctx.reply("ብር ለማስገባት 'Play Now' ውስጥ ገብተው 'Deposit' የሚለውን ይጫኑ።"));
+bot.action('bal', (ctx) => ctx.reply("የአሁኑ ባላንስዎ በጨዋታው ውስጥ ከላይ ይታይዎታል።"));
+bot.action('sup', (ctx) => ctx.reply("ለእገዛ በ @YourAdminUsername ያነጋግሩን።"));
 
-bot.action('dep', (ctx) => ctx.reply("ብር ለማስገባት 'Play Now' ውስጥ ገብተው Deposit የሚለውን ይጫኑ።"));
+bot.launch().then(() => console.log("Ardi Bingo Bot Online!"));
 
-bot.launch();
-console.log("Ardi Bingo Bot started!");
+process.once('SIGINT', () => bot.stop('SIGINT'));
+process.once('SIGTERM', () => bot.stop('SIGTERM'));
