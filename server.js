@@ -1,14 +1,16 @@
 require('dotenv').config();
 const { Telegraf, Markup } = require('telegraf');
 
-// ቦት ቶከን እና አድሚን ID
+// ቦት ቶከን (ከ image_939ffd.png የተወሰደ)
 const bot = new Telegraf('8684712579:AAE9JK0cdSK-cVeycF7xAd_KSrUUqmN5HWI');
+
+// አድሚን ID (የእራስህን ID እዚህ አስገባ ወይም በ .env ፋይል ውስጥ አስቀምጥ)
 const ADMIN_ID = 1046142540; 
 
-// ለጊዜው ባላንስ እዚህ ጋር እናስቀምጥ (በኋላ በDatabase መተካት አለበት)
+// ለጊዜው ባላንስን በሜሞሪ ለመያዝ (ቦቱ ሲጠፋ ይጠፋል - ለቋሚ መረጃ Database ያስፈልጋል)
 let userBalances = {};
 
-// 1. ቦት ሲጀምር (/start)
+// ቦቱ ሲጀመር (Start)
 bot.start((ctx) => {
     ctx.reply(`እንኳን ወደ Ardi Bingo በሰላም መጡ! 🎰\n\nለመጀመር ስልክ ቁጥርዎን ያጋሩ።`, 
         Markup.keyboard([
@@ -17,16 +19,14 @@ bot.start((ctx) => {
     );
 });
 
-// 2. ስልክ ቁጥር ሲላክ
+// ስልክ ቁጥር ሲላክ
 bot.on('contact', (ctx) => {
     const userId = ctx.from.id;
-    // ተጫዋቹ አዲስ ከሆነ 200 ብር ቦነስ እንስጠው
-    if (!userBalances[userId]) {
-        userBalances[userId] = 200.00;
-    }
+    // ተቀማጭ ባላንስ ከሌለው 200 በነጻ እንዲጀምር (እንደ ምሳሌ)
+    if (!userBalances[userId]) userBalances[userId] = 200.00;
 
     const balance = userBalances[userId];
-    // ዌብ አፑ ሲከፈት ባላንሱን ይዞ እንዲሄድ በ URL Parameter እንልካለን
+    // ዌብ አፕ URL (ከ github የተወሰደ)
     const webAppUrl = `https://abitidagi626-ux.github.io/ardi-bingo-real/index.html?balance=${balance}`;
 
     ctx.reply(`✅ በትክክል ተመዝግበዋል!\n💵 የአሁኑ ባላንስዎ: ${balance} ETB`, 
@@ -37,81 +37,79 @@ bot.on('contact', (ctx) => {
     );
 });
 
-// 3. ከዌብ አፕ የሚመጣ መረጃ መቀበያ (Deposit ወይም Win)
+// ዋናው ክፍል፦ ከዌብ አፕ (payment.html) የሚመጣ ዳታ መቀበያ
+// በ image_fb236c.png ላይ የታየውን TypeError ለመፍታት የተስተካከለ
 bot.on('web_app_data', async (ctx) => {
     try {
-        const data = JSON.parse(ctx.webAppData.data());
-        console.log("የደረሰ መረጃ:", data);
+        // በቅርብ version telegraf ላይ ዳታ የሚገኘው በዚህ መንገድ ነው
+        const rawData = ctx.message.web_app_data.data;
+        console.log("ከዌብ አፕ የመጣ ዳታ:", rawData);
+        
+        const data = JSON.parse(rawData);
 
-        // ሀ. የዲፖዚት ጥያቄ ከሆነ
         if (data.type === 'deposit_request') {
+            const amount = data.amount;
+            const bank = data.bank;
+            const transaction = data.transaction;
+            const userName = data.user_name;
+
             const adminMsg = `🔔 **አዲስ የዲፖዚት ጥያቄ**\n\n` +
-                             `👤 ተጫዋች: ${ctx.from.first_name}\n` +
-                             `💰 መጠን: ${data.amount} ETB\n` +
-                             `🏦 ባንክ: ${data.bank || 'Telebirr'}\n` +
-                             `📝 መረጃ: ${data.transaction || 'N/A'}\n` +
-                             `🆔 ID: \`${ctx.from.id}\``;
+                             `👤 ተጫዋች: ${userName}\n` +
+                             `💰 መጠን: ${amount} ETB\n` +
+                             `🏦 ባንክ: ${bank}\n` +
+                             `📝 SMS: ${transaction}\n` +
+                             `🆔 User ID: \`${ctx.from.id}\``;
 
             const adminKeyboard = Markup.inlineKeyboard([
-                [
-                    Markup.button.callback("✅ አጽድቅ", `app_${ctx.from.id}_${data.amount}`),
-                    Markup.button.callback("❌ ሰርዝ", `can_${ctx.from.id}`)
-                ]
+                [Markup.button.callback("✅ አጽድቅ", `app_${ctx.from.id}_${amount}`)],
+                [Markup.button.callback("❌ ሰርዝ", `can_${ctx.from.id}`)]
             ]);
 
-            await bot.telegram.sendMessage(ADMIN_ID, adminMsg, { parse_mode: 'Markdown', ...adminKeyboard });
-            await ctx.reply("✅ የዲፖዚት መረጃዎ ለአድሚን ተልኳል። ሲረጋገጥ መልዕክት ይደርስዎታል።");
-        } 
-        
-        // ለ. ተጫዋቹ አሸንፎ ከሆነ (Win Notification)
-        else if (data.type === 'game_win') {
-            await bot.telegram.sendMessage(ADMIN_ID, `🎉 ተጫዋች ${ctx.from.first_name} (ID: ${ctx.from.id}) ${data.amount} ብር አሸንፏል!`);
-        }
+            // ለአድሚን መረጃውን መላክ
+            await bot.telegram.sendMessage(ADMIN_ID, adminMsg, { 
+                parse_mode: 'Markdown', 
+                ...adminKeyboard 
+            });
 
+            await ctx.reply("✅ የዲፖዚት መረጃዎ ለአድሚን ተልኳል። ሲረጋገጥ መልዕክት ይደርስዎታል።");
+        }
     } catch (e) {
-        console.error("WebAppData Error:", e);
-        await ctx.reply("መረጃውን በማስተናገድ ላይ ስህተት ተፈጥሯል።");
+        console.error("የዳታ አያያዝ ስህተት (TypeError Fix):", e.message);
+        await ctx.reply("መረጃውን በማስተናገድ ላይ ስህተት ተፈጥሯል። እባክዎ በድጋሚ ይሞክሩ።");
     }
 });
 
-// 4. አድሚን ሲያጸድቅ (Approve)
+// አድሚኑ "አጽድቅ" ሲጫን
 bot.action(/app_(\d+)_(\d+)/, async (ctx) => {
-    if (ctx.from.id !== ADMIN_ID) return ctx.answerCbQuery("አይፈቀድልዎትም!");
-    
     const userId = ctx.match[1];
     const amount = parseFloat(ctx.match[2]);
     
-    // ባላንሱን ማሳደግ
-    if (userBalances[userId] !== undefined) {
-        userBalances[userId] += amount;
-    } else {
-        userBalances[userId] = amount;
-    }
+    // ባላንስ መጨመር
+    userBalances[userId] = (userBalances[userId] || 0) + amount;
     
-    await ctx.answerCbQuery("ክፍያው ጸድቋል!");
-    await ctx.editMessageText(ctx.callbackQuery.message.text + `\n\n✅ **ሁኔታ: ጸድቋል (ባላንስ ታድሷል)**`);
+    await ctx.editMessageText(ctx.callbackQuery.message.text + `\n\n✅ **ሁኔታ: ጸድቋል (ባላንስ ተጨምሯል)**`);
     
-    await bot.telegram.sendMessage(userId, `🎉 የ ${amount} ብር ዲፖዚትዎ ጸድቋል። አዲሱ ባላንስዎ: ${userBalances[userId]} ETB!`);
+    // ለተጫዋቹ ማሳወቅ
+    await bot.telegram.sendMessage(userId, `🎉 የ ${amount} ብር ዲፖዚትዎ ጸድቋል።\n💵 አዲስ ባላንስ: ${userBalances[userId]} ETB`);
 });
 
-// 5. አድሚን ሲሰርዝ (Cancel)
+// አድሚኑ "ሰርዝ" ሲጫን
 bot.action(/can_(\d+)/, async (ctx) => {
-    if (ctx.from.id !== ADMIN_ID) return ctx.answerCbQuery("ጥያቄው ተሰርዟል!");
     const userId = ctx.match[1];
     await ctx.editMessageText(ctx.callbackQuery.message.text + `\n\n❌ **ሁኔታ: ውድቅ ተደርጓል**`);
-    await bot.telegram.sendMessage(userId, `⚠️ ይቅርታ፣ የዲፖዚት ጥያቄዎ ውድቅ ተደርጓል።`);
+    await bot.telegram.sendMessage(userId, `⚠️ የዲፖዚት ጥያቄዎ ውድቅ ተደርጓል። እባክዎ ትክክለኛ መረጃ መላክዎን ያረጋግጡ።`);
 });
 
-// 6. የባላንስ ቼክ እና ሰፖርት
+// ባላንስ ለማየት
 bot.hears('💰 Check Balance', (ctx) => {
     const bal = userBalances[ctx.from.id] || 0;
     ctx.reply(`💵 የአሁኑ ባላንስዎ: ${bal.toFixed(2)} ETB`);
 });
 
-bot.hears('👨‍💻 Support', (ctx) => {
-    ctx.reply("ለማንኛውም እርዳታ አድሚኑን ያነጋግሩ: @Yordi_Bingo_Admin");
+// ስህተት ቢፈጠር ቦቱ እንዳይቆም
+bot.catch((err, ctx) => {
+    console.log(`ይቅርታ፣ በ ${ctx.updateType} ላይ ስህተት ተፈጥሯል:`, err);
 });
 
-// ቦቱን ማስጀመር
 bot.launch();
 console.log("🚀 Ardi Bingo Server is Online and Syncing with App.js!");
