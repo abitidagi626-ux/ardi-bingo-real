@@ -179,7 +179,7 @@
                 <button class="action-btn submit-btn" onclick="submitRequest()">አረጋግጥ / Confirm</button>
 
                 <div class="support-text">
-                    ሚያጋጥማችሁ የክፍያ ችግር ካለ በቴሌግራም <a href="https://t.me/ArdiiiBingoBot" target="_blank">@ArdiiiBingoBot</a> ኤጀንቱን ማነጋገር ይችላሉ።
+                    ሚያጋጥማችሁ የክፍያ ችግር ካለ በቴሌግራም <a href="https://t.me/ArdiiiBingoBot" target="_blank">@ArdiiiBingoBot</a> ማነጋገር ይችላሉ።
                 </div>
             </div>
         </div>
@@ -188,6 +188,8 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
+        // የላይኛው ባር ከቦቱ ቀለም ጋር እንዲመሳሰል
+        tg.setHeaderColor('#00332c');
 
         let currentPage = 'selection';
         let selectedBankName = '';
@@ -218,43 +220,51 @@
 
         function copyNumber() {
             const num = document.getElementById('target-number').innerText;
-            const el = document.createElement('textarea');
-            el.value = num;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-            
-            tg.showAlert("ቁጥሩ ኮፒ ተደርጓል፦ " + num);
+            navigator.clipboard.writeText(num).then(() => {
+                tg.showAlert("ቁጥሩ ኮፒ ተደርጓል፦ " + num);
+            }).catch(() => {
+                // ለድሮ ስልኮች አማራጭ
+                const el = document.createElement('textarea');
+                el.value = num;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+                tg.showAlert("ቁጥሩ ኮፒ ተደርጓል፦ " + num);
+            });
         }
 
         function submitRequest() {
-            const amount = document.getElementById('sent-amount').value;
-            const message = document.getElementById('transaction-msg').value;
+            const amountInput = document.getElementById('sent-amount').value;
+            const messageInput = document.getElementById('transaction-msg').value;
 
-            if(!amount || amount < 5) {
-                tg.showAlert("እባክዎ ትክክለኛ የብር መጠን ያስገቡ!");
+            // 1. ባዶ መሆኑን ማረጋገጥ
+            if(!amountInput || parseFloat(amountInput) <= 0) {
+                tg.showAlert("እባክዎ የላኩትን ትክክለኛ የብር መጠን ያስገቡ!");
                 return;
             }
-            if(!message || message.trim().length < 5) {
-                tg.showAlert("እባክዎ የትራንዛክሽን መረጃውን (SMS) በትክክል ያስገቡ!");
+            if(!messageInput || messageInput.trim().length < 10) {
+                tg.showAlert("እባክዎ የደረሰዎትን የSMS መልዕክት ሙሉ በሙሉ እዚህ ይለጥፉ!");
                 return;
             }
 
-            // ለቦቱ የሚላክ ዳታ
+            // 2. ለቦቱ የሚላከው የዳታ መዋቅር (ይህ ከ server.js ጋር መጣጣም አለበት)
             const depositData = {
                 type: 'deposit_request',
-                user_name: tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.first_name || 'Player') : 'Player',
-                amount: amount,
+                user_name: tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.first_name || 'ተጫዋች') : 'ተጫዋች',
+                amount: amountInput,
                 bank: selectedBankName,
-                transaction: message
+                transaction: messageInput.trim()
             };
 
-            // ዳታውን ለቴሌግራም ቦት መላክ
-            tg.sendData(JSON.stringify(depositData));
-            
-            // ዌብ አፑን መዝጋት
-            tg.close();
+            // 3. ዳታውን መላክ
+            try {
+                tg.sendData(JSON.stringify(depositData));
+                // ዌብ አፑን መዝጋት
+                setTimeout(() => { tg.close(); }, 100);
+            } catch (error) {
+                tg.showAlert("መረጃውን መላክ አልተቻለም። እባክዎ ደግመው ይሞክሩ።");
+            }
         }
     </script>
 </body>
