@@ -61,12 +61,13 @@ bot.on('contact', (ctx) => {
     );
 });
 
-// ከዌብ አፕ (payment.html) የሚመጣ የዲፖዚት መረጃ መቀበያ
+// ከዌብ አፕ የሚመጣ መረጃ መቀበያ (Deposit, Buy Card, Win)
 bot.on('web_app_data', async (ctx) => {
     try {
         const rawData = ctx.message.web_app_data.data;
         const data = JSON.parse(rawData);
 
+        // 1. የዲፖዚት ጥያቄ
         if (data.type === 'deposit_request') {
             const adminMsg = `🔔 **አዲስ የዲፖዚት ጥያቄ**\n\n` +
                              `👤 ተጫዋች: ${data.user_name}\n` +
@@ -84,12 +85,35 @@ bot.on('web_app_data', async (ctx) => {
                 parse_mode: 'Markdown', 
                 ...adminKeyboard 
             });
-
             await ctx.reply("✅ የዲፖዚት መረጃዎ ለአድሚን ተልኳል። ሲረጋገጥ መልዕክት ይደርስዎታል።");
         }
+
+        // 2. ካርድ ሲገዛ ባላንስ መቀነስ
+        if (data.type === 'buy_card') {
+            let balances = loadBalances();
+            const userId = ctx.from.id;
+            const price = parseFloat(data.amount);
+
+            if (balances[userId] >= price) {
+                balances[userId] -= price;
+                saveBalances(balances);
+                console.log(`User ${userId} bought card ${data.cardId}. Remaining: ${balances[userId]}`);
+            }
+        }
+
+        // 3. ተጫዋች ሲያሸንፍ (ለአድሚን ማሳወቅ)
+        if (data.type === 'game_win') {
+            const winMsg = `🏆 **ቢንጎ! አሸናፊ ተገኝቷል**\n\n` +
+                           `👤 ተጫዋች: \`${ctx.from.id}\`\n` +
+                           `🎴 ካርቴላ: #${data.cardId}\n` +
+                           `💰 የድል መጠን: ${data.amount} ETB\n\n` +
+                           `ለማጽደቅ /win_${ctx.from.id}_${data.amount} ብለው ይላኩ።`;
+            
+            await bot.telegram.sendMessage(ADMIN_ID, winMsg, { parse_mode: 'Markdown' });
+        }
+
     } catch (e) {
         console.error("Data Error:", e.message);
-        await ctx.reply("መረጃውን በማስተናገድ ላይ ስህተት ተፈጥሯል።");
     }
 });
 
@@ -104,6 +128,20 @@ bot.action(/app_(\d+)_(\d+)/, async (ctx) => {
     
     await ctx.editMessageText(ctx.callbackQuery.message.text + `\n\n✅ **ሁኔታ: ጸድቋል (ባላንስ ተጨምሯል)**`);
     await bot.telegram.sendMessage(userId, `🎉 የ ${amount} ብር ዲፖዚትዎ ጸድቋል።\n💵 አዲስ ባላንስ: ${balances[userId]} ETB`);
+});
+
+// አሸናፊ ሲኖር አድሚኑ የሚጠቀምበት ኮማንድ (ለምሳሌ፡ /win_ID_AMOUNT)
+bot.hears(/\/win_(\d+)_([\d.]+)/, async (ctx) => {
+    if (ctx.from.id !== ADMIN_ID) return;
+    const userId = ctx.match[1];
+    const amount = parseFloat(ctx.match[2]);
+    let balances = loadBalances();
+
+    balances[userId] = (balances[userId] || 0) + amount;
+    saveBalances(balances);
+
+    await ctx.reply(`✅ ለተጫዋች \`${userId}\` ${amount} ብር የድል ክፍያ ተጨምሯል።`, { parse_mode: 'Markdown' });
+    await bot.telegram.sendMessage(userId, `🎊 እንኳን ደስ አለዎት! የ ${amount} ብር ሽልማትዎ በባላንስዎ ላይ ተጨምሯል።`);
 });
 
 // አድሚን ሲሰርዝ
