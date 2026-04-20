@@ -1,8 +1,8 @@
 // ---------------------------------------------------------
-// 1. የሂሳብ ሚዛን (Balance) ሎጂክ - (ከ balance-manager.js የመጣ)
+// 1. የሂሳብ ሚዛን (Balance) ሎጂክ
 // ---------------------------------------------------------
 
-// ለሙከራ ያህል መጀመሪያ 200 ብር እንስጠው (በኋላ ከዳታቤዝ ጋር ይገናኛል)
+// ለሙከራ ያህል መጀመሪያ 200 ብር (ካልተመዘገበ)
 if (!localStorage.getItem('balance_user_1')) {
     localStorage.setItem('balance_user_1', '200.00');
 }
@@ -13,12 +13,15 @@ function getUserBalance(userId) {
 
 function updateUserBalance(userId, newAmount) {
     localStorage.setItem(`balance_${userId}`, newAmount.toFixed(2));
-    // በገጹ ላይ የባላንስ መግለጫ ካለ እንዲታይ (ለምሳሌ ID: balance-display)
     const display = document.getElementById('balance-display');
     if (display) display.innerText = `ETB ${newAmount.toFixed(2)}`;
+    
+    // ለቴሌግራም ዌብ አፑ የባላንስ ለውጡን ማሳወቅ (አስፈላጊ ከሆነ)
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+    }
 }
 
-// ክፍያ መፈጸሚያ ተግባር (Stake Deduction)
 function deductStake(userId, stakeAmount) {
     let currentBalance = getUserBalance(userId);
     if (currentBalance >= stakeAmount) {
@@ -27,13 +30,52 @@ function deductStake(userId, stakeAmount) {
         console.log(`Stake deducted: ${stakeAmount}. New Balance: ${newBalance}`);
         return true; 
     } else {
-        alert("በቂ ሂሳብ የሎትም! እባክዎ መጀመሪያ ብር ያስገቡ (Deposit)።");
+        // ብር ከሌለው ወደ ዲፖዚት ገጽ እንዲሄድ መጠየቅ ይቻላል
+        alert("በቂ ሂሳብ የሎትም! እባክዎ መጀመሪያ ዲፖዚት ያድርጉ።");
         return false; 
     }
 }
 
+// አሸናፊ ሲሆን ብር የሚጨምር ተግባር
+function addWinnings(userId, winAmount) {
+    let currentBalance = getUserBalance(userId);
+    let newBalance = currentBalance + winAmount;
+    updateUserBalance(userId, newBalance);
+    
+    // ለአድሚን ወይም ለቦቱ መረጃ መላክ (አሸናፊ መኖሩን)
+    sendDataToBot({
+        type: 'game_win',
+        userId: userId,
+        amount: winAmount,
+        message: `ተጫዋቹ ${winAmount} ብር አሸንፏል!`
+    });
+}
+
 // ---------------------------------------------------------
-// 2. የጨዋታ ሎጂክ (Bingo Game Logic)
+// 2. የቴሌግራም ግንኙነት (Web App Bridge) - አዲስ የተጨመረ
+// ---------------------------------------------------------
+
+function sendDataToBot(data) {
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.sendData(JSON.stringify(data));
+    }
+}
+
+// የዲፖዚት ጥያቄ ወደ ቦቱ ለመላክ (በገጽህ ላይ የDeposit በተን ካለህ ይሄን ጥራ)
+function requestDeposit() {
+    const amount = prompt("ማስገባት የሚፈልጉትን የገንዘብ መጠን ያስገቡ:");
+    if (amount && !isNaN(amount)) {
+        sendDataToBot({
+            type: 'deposit_request',
+            amount: amount,
+            method: 'TELEBIRR' // ወይም ተጠቃሚው እንዲመርጥ ማድረግ ይቻላል
+        });
+        alert("የዲፖዚት ጥያቄዎ ለቦቱ ተልኳል!");
+    }
+}
+
+// ---------------------------------------------------------
+// 3. የጨዋታ ሎጂክ (Bingo Game Logic)
 // ---------------------------------------------------------
 
 const stakes = [10, 20, 30, 50, 80, 100, 150, 200];
@@ -42,7 +84,6 @@ let boughtCardsNumbers = {}, drawnNumbers = new Set(), playerMarkedNumbers = {},
 
 const stakeData = { 10: { bought: new Set() }, 20: { bought: new Set() }, 30: { bought: new Set() }, 50: { bought: new Set() }, 80: { bought: new Set() }, 100: { bought: new Set() }, 150: { bought: new Set() }, 200: { bought: new Set() } };
 
-// የካርቴላ ቁጥሮችን ማመንጫ
 function getFixedNumbers(cardId) {
     let card = [];
     const ranges = [[1,15], [16,30], [31,45], [46,60], [61,75]];
@@ -63,7 +104,6 @@ function getFixedNumbers(cardId) {
     return finalCard;
 }
 
-// መጀመሪያ ገጹ ሲከፈት የሚሰራ
 function init() {
     const list = document.getElementById('stake-list');
     if (!list) return;
@@ -80,23 +120,24 @@ function init() {
         list.appendChild(row);
     });
     
-    // የባላንስ ማሳያውን አፕዴት አድርግ
     updateUserBalance('user_1', getUserBalance('user_1'));
     startGlobalTimer();
+
+    // የቴሌግራም ዌብ አፕን ማዘጋጀት
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand(); // ገጹን ሙሉ እንዲሆን ማድረግ
+    }
 }
 
-// የ"Join" ጥያቄን በሂሳብ ሚዛን የሚያስተናግድ ተግባር
 function handleJoinRequest(stake) {
-    // 1. መቆለፉን አረጋግጥ
     if (lockStake && lockStake !== stake) {
         return alert("አሁን መቀጠል የሚችሉት በ " + lockStake + " ብር ስቴክ ብቻ ነው!");
     }
 
-    // 2. ከሂሳብ ላይ ለመቀነስ ሞክር (userId 'user_1' ለሙከራ ነው)
     const paymentSuccess = deductStake('user_1', stake);
 
     if (paymentSuccess) {
-        // ክፍያው ከተሳካ ወደ ካርቴላ ምርጫ ውሰድ
         openCardSelection(stake);
     }
 }
@@ -125,7 +166,8 @@ function openCardSelection(stake) {
 }
 
 function updateCardCountUI() { 
-    document.getElementById('card-count-info').innerText = stakeData[currentStake].bought.size; 
+    const count = stakeData[currentStake].bought.size;
+    document.getElementById('card-count-info').innerText = count; 
 }
 
 function generateCardGrid() {
@@ -158,8 +200,8 @@ function showPreview(id) {
 }
 
 function confirmPurchase() {
-    // ማሳሰቢያ፡ እዚህ ጋር ለሁለተኛ ካርቴላ በድጋሚ ክፍያ እንዲጠይቅ ከፈለግክ deductStake መጠቀም ትችላለህ
-    // ለጊዜው አንድ ጊዜ Join ሲሉ በተከፈለው ክፍያ እስከ 4 ካርቴላ እንዲመርጡ ተደርጓል
+    // እዚህ ጋር ከፈለግክ ለእያንዳንዱ ተጨማሪ ካርቴላ ተጨማሪ ብር ማስከፈል ትችላለህ
+    // አሁን ባለው ግን አንድ ጊዜ Join ሲሉ እስከ 4 ካርቴላ በነጻ ይመርጣሉ
     stakeData[currentStake].bought.add(pendingCardId);
     boughtCardsNumbers[pendingCardId] = getFixedNumbers(pendingCardId);
     playerMarkedNumbers[pendingCardId] = new Set([12]);
@@ -180,13 +222,13 @@ function startBingoArena(stake) {
     document.getElementById('game-screen').classList.remove('hidden');
     
     const board = document.getElementById('numbers-board');
-    board.innerHTML = ""; // Clear board
+    board.innerHTML = ""; 
     for(let i=1; i<=75; i++) {
         const div = document.createElement('div'); div.className = 'board-cell'; div.id = `ball-${i}`; div.innerText = i; board.appendChild(div);
     }
     
     const container = document.getElementById('arena-cards-container');
-    container.innerHTML = ""; // Clear container
+    container.innerHTML = ""; 
     stakeData[stake].bought.forEach(id => {
         const wrapper = document.createElement('div'); wrapper.className = 'arena-card-wrapper';
         wrapper.innerHTML = `<div class="card-label-small">CARD #${id}</div>`;
@@ -224,28 +266,18 @@ function manualBingoCheck(id) {
     let winningPattern = patterns.find(p => p.every(idx => marked.has(idx)));
     if (winningPattern) { 
         clearInterval(gameInterval); 
-        showBingoWinner(id, winningPattern);
-        
-        // አሸናፊ ሲሆን ብሩን ወደ ባላንስ ጨምር
         const winAmount = parseFloat(document.getElementById('arena-win-amount').innerText);
+        showBingoWinner(id, winningPattern);
         addWinnings('user_1', winAmount);
     } 
     else { alert("ገና አልሞላም! (Not Bingo yet)"); }
-}
-
-// አሸናፊ ሲሆን ብር የሚጨምር ተግባር
-function addWinnings(userId, winAmount) {
-    let currentBalance = getUserBalance(userId);
-    let newBalance = currentBalance + winAmount;
-    updateUserBalance(userId, newBalance);
-    console.log(`Winner! ${winAmount} ETB added.`);
 }
 
 function showBingoWinner(cardId, pattern) {
     const overlay = document.getElementById('winner-display-overlay');
     const text = document.getElementById('winner-text');
     const preview = document.getElementById('winning-card-preview');
-    text.innerText = `Card Number #${cardId} is the Winner!`;
+    text.innerText = `ካርቴላ #${cardId} አሸንፏል!`;
     overlay.classList.remove('hidden');
     
     const cardGrid = document.createElement('div');
