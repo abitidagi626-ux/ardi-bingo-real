@@ -3,7 +3,7 @@ const { Telegraf, Markup } = require('telegraf');
 
 // የቦት Token እና Admin ID
 const bot = new Telegraf('8684712579:AAE9JK0cdSK-cVeycF7xAd_KSrUUqmN5HWI');
-const ADMIN_ID = 1046142540; 
+const ADMIN_ID = 8076714817; 
 
 bot.start((ctx) => {
     ctx.reply(`እንኳን ወደ Ardi Bingo በሰላም መጡ!`, 
