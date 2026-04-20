@@ -1,16 +1,36 @@
 require('dotenv').config();
 const { Telegraf, Markup } = require('telegraf');
+const fs = require('fs');
 
-// ቦት ቶከን (ከ image_939ffd.png የተወሰደ)
+// ቦት ቶከን
 const bot = new Telegraf('8684712579:AAE9JK0cdSK-cVeycF7xAd_KSrUUqmN5HWI');
-
-// አድሚን ID (የእራስህን ID እዚህ አስገባ ወይም በ .env ፋይል ውስጥ አስቀምጥ)
 const ADMIN_ID = 1046142540; 
+const DB_FILE = './database.json';
 
-// ለጊዜው ባላንስን በሜሞሪ ለመያዝ (ቦቱ ሲጠፋ ይጠፋል - ለቋሚ መረጃ Database ያስፈልጋል)
-let userBalances = {};
+// --- ዳታቤዝ አያያዝ ---
+function loadBalances() {
+    try {
+        if (!fs.existsSync(DB_FILE)) {
+            fs.writeFileSync(DB_FILE, JSON.stringify({}));
+            return {};
+        }
+        const data = fs.readFileSync(DB_FILE);
+        return JSON.parse(data);
+    } catch (e) {
+        console.error("ዳታቤዝ ማንበብ አልተቻለም:", e);
+        return {};
+    }
+}
 
-// ቦቱ ሲጀመር (Start)
+function saveBalances(balances) {
+    try {
+        fs.writeFileSync(DB_FILE, JSON.stringify(balances, null, 4));
+    } catch (e) {
+        console.error("ዳታቤዝ መጻፍ አልተቻለም:", e);
+    }
+}
+
+// ቦቱ ሲጀመር
 bot.start((ctx) => {
     ctx.reply(`እንኳን ወደ Ardi Bingo በሰላም መጡ! 🎰\n\nለመጀመር ስልክ ቁጥርዎን ያጋሩ።`, 
         Markup.keyboard([
@@ -22,11 +42,15 @@ bot.start((ctx) => {
 // ስልክ ቁጥር ሲላክ
 bot.on('contact', (ctx) => {
     const userId = ctx.from.id;
-    // ተቀማጭ ባላንስ ከሌለው 200 በነጻ እንዲጀምር (እንደ ምሳሌ)
-    if (!userBalances[userId]) userBalances[userId] = 200.00;
+    let balances = loadBalances();
 
-    const balance = userBalances[userId];
-    // ዌብ አፕ URL (ከ github የተወሰደ)
+    // አዲስ ተጫዋች ከሆነ 200 ብር ስጦታ መስጠት
+    if (!balances[userId]) {
+        balances[userId] = 200.00;
+        saveBalances(balances);
+    }
+
+    const balance = balances[userId];
     const webAppUrl = `https://abitidagi626-ux.github.io/ardi-bingo-real/index.html?balance=${balance}`;
 
     ctx.reply(`✅ በትክክል ተመዝግበዋል!\n💵 የአሁኑ ባላንስዎ: ${balance} ETB`, 
@@ -37,35 +61,25 @@ bot.on('contact', (ctx) => {
     );
 });
 
-// ዋናው ክፍል፦ ከዌብ አፕ (payment.html) የሚመጣ ዳታ መቀበያ
-// በ image_fb236c.png ላይ የታየውን TypeError ለመፍታት የተስተካከለ
+// ከዌብ አፕ (payment.html) የሚመጣ የዲፖዚት መረጃ መቀበያ
 bot.on('web_app_data', async (ctx) => {
     try {
-        // በቅርብ version telegraf ላይ ዳታ የሚገኘው በዚህ መንገድ ነው
         const rawData = ctx.message.web_app_data.data;
-        console.log("ከዌብ አፕ የመጣ ዳታ:", rawData);
-        
         const data = JSON.parse(rawData);
 
         if (data.type === 'deposit_request') {
-            const amount = data.amount;
-            const bank = data.bank;
-            const transaction = data.transaction;
-            const userName = data.user_name;
-
             const adminMsg = `🔔 **አዲስ የዲፖዚት ጥያቄ**\n\n` +
-                             `👤 ተጫዋች: ${userName}\n` +
-                             `💰 መጠን: ${amount} ETB\n` +
-                             `🏦 ባንክ: ${bank}\n` +
-                             `📝 SMS: ${transaction}\n` +
+                             `👤 ተጫዋች: ${data.user_name}\n` +
+                             `💰 መጠን: ${data.amount} ETB\n` +
+                             `🏦 ባንክ: ${data.bank}\n` +
+                             `📝 SMS: ${data.transaction}\n` +
                              `🆔 User ID: \`${ctx.from.id}\``;
 
             const adminKeyboard = Markup.inlineKeyboard([
-                [Markup.button.callback("✅ አጽድቅ", `app_${ctx.from.id}_${amount}`)],
+                [Markup.button.callback("✅ አጽድቅ", `app_${ctx.from.id}_${data.amount}`)],
                 [Markup.button.callback("❌ ሰርዝ", `can_${ctx.from.id}`)]
             ]);
 
-            // ለአድሚን መረጃውን መላክ
             await bot.telegram.sendMessage(ADMIN_ID, adminMsg, { 
                 parse_mode: 'Markdown', 
                 ...adminKeyboard 
@@ -74,42 +88,42 @@ bot.on('web_app_data', async (ctx) => {
             await ctx.reply("✅ የዲፖዚት መረጃዎ ለአድሚን ተልኳል። ሲረጋገጥ መልዕክት ይደርስዎታል።");
         }
     } catch (e) {
-        console.error("የዳታ አያያዝ ስህተት (TypeError Fix):", e.message);
-        await ctx.reply("መረጃውን በማስተናገድ ላይ ስህተት ተፈጥሯል። እባክዎ በድጋሚ ይሞክሩ።");
+        console.error("Data Error:", e.message);
+        await ctx.reply("መረጃውን በማስተናገድ ላይ ስህተት ተፈጥሯል።");
     }
 });
 
-// አድሚኑ "አጽድቅ" ሲጫን
+// አድሚን ሲያጸድቅ - ባላንስ በቋሚነት እዚህ ጋር ይቆጥባል
 bot.action(/app_(\d+)_(\d+)/, async (ctx) => {
     const userId = ctx.match[1];
     const amount = parseFloat(ctx.match[2]);
+    let balances = loadBalances();
     
-    // ባላንስ መጨመር
-    userBalances[userId] = (userBalances[userId] || 0) + amount;
+    balances[userId] = (balances[userId] || 0) + amount;
+    saveBalances(balances);
     
     await ctx.editMessageText(ctx.callbackQuery.message.text + `\n\n✅ **ሁኔታ: ጸድቋል (ባላንስ ተጨምሯል)**`);
-    
-    // ለተጫዋቹ ማሳወቅ
-    await bot.telegram.sendMessage(userId, `🎉 የ ${amount} ብር ዲፖዚትዎ ጸድቋል።\n💵 አዲስ ባላንስ: ${userBalances[userId]} ETB`);
+    await bot.telegram.sendMessage(userId, `🎉 የ ${amount} ብር ዲፖዚትዎ ጸድቋል።\n💵 አዲስ ባላንስ: ${balances[userId]} ETB`);
 });
 
-// አድሚኑ "ሰርዝ" ሲጫን
+// አድሚን ሲሰርዝ
 bot.action(/can_(\d+)/, async (ctx) => {
     const userId = ctx.match[1];
     await ctx.editMessageText(ctx.callbackQuery.message.text + `\n\n❌ **ሁኔታ: ውድቅ ተደርጓል**`);
-    await bot.telegram.sendMessage(userId, `⚠️ የዲፖዚት ጥያቄዎ ውድቅ ተደርጓል። እባክዎ ትክክለኛ መረጃ መላክዎን ያረጋግጡ።`);
+    await bot.telegram.sendMessage(userId, `⚠️ የዲፖዚት ጥያቄዎ ውድቅ ተደርጓል።`);
 });
 
 // ባላንስ ለማየት
 bot.hears('💰 Check Balance', (ctx) => {
-    const bal = userBalances[ctx.from.id] || 0;
+    const balances = loadBalances();
+    const bal = balances[ctx.from.id] || 0;
     ctx.reply(`💵 የአሁኑ ባላንስዎ: ${bal.toFixed(2)} ETB`);
 });
 
-// ስህተት ቢፈጠር ቦቱ እንዳይቆም
-bot.catch((err, ctx) => {
-    console.log(`ይቅርታ፣ በ ${ctx.updateType} ላይ ስህተት ተፈጥሯል:`, err);
+// Support
+bot.hears('👨‍💻 Support', (ctx) => {
+    ctx.reply("ማንኛውም ጥያቄ ካለዎት አድሚኑን @ArdiiiBingoBot ማነጋገር ይችላሉ።");
 });
 
 bot.launch();
-console.log("🚀 Ardi Bingo Server is Online and Syncing with App.js!");
+console.log("🚀 Ardi Bingo Server is Online with Database.json!");
