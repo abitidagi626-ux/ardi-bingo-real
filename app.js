@@ -5,32 +5,68 @@ const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
 
-let currentBalance = 0;
-let currentStake = null;
-let lockStake = null;
-let timeLeft = 60; // ታይመሩ 60 ሰከንድ
-let pendingCardId = null;
-
-// የጨዋታ ዳታዎች
-let boughtCardsNumbers = {};
-let drawnNumbers = new Set();
-let playerMarkedNumbers = {};
-let gameInterval;
-const stakeData = { 10: { bought: new Set() }, 20: { bought: new Set() }, 30: { bought: new Set() }, 50: { bought: new Set() }, 80: { bought: new Set() }, 100: { bought: new Set() }, 150: { bought: new Set() }, 200: { bought: new Set() } };
-
-// ገጹ ሲከፈት ባላንስን ከ URL መቀበል
+// ገጹ ሲከፈት ባላንስን ከ URL መቀበል (ከቦቱ የሚመጣ)
 const urlParams = new URLSearchParams(window.location.search);
-currentBalance = parseFloat(urlParams.get('balance')) || 0.00;
-updateBalanceDisplay(currentBalance);
+let currentBalance = parseFloat(urlParams.get('balance')) || 0.00;
+
+// ለሙከራ ያህል (URL ላይ ባላንስ ከሌለ ብቻ ከ localStorage ውሰድ)
+if (isNaN(currentBalance) || currentBalance === 0) {
+    currentBalance = parseFloat(localStorage.getItem('user_balance')) || 200.00;
+}
 
 function updateBalanceDisplay(amount) {
     const display = document.getElementById('balance'); 
     if (display) display.innerText = amount.toFixed(2);
+    localStorage.setItem('user_balance', amount.toFixed(2));
+}
+
+// ባላንስ ለመቀነስ
+function deductStake(stakeAmount) {
+    if (currentBalance >= stakeAmount) {
+        currentBalance -= stakeAmount;
+        updateBalanceDisplay(currentBalance);
+        
+        // ለቦቱ ማሳወቅ (ባላንስ መቀነሱን)
+        sendDataToBot({
+            type: 'buy_card',
+            amount: stakeAmount,
+            userId: tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 'unknown'
+        });
+        return true; 
+    } else {
+        alert("በቂ ሂሳብ የለዎትም! እባክዎ መጀመሪያ ዲፖዚት ያድርጉ።");
+        return false; 
+    }
+}
+
+// አሸናፊ ሲሆን ብር የሚጨምር
+function addWinnings(winAmount) {
+    currentBalance += winAmount;
+    updateBalanceDisplay(currentBalance);
+    
+    sendDataToBot({
+        type: 'game_win',
+        amount: winAmount,
+        userId: tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 'unknown'
+    });
+}
+
+function sendDataToBot(data) {
+    if (tg) {
+        tg.sendData(JSON.stringify(data));
+    }
 }
 
 // ---------------------------------------------------------
-// 2. የካርድ ቁጥሮች አመራረት
+// 2. የጨዋታ ዳታዎች እና ተለዋዋጮች
 // ---------------------------------------------------------
+const stakes = [10, 20, 30, 50, 80, 100, 150, 200];
+let currentStake = null, lockStake = null, timeLeft = 60, pendingCardId = null;
+let boughtCardsNumbers = {}, drawnNumbers = new Set(), playerMarkedNumbers = {}, gameInterval;
+
+const stakeData = { 10: { bought: new Set() }, 20: { bought: new Set() }, 30: { bought: new Set() }, 50: { bought: new Set() }, 80: { bought: new Set() }, 100: { bought: new Set() }, 150: { bought: new Set() }, 200: { bought: new Set() } };
+
+// የካርድ ቁጥሮች አመራረት (Fixed Logic)
 function getFixedNumbers(cardId) {
     let card = [];
     const ranges = [[1,15], [16,30], [31,45], [46,60], [61,75]];
@@ -52,31 +88,29 @@ function getFixedNumbers(cardId) {
 }
 
 // ---------------------------------------------------------
-// 3. ዋና ተግባራት (Main Logic)
+// 3. ዋና ተግባራት (UI & Game Flow)
 // ---------------------------------------------------------
 
 function init() {
     const list = document.getElementById('stake-list');
     if (!list) return;
     
-    const stakes = [10, 20, 30, 50, 80, 100, 150, 200];
-    list.innerHTML = ""; 
-    
+    list.innerHTML = ""; // ዝርዝሩን ማጽዳት
     stakes.forEach(s => {
         const row = document.createElement('div'); 
         row.className = 'stake-row';
         row.innerHTML = `
             <span><b>${s} ETB</b></span>
-            <span class="timer-display" id="timer-${s}">00:60</span>
+            <span class="timer-display">00:60</span>
             <span id="win-${s}">0.00</span>
-            <button onclick="handleJoinRequest(${s})" style="background:#efae10; border:none; border-radius:5px; padding:8px 15px; cursor:pointer; font-weight:bold;">Join »</button>`;
+            <button onclick="handleJoinRequest(${s})">Join »</button>`;
         list.appendChild(row);
     });
     
+    updateBalanceDisplay(currentBalance);
     startGlobalTimer();
 }
 
-// ታይመሩ 0 ሲሆን በራሱ ወደ ጌም እንዲወስድ የተስተካከለ
 function startGlobalTimer() {
     const timer = setInterval(() => {
         if (timeLeft > 0) {
@@ -86,13 +120,8 @@ function startGlobalTimer() {
             if(document.getElementById('modal-timer')) document.getElementById('modal-timer').innerText = timeStr;
         } else { 
             clearInterval(timer); 
-            // ታይመሩ 0 ሲሆን እና ተጫዋቹ ካርድ ገዝቶ ከሆነ ወደ ጌም አሬና ውሰደው
-            if (lockStake) {
-                startBingoArena(lockStake); 
-            } else {
-                alert("ጊዜው አልቋል! ካርድ ስላልገዙ ጨዋታውን ማየት አይችሉም።");
-                location.reload();
-            }
+            if (lockStake) startBingoArena(lockStake); 
+            else location.reload(); 
         }
     }, 1000);
 }
@@ -101,11 +130,11 @@ function handleJoinRequest(stake) {
     if (lockStake && lockStake !== stake) {
         return alert("አሁን መቀጠል የሚችሉት በ " + lockStake + " ብር ብቻ ነው!");
     }
-    if (currentBalance < stake) {
-        return alert("በቂ ባላንስ የለዎትም!");
+    // ካርድ ለመግዛት ሲሞክር ባላንስ ይቀንሳል
+    if (deductStake(stake)) {
+        currentStake = stake;
+        openCardSelection(stake);
     }
-    currentStake = stake;
-    openCardSelection(stake);
 }
 
 function openCardSelection(stake) {
@@ -114,6 +143,11 @@ function openCardSelection(stake) {
     document.getElementById('selected-stake-val').innerText = stake;
     updateCardCountUI(); 
     generateCardGrid();
+}
+
+function updateCardCountUI() { 
+    const count = stakeData[currentStake].bought.size;
+    document.getElementById('card-count-info').innerText = count; 
 }
 
 function generateCardGrid() {
@@ -144,35 +178,27 @@ function showPreview(id) {
     document.getElementById('card-modal').classList.remove('hidden');
 }
 
-// ካርድ ሲገዛ የሚሰራው ዋና ተግባር
 function confirmPurchase() {
-    // 1. ባላንስ መቀነስ
-    currentBalance -= currentStake;
-    updateBalanceDisplay(currentBalance);
-    
-    // 2. ዳታ መመዝገብ
     stakeData[currentStake].bought.add(pendingCardId);
     boughtCardsNumbers[pendingCardId] = getFixedNumbers(pendingCardId);
     playerMarkedNumbers[pendingCardId] = new Set([12]);
     lockStake = currentStake;
     
-    // 3. ከገጹ ሳይወጣ (Web App ሳይዘጋ) ለቦቱ መረጃ መላክ
-    // tg.sendData() ገጹን ስለሚዘጋው፣ እዚህ ጋር በ fetch ወይም በሌላ መንገድ ቦቱን ማሳወቅ ይቻላል
-    // ካልሆነም ጌሙ ሲያልቅ ብቻ መላክ ይቻላል። ለጊዜው ባላንሱን እዚህ ቀንሰነዋል።
+    // የዊን መጠን ስሌት (ተጫዋቾች በበዙ ቁጥር ያድጋል - ለጊዜው 80%)
+    const win = (currentStake * stakeData[currentStake].bought.size * 0.8).toFixed(2);
+    document.getElementById(`win-${currentStake}`).innerText = win;
+    document.getElementById('arena-win-amount').innerText = win;
     
     closeModal(); 
     updateCardCountUI(); 
     generateCardGrid();
-    
     tg.HapticFeedback.impactOccurred('medium');
 }
 
-function updateCardCountUI() { 
-    const count = stakeData[currentStake].bought.size;
-    document.getElementById('card-count-info').innerText = count; 
-}
+// ---------------------------------------------------------
+// 4. የጨዋታ ሜዳ (Bingo Arena)
+// ---------------------------------------------------------
 
-// ወደ ቁጥሮች መጥሪያ (Arena) የሚወስድ ክፍል
 function startBingoArena(stake) {
     document.getElementById('card-screen').classList.add('hidden');
     document.getElementById('stake-screen').classList.add('hidden');
@@ -201,7 +227,7 @@ function startBingoArena(stake) {
             const cell = document.createElement('div'); 
             cell.className = 'arena-cell' + (idx === 12 ? ' marked' : '');
             cell.innerText = idx === 12 ? 'F' : n; 
-            cell.onclick = () => { if(drawnNumbers.has(n)) { playerMarkedNumbers[id].add(idx); cell.classList.add('marked'); } };
+            cell.onclick = () => { if(drawnNumbers.has(n)) { playerMarkedNumbers[id].add(idx); cell.classList.add('marked'); tg.HapticFeedback.selectionChanged(); } };
             cardGrid.appendChild(cell);
         });
         wrapper.appendChild(cardGrid);
@@ -213,7 +239,6 @@ function startBingoArena(stake) {
         container.appendChild(wrapper);
     });
     
-    // የቁጥሮች መጥሪያ ሎጂክ
     let pool = Array.from({length:75}, (_,i)=>i+1).sort(()=>Math.random()-0.5), idx = 0;
     gameInterval = setInterval(() => {
         if(idx >= 75) return clearInterval(gameInterval);
@@ -228,17 +253,49 @@ function startBingoArena(stake) {
 
 function manualBingoCheck(id) {
     const marked = playerMarkedNumbers[id];
-    const patterns = [[0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24],[0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24],[0,6,12,18,24],[4,8,12,16,20]];
-    if (patterns.some(p => p.every(idx => marked.has(idx)))) {
-        clearInterval(gameInterval);
-        alert("BINGO! አሸንፈዋል!");
-        location.reload();
-    } else {
-        alert("ገና አልሞላም!");
-    }
+    const patterns = [
+        [0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24], 
+        [0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24], 
+        [0,6,12,18,24],[4,8,12,16,20], [0,4,20,24] 
+    ];
+    let winningPattern = patterns.find(p => p.every(idx => marked.has(idx)));
+    if (winningPattern) { 
+        clearInterval(gameInterval); 
+        const winAmount = parseFloat(document.getElementById('arena-win-amount').innerText);
+        showBingoWinner(id, winningPattern);
+        addWinnings(winAmount);
+    } 
+    else { alert("ገና አልሞላም! (Not Bingo yet)"); }
+}
+
+function showBingoWinner(cardId, pattern) {
+    const overlay = document.getElementById('winner-display-overlay');
+    const text = document.getElementById('winner-text');
+    const preview = document.getElementById('winning-card-preview');
+    text.innerText = `ካርቴላ #${cardId} አሸንፏል!`;
+    overlay.classList.remove('hidden');
+    
+    const cardGrid = document.createElement('div');
+    cardGrid.className = 'player-card-arena';
+    cardGrid.style.display = 'grid'; 
+    cardGrid.style.gridTemplateColumns = 'repeat(5, 1fr)'; 
+    cardGrid.style.gap = '2px';
+    
+    boughtCardsNumbers[cardId].forEach((n, idx) => {
+        const cell = document.createElement('div'); 
+        cell.className = 'arena-cell' + (pattern.includes(idx) ? ' winner-cell' : '');
+        cell.style.width = '40px'; cell.style.height = '40px'; cell.style.border = '1px solid #ccc';
+        cell.style.display = 'flex'; cell.style.alignItems = 'center'; cell.style.justifyContent = 'center';
+        cell.style.fontWeight = 'bold'; cell.style.color = 'black';
+        cell.innerText = idx === 12 ? 'F' : n;
+        cardGrid.appendChild(cell);
+    });
+    preview.innerHTML = ""; 
+    preview.appendChild(cardGrid);
 }
 
 function closeModal() { document.getElementById('card-modal').classList.add('hidden'); }
 function showStakeScreen() { document.getElementById('card-screen').classList.add('hidden'); document.getElementById('stake-screen').classList.remove('hidden'); }
 
+// ማስጀመር
 init();
