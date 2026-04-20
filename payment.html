@@ -218,7 +218,6 @@
 
         function copyNumber() {
             const num = document.getElementById('target-number').innerText;
-            // ለሞባይል ብሮውዘሮች አስተማማኝ የሆነ ኮፒ የማድረጊያ መንገድ
             const el = document.createElement('textarea');
             el.value = num;
             document.body.appendChild(el);
@@ -242,10 +241,10 @@
                 return;
             }
 
-            // ለቦቱ የሚላክ ዳታ (ከ server.js ጋር የሚስማማ)
+            // ለቦቱ የሚላክ ዳታ
             const depositData = {
                 type: 'deposit_request',
-                user_name: tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name) : 'Player',
+                user_name: tg.initDataUnsafe.user ? (tg.initDataUnsafe.user.first_name || 'Player') : 'Player',
                 amount: amount,
                 bank: selectedBankName,
                 transaction: message
